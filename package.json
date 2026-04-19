@@ -9,9 +9,13 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.2.0",
+    "fontawesome-free": "^1.0.4",
     "framer-motion": "^12.38.0",
+    "lucide-react": "^1.8.0",
     "next": "16.2.2",
     "react": "19.2.4",
+    "react-device-mockup": "^1.0.0",
     "react-dom": "19.2.4",
     "react-responsive-carousel": "^3.2.23",
     "react-social-media-embed": "^2.5.18"

@@ -10,6 +10,7 @@ import Content from "./components/Content"
 import Latest from "./components/Latest"
 import Belief from "./components/Belief"
 import GetStarted from "./components/GetStarted"
+import Packages from "./components/Packages"
 import Footer from "./components/Footer"
 
 export default function Home() {
@@ -25,6 +26,7 @@ export default function Home() {
       <Latest />
       <Belief />
       <GetStarted />
+      <Packages />
       <Footer />
     </div>
   );

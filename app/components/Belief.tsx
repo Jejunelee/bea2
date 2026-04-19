@@ -36,7 +36,7 @@ export default function Belief() {
     ];
 
     return (
-        <section>
+        <section className="font-helvetica">
             {/* HERO IMAGE */}
             <div
                 className="h-[160px] flex items-center justify-center text-center relative"
@@ -52,12 +52,12 @@ export default function Belief() {
                 <div className="absolute inset-0 bg-white/60 backdrop-blur-sm" />
 
                 <div className="relative z-10">
-                    <p className="text-lg tracking-[0.1em] text-neutral-700">
+                    <p className="text-lg tracking-[0.1em] text-black/60">
                         THINGS I ACTUALLY BELIEVE
                     </p>
 
-                    <h2 className="text-4xl md:text-5xl font-light text-neutral-900">
-                        Opinions <span className="italic">worth</span> having
+                    <h2 className="text-black/80 text-4xl md:text-5xl font-medium">
+                        Opinions <span className="font-editorial italic">worth</span> having
                     </h2>
                 </div>
             </div>
@@ -72,14 +72,14 @@ export default function Belief() {
                                     {belief.title}
                                 </h3>
 
-                                <p className="text-xl leading-relaxed font-light">
+                                <p className="text-[25px] leading-relaxed font-medium font-editorial">
                                     {belief.headline}
                                 </p>
 
                                 {/* Fixed border - now spans full width */}
                                 <div className="border-b border-neutral-700 my-6 w-full"></div>
 
-                                <p className="text-neutral-300 leading-relaxed text-[15px]">
+                                <p className="text-white leading-tight text-[20px]">
                                     {belief.description}
                                 </p>
                             </div>
@@ -88,7 +88,7 @@ export default function Belief() {
 
                     {/* CTA BUTTON */}
                     <div className="flex justify-center mt-16">
-                        <button className="border-3 border-white bg-[#ADDDB1] text-black px-6 py-2 rounded-full text-lg font-black hover:bg-[#bdd8bf] transition">
+                        <button className="font-helvetica border-3 border-white bg-[#ADDDB1] text-black px-6 py-1.5 rounded-full text-lg font-medium hover:bg-[#bdd8bf] transition">
                             Read more on Substack →
                         </button>
                     </div>

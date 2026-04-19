@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
 
 export default function AboutMe() {
   // Component for Mac-like window header with image name
@@ -13,13 +14,68 @@ export default function AboutMe() {
     </div>
   );
 
+  const sectionRef = useRef<HTMLElement>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  useEffect(() => {
+    const currentSection = sectionRef.current;
+    if (!currentSection) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            setHasAnimated(true);
+          }
+        });
+      },
+      { threshold: 0.3 } // Trigger when 30% of the section is visible
+    );
+
+    observer.observe(currentSection);
+
+    return () => {
+      if (currentSection) {
+        observer.unobserve(currentSection);
+      }
+    };
+  }, [hasAnimated]);
+
   return (
-    <section className="relative w-full py-24 bg-[#FEFDF8] overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="relative w-full py-24 bg-[#FEFDF8] font-helvetica"
+    >
       <div className="max-w-7xl mx-auto px-6 relative">
         {/* Title */}
         <div className="text-black text-center mb-8">
-          <h2 className="text-4xl md:text-5xl font-semibold tracking-tight">
-            Hi, I’m <span className="italic">Bea</span>!
+          <h2 className="text-4xl md:text-5xl font-medium tracking-tight">
+            Hi,{" "}
+            <span className="relative inline-block">
+              <span className="relative z-10"> I'm </span>{" "}
+              <span className="relative z-10 font-editorial italic">Bea!</span>
+              <span className="absolute inset-0 -z-0 overflow-hidden">
+                <img
+                  src="/Landing/HERO/2.png"
+                  alt=""
+                  className={`absolute object-cover ${
+                    hasAnimated ? "swipe-animation" : ""
+                  }`}
+                  style={{
+                    objectPosition: 'center',
+                    top: '40%',
+                    left: '70%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '20%',
+                    height: '120%',
+                    minWidth: '90%',
+                    clipPath: hasAnimated
+                      ? undefined
+                      : 'polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)'
+                  }}
+                />
+              </span>
+            </span>
           </h2>
         </div>
 
@@ -55,7 +111,7 @@ export default function AboutMe() {
               >
                 <div className="relative w-full aspect-[4/4.5]">
                   <Image
-                    src="/1.JPG"
+                    src="/Landing/AboutMe/4.png"
                     alt="bhutan"
                     fill
                     className="object-cover"
@@ -77,7 +133,7 @@ export default function AboutMe() {
               <MacHeader imageName="cca.jpg" />
               <div className="relative w-full aspect-[4/4.5]">
                 <Image
-                  src="/1.JPG"
+                  src="/Landing/AboutMe/1.png"
                   alt="cca"
                   fill
                   className="object-cover"
@@ -96,7 +152,7 @@ export default function AboutMe() {
               >
                 <div className="relative w-full aspect-[4/4.5]">
                   <Image
-                    src="/1.JPG"
+                    src="/Landing/AboutMe/5.png"
                     alt="phstar"
                     fill
                     className="object-cover"
@@ -119,7 +175,7 @@ export default function AboutMe() {
               >
                 <div className="relative w-full aspect-[4/4.5]">
                   <Image
-                    src="/1.JPG"
+                    src="/Landing/AboutMe/6.png"
                     alt="abroad"
                     fill
                     className="object-cover"
@@ -173,7 +229,7 @@ export default function AboutMe() {
               <MacHeader imageName="europe.jpg" />
               <div className="relative w-full aspect-[4/4.5]">
                 <Image
-                  src="/1.JPG"
+                  src="/Landing/AboutMe/2.png"
                   alt="europe"
                   fill
                   className="object-cover"
@@ -190,7 +246,7 @@ export default function AboutMe() {
               <MacHeader imageName="tequila.jpg" />
               <div className="relative w-full aspect-[4/4.5]">
                 <Image
-                  src="/1.JPG"
+                  src="/Landing/AboutMe/3.png"
                   alt="tequila"
                   fill
                   className="object-cover"
@@ -200,6 +256,20 @@ export default function AboutMe() {
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes swipeLeftToRight {
+          0% {
+            clip-path: polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%);
+          }
+          100% {
+            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+          }
+        }
+        .swipe-animation {
+          animation: swipeLeftToRight 0.8s ease-out forwards;
+        }
+      `}</style>
     </section>
   );
 }

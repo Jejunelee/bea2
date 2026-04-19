@@ -15,17 +15,17 @@ const items = [
 export default function Ticker() {
   return (
     <div
-      className="relative overflow-hidden w-full py-9"
+      className="relative overflow-hidden w-full py-8 font-helvetica"
       style={{
-        backgroundColor: "#ebf5e8",
-        color: "#9d9e96",
+        backgroundColor: "#ADDDB1",
+        color: "#677567",
       }}
     >
       <div className="flex whitespace-nowrap animate-ticker">
         {[...items, ...items].map((item, i) => (
           <span
             key={i}
-            className="text-2xl md:text-3xl tracking-wide font-medium"
+            className="text-2xl md:text-3xl tracking-wide font-normal"
           >
             {item}
             <span className="mx-4">✦</span>

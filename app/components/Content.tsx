@@ -1,6 +1,6 @@
 "use client";
 
-import { InstagramEmbed, TikTokEmbed } from 'react-social-media-embed';
+import { InstagramEmbed, TikTokEmbed, LinkedInEmbed } from 'react-social-media-embed';
 import { Carousel } from 'react-responsive-carousel';
 import 'react-responsive-carousel/lib/styles/carousel.min.css';
 
@@ -15,6 +15,25 @@ const tiktokPosts = [
   "https://www.tiktok.com/@beatrinidad_/video/7593986097269476628",  // Replace with actual video URL
   "https://www.tiktok.com/@beatrinidad_/video/7593986097269476628",  // Replace with actual video URL
   "https://www.tiktok.com/@beatrinidad_/video/7593986097269476628",  // Replace with actual video URL
+];
+
+// LinkedIn posts - REPLACE THESE WITH YOUR ACTUAL POSTS
+const linkedinPosts = [
+  {
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:6898694772484112384",
+    postUrl: "https://www.linkedin.com/posts/peterdiamandis_5-discoveries-the-james-webb-telescope-will-activity-6898694773406875648-z-D7",
+    title: "Post Title 1"
+  },
+  {
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:XXXXXXXXXXXXXXXXXX",
+    postUrl: "https://www.linkedin.com/posts/yourusername_post-title-activity-XXXXXXXXXXXXXXXXXX",
+    title: "Post Title 2"
+  },
+  {
+    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:YYYYYYYYYYYYYYYYYY",
+    postUrl: "https://www.linkedin.com/posts/yourusername_another-post-activity-YYYYYYYYYYYYYYYYYY",
+    title: "Post Title 3"
+  },
 ];
 
 // Spotify podcast episodes - using standard iframe embed
@@ -100,6 +119,45 @@ export default function SocialFeedPage() {
               <div key={index} className="flex justify-center">
                 <div className="bg-white rounded-xl shadow-lg p-4 w-full max-w-md">
                   <TikTokEmbed url={post} width={325} />
+                </div>
+              </div>
+            ))}
+          </Carousel>
+        </section>
+
+        {/* LinkedIn Section - NEW */}
+        <section>
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold text-gray-900">LinkedIn Feed</h2>
+            <a 
+              href="https://www.linkedin.com/in/yourusername/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-700 hover:text-blue-800 text-sm inline-block mt-2"
+            >
+              Follow me on LinkedIn →
+            </a>
+          </div>
+          
+          <Carousel
+            showArrows={true}
+            showStatus={false}
+            showThumbs={false}
+            infiniteLoop={true}
+            autoPlay={true}
+            interval={7000}
+            stopOnHover={true}
+            swipeable={true}
+          >
+            {linkedinPosts.map((post, index) => (
+              <div key={index} className="flex justify-center">
+                <div className="bg-white rounded-xl shadow-lg p-4 w-full max-w-md">
+                  <LinkedInEmbed 
+                    url={post.embedUrl}
+                    postUrl={post.postUrl}
+                    width={325}
+                    height={570}
+                  />
                 </div>
               </div>
             ))}

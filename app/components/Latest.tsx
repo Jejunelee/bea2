@@ -9,7 +9,7 @@ export default function Latest() {
 
         {/* LEFT PODCAST BLOCK */}
         <div className="flex flex-col items-center text-center">
-          <h3 className="text-3xl font-semibold mb-3">
+          <h3 className="font-helvetica text-3xl font-semibold mb-3">
             The latest drops
           </h3>
 
@@ -58,7 +58,7 @@ export default function Latest() {
             className="mb-2"
           />
 
-          <p className="text-base font-medium">
+          <p className="font-helvetica text-2xl font-medium">
             Subscribe to my <br /> podcast
           </p>
         </div>

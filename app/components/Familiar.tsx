@@ -6,28 +6,28 @@ import Image from "next/image";
 const cards = [
   {
     id: 1,
-    image: "/1.JPG",
+    image: "/Landing/Familiar/1.png",
     title: "I'm posting. Nothing's building.",
     description:
       "Six months of content, same reach. You're consistent, but consistency alone isn't doing what they promised it would. You're starting to wonder if experimentation is the missing piece, or if the problem runs deeper than that.",
   },
   {
     id: 2,
-    image: "/1.JPG",
+    image: "/Landing/Familiar/2.png",
     title: "I sound like everyone else.",
     description:
       "Your ideas are good. But they come out like templates. You open the app, see three people saying exactly what you were going to say, and close it again.",
   },
   {
     id: 3,
-    image: "/1.JPG",
+    image: "/Landing/Familiar/3.png",
     title: "I hired an agency, but they're not a growth partner.",
     description:
       "They deliver content on time and call it done. But nobody in that office loses sleep over whether your business is actually growing. You don't need a vendor. You need someone who's invested in the outcome.",
   },
   {
     id: 4,
-    image: "/1.JPG",
+    image: "/Landing/Familiar/4.png",
     title: "My competitors just look more legit.",
     description:
       "Same expertise, sometimes less. But their story is clearer and you can't figure out what they're doing that you're not. The difference usually isn't budget. It's clarity.",
@@ -41,14 +41,14 @@ export default function Familiar() {
   };
 
   return (
-    <section className="relative w-full bg-[white]">
+    <section className="relative w-full bg-[white] font-helvetica">
       {/* Sticky Heading */}
       <div className="top-0 z-30 bg-[white] py-12 px-6">
         <div className="max-w-5xl mx-auto text-center">
-          <h2 className="text-black text-4xl md:text-5xl font-semibold tracking-tight">
-            Sounds <span className="text-black italic font-normal">familiar?</span>
+          <h2 className="text-black text-4xl md:text-5xl font-medium tracking-tight">
+            Sounds <span className="text-black italic font-normal font-editorial">familiar?</span>
           </h2>
-          <p className="mt-4 text-gray-600 text-lg">
+          <p className="mt-4 text-black text-lg">
             The things nobody says out loud, but everyone feels.
           </p>
         </div>
@@ -80,8 +80,8 @@ export default function Familiar() {
                     className="mb-4 w-18 h-18"
                   />
 
-                  <h3 className="text-3xl md:text-4xl font-semibold mb-4">{card.title}</h3>
-                  <p className="text-gray-300 leading-relaxed">{card.description}</p>
+                  <h3 className="font-helvetica text-3xl md:text-4xl font-medium mb-4">"{card.title}"</h3>
+                  <p className="text-white text-lg leading-relaxed">{card.description}</p>
                 </div>
               </div>
             </div>

@@ -140,7 +140,7 @@ export default function GetStarted() {
       {/* Content - now centered vertically and horizontally */}
       <div className="relative max-w-5xl mx-auto text-center z-10 px-6">
         <h2
-          className="text-4xl md:text-6xl font-medium text-black transition-transform duration-300"
+          className="text-3xl md:text-5xl font-medium text-black transition-transform duration-300"
           style={{
             transform: `translate(${(percentX - 0.5) * 8}px, ${
               (percentY - 0.5) * 8
@@ -148,21 +148,10 @@ export default function GetStarted() {
           }}
         >
           Ready to get{" "}
-          <span className="italic font-serif bg-gradient-to-r from-amber-600 to-amber-800 bg-clip-text text-transparent">
+          <span className="italic font-editorial font-medium">
             started?
           </span>
         </h2>
-
-        <p
-          className="mt-6 text-neutral-600 max-w-md mx-auto"
-          style={{
-            transform: `translate(${(percentX - 0.5) * 6}px, ${
-              (percentY - 0.5) * 6
-            }px)`,
-          }}
-        >
-          Let's transform your digital presence. Book a free consultation call.
-        </p>
 
         <div
           className="mt-12"
@@ -217,20 +206,6 @@ export default function GetStarted() {
               </svg>
             </span>
           </button>
-        </div>
-
-        {/* Trust indicator */}
-        <div
-          className="mt-16 flex items-center justify-center gap-8 text-xs text-neutral-400"
-          style={{
-            transform: `translate(${(percentX - 0.5) * 3}px, ${
-              (percentY - 0.5) * 3
-            }px)`,
-          }}
-        >
-          <span>✨ No obligation</span>
-          <span>⚡ 30-min discovery call</span>
-          <span>🎯 Strategy focused</span>
         </div>
       </div>
     </section>
