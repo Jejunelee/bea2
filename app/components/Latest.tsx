@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Latest() {
   return (
@@ -8,7 +9,7 @@ export default function Latest() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 items-start">
 
         {/* LEFT PODCAST BLOCK */}
-        <div className="flex flex-col items-center text-center">
+        <Link href="/work" className="flex flex-col items-center text-center cursor-pointer">
           <h3 className="font-helvetica text-3xl font-semibold mb-3">
             The latest drops
           </h3>
@@ -61,14 +62,14 @@ export default function Latest() {
           <p className="font-helvetica text-2xl font-medium">
             Subscribe to my <br /> podcast
           </p>
-        </div>
+        </Link>
 
 
         {/* CONTENT CARDS */}
         <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* CARD 1 */}
-          <div className="flex flex-col">
+          <Link href="/work" className="flex flex-col cursor-pointer">
             <div className="bg-[#e8b6c0] h-12 flex items-center justify-center mb-3">
               <Image
                 src="/Landing/Icons/Icons1.png"
@@ -80,17 +81,17 @@ export default function Latest() {
 
             <div className="relative w-full aspect-[3/4] overflow-hidden">
               <Image
-                src="/1.JPG"
+                src="/Landing/Latest/1.png"
                 alt="post1"
                 fill
                 className="object-cover"
               />
             </div>
-          </div>
+          </Link>
 
 
           {/* CARD 2 */}
-          <div className="flex flex-col">
+          <Link href="/work" className="flex flex-col cursor-pointer">
             <div className="bg-[#f3cc2b] h-12 flex items-center justify-center mb-3">
               <Image
                 src="/Landing/Icons/Icons2.png"
@@ -102,17 +103,17 @@ export default function Latest() {
 
             <div className="relative w-full aspect-[3/4] overflow-hidden">
               <Image
-                src="/1.JPG"
+                src="/Landing/Latest/2.png"
                 alt="post2"
                 fill
                 className="object-cover"
               />
             </div>
-          </div>
+          </Link>
 
 
           {/* CARD 3 */}
-          <div className="flex flex-col">
+          <Link href="/work" className="flex flex-col cursor-pointer">
             <div className="bg-[#9ac33b] h-12 flex items-center justify-center mb-3">
               <Image
                 src="/Landing/Icons/Icon3.png"
@@ -124,13 +125,13 @@ export default function Latest() {
 
             <div className="relative w-full aspect-[3/4] overflow-hidden">
               <Image
-                src="/1.JPG"
+                src="/Landing/Latest/3.png"
                 alt="post3"
                 fill
                 className="object-cover"
               />
             </div>
-          </div>
+          </Link>
 
         </div>
 

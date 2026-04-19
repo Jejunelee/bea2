@@ -10,6 +10,8 @@ interface Episode {
 }
 
 export default function Section2() {
+  const sectionRef = useRef(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
   const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -95,53 +97,140 @@ export default function Section2() {
     };
   }, [currentIndex, episodes.length, isTransitioning]);
 
-  // Auto-play every 8 seconds
+  // Auto-play every 8 seconds (only start after animation is done)
   useEffect(() => {
+    if (!hasAnimated) return;
+    
     const interval = setInterval(() => {
       nextSlide();
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [nextSlide]);
+  }, [nextSlide, hasAnimated]);
+
+  // Intersection Observer for scroll animation
+  useEffect(() => {
+    const currentSection = sectionRef.current;
+    if (!currentSection) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            setHasAnimated(true);
+          }
+        });
+      },
+      {
+        threshold: 0.2,
+        rootMargin: "0px 0px -100px 0px",
+      }
+    );
+
+    observer.observe(currentSection);
+
+    return () => {
+      if (currentSection) {
+        observer.unobserve(currentSection);
+      }
+    };
+  }, [hasAnimated]);
 
   return (
-    <section className="w-full bg-black text-white py-24" style={{ fontFamily: 'Helvetica' }}>
+    <section 
+      ref={sectionRef}
+      className="w-full bg-black text-white py-24" 
+      style={{ fontFamily: 'Helvetica' }}
+    >
       <div className="max-w-7xl mx-auto px-6">
         {/* Stack on mobile, side-by-side on large screens with proper gaps */}
         <div className="flex flex-col lg:flex-row lg:gap-12 items-center">
           
           {/* LEFT CONTENT - takes full width on mobile, half on desktop */}
           <div className="w-full lg:w-1/2 mb-12 lg:mb-0">
-            <p className="text-2xl tracking-widest uppercase text-white/70 mb-6">
-              Origin Series
-            </p>
+            {/* Origin Series badge */}
+            <div
+              className={`transition-all duration-700 ease-out ${
+                hasAnimated
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-6"
+              }`}
+            >
+              <p className="text-2xl tracking-widest uppercase text-white/70 mb-6">
+                Origin Series
+              </p>
+            </div>
 
-            <h2 className="text-4xl md:text-5xl font-medium text-[#F4D35E] leading-tight mb-6">
-              Your Story On Camera.
-              <br />
-              Done Properly.
-            </h2>
+            {/* Heading */}
+            <div
+              className={`transition-all duration-700 delay-75 ease-out ${
+                hasAnimated
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-6"
+              }`}
+            >
+              <h2 className="text-4xl md:text-5xl font-medium text-[#F4D35E] leading-tight mb-6">
+                Your Story On Camera.
+                <br />
+                Done Properly.
+              </h2>
+            </div>
 
-            <p className="text-xl text-white/80 max-w-xl mb-6">
-              A 3-Part Founder Story Series Scripted And Built For Social. Your
-              Origin, Your Why, And Your World. This Is The Kind Of Content That
-              Makes People Follow You And Actually Stay — Because It Shows Them
-              Who You Are, Not Just What You Sell.
-            </p>
+            {/* Description */}
+            <div
+              className={`transition-all duration-700 delay-150 ease-out ${
+                hasAnimated
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-6"
+              }`}
+            >
+              <p className="text-xl text-white/80 max-w-xl mb-6">
+                A 3-Part Founder Story Series Scripted And Built For Social. Your
+                Origin, Your Why, And Your World. This Is The Kind Of Content That
+                Makes People Follow You And Actually Stay — Because It Shows Them
+                Who You Are, Not Just What You Sell.
+              </p>
+            </div>
 
+            {/* Bullet points */}
             <ul className="space-y-2 text-white/90 mb-8 text-xl">
-              <li>• Story Extraction And Scripting</li>
-              <li>• 3-Episode Production Brief</li>
-              <li>• Distribution And Repurposing Guide</li>
+              {["Story Extraction And Scripting", "3-Episode Production Brief", "Distribution And Repurposing Guide"].map((item, idx) => (
+                <li
+                  key={idx}
+                  className={`transition-all duration-700 ease-out ${
+                    hasAnimated
+                      ? "opacity-100 translate-x-0"
+                      : "opacity-0 -translate-x-4"
+                  }`}
+                  style={{ transitionDelay: `${200 + idx * 100}ms` }}
+                >
+                  • {item}
+                </li>
+              ))}
             </ul>
 
-            <button className="text-xl bg-[#F4C400] text-black font-medium px-6 py-1.5 rounded-full border border-white shadow-sm hover:opacity-90 transition">
-              From £800 / project-based
-            </button>
+            {/* Button */}
+            <div
+              className={`transition-all duration-700 delay-500 ease-out ${
+                hasAnimated
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-6"
+              }`}
+            >
+              <button className="text-xl bg-[#F4C400] text-black font-medium px-6 py-1.5 rounded-full border border-white shadow-sm hover:opacity-90 transition">
+                From £800 / project-based
+              </button>
+            </div>
           </div>
 
           {/* RIGHT CAROUSEL - takes full width on mobile, half on desktop */}
-          <div className="w-full lg:w-1/2 flex flex-col items-center">
+          <div
+            className={`w-full lg:w-1/2 flex flex-col items-center transition-all duration-800 delay-300 ease-out ${
+              hasAnimated
+                ? "opacity-100 translate-x-0"
+                : "opacity-0 translate-x-8"
+            }`}
+          >
             {/* Carousel container - shows exactly one episode */}
             <div className="w-full max-w-[380px] mx-auto">
               <div className="overflow-hidden rounded-2xl">
@@ -160,7 +249,7 @@ export default function Section2() {
                     >
                       <div className="w-full bg-white rounded-xl shadow-2xl overflow-hidden">
                         {/* Episode title header */}
-                        <div className="p-5 bg-gradient-to-r from-[#1DB954] to-[#191414] p-4">
+                        <div className="p-5 bg-gradient-to-r from-[#1DB954] to-[#191414]">
                           <p className="text-white font-semibold text-sm">
                             Episode {episode.episodeNumber}
                           </p>
@@ -176,15 +265,15 @@ export default function Section2() {
                         <div className="pt-2 bg-black"></div>
                         
                         <iframe
-  src={episode.embedUrl}
-  width="100%"
-  height="352"
-  frameBorder="0"
-  allowFullScreen
-  allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-  loading="lazy"
-  className="w-full bg-black overflow-hidden"  // ← add rounded + overflow-hidden
-/>
+                          src={episode.embedUrl}
+                          width="100%"
+                          height="352"
+                          frameBorder="0"
+                          allowFullScreen
+                          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                          loading="lazy"
+                          className="w-full bg-black overflow-hidden"
+                        />
                       </div>
                     </div>
                   ))}

@@ -4,6 +4,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Bell, MessageCircle, Heart, Clock, Wifi, Battery, Signal } from 'lucide-react';
 
 export default function Section3() {
+  const sectionRef = useRef(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
   const [rotation, setRotation] = useState({ x: 0, y: 0 });
   const phoneContainerRef = useRef<HTMLDivElement>(null);
 
@@ -42,8 +44,37 @@ export default function Section3() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
+  // Intersection Observer for scroll animation
+  useEffect(() => {
+    const currentSection = sectionRef.current;
+    if (!currentSection) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            setHasAnimated(true);
+          }
+        });
+      },
+      {
+        threshold: 0.2,
+        rootMargin: "0px 0px -100px 0px",
+      }
+    );
+
+    observer.observe(currentSection);
+
+    return () => {
+      if (currentSection) {
+        observer.unobserve(currentSection);
+      }
+    };
+  }, [hasAnimated]);
+
   return (
     <section 
+      ref={sectionRef}
       className="w-full bg-[#E9E7E2] relative overflow-hidden" 
       style={{ fontFamily: 'Helvetica' }}
     >
@@ -51,37 +82,91 @@ export default function Section3() {
   
         {/* LEFT CONTENT */}
         <div className="pt-8">
-          <p className="text-2xl tracking-widest uppercase text-black/70 mb-6">
-            AI For Marketing Normies
-          </p>
-  
-          <h2 className="text-4xl md:text-5xl font-medium text-[#6B7F1A] leading-tight mb-6">
-            AI Should Make You Sound
-            <br />
-            More Like Yourself, Not Less.
-          </h2>
-  
-          <p className="text-xl text-black/80 max-w-2xl mb-6">
-            Two Entrepreneurs Came To Me Recently Asking Me To Teach Them AI —
-            Specifically For Their Business Development And Marketing Processes.
-            Not The Overwhelming, Jargon-Heavy Stuff. Just How To Actually Make It
-            Work In Their Day-To-Day Without Losing Their Voice In The Process.
-            So I Said Yes, And Now It's A Proper Offer.
-          </p>
-  
+          {/* Badge */}
+          <div
+            className={`transition-all duration-700 ease-out ${
+              hasAnimated
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-6"
+            }`}
+          >
+            <p className="text-2xl tracking-widest uppercase text-black/70 mb-6">
+              AI For Marketing Normies
+            </p>
+          </div>
+
+          {/* Heading */}
+          <div
+            className={`transition-all duration-700 delay-75 ease-out ${
+              hasAnimated
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-6"
+            }`}
+          >
+            <h2 className="text-4xl md:text-5xl font-medium text-[#6B7F1A] leading-tight mb-6">
+              AI Should Make You Sound
+              <br />
+              More Like Yourself, Not Less.
+            </h2>
+          </div>
+
+          {/* Description */}
+          <div
+            className={`transition-all duration-700 delay-150 ease-out ${
+              hasAnimated
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-6"
+            }`}
+          >
+            <p className="text-xl text-black/80 max-w-2xl mb-6">
+              Two Entrepreneurs Came To Me Recently Asking Me To Teach Them AI —
+              Specifically For Their Business Development And Marketing Processes.
+              Not The Overwhelming, Jargon-Heavy Stuff. Just How To Actually Make It
+              Work In Their Day-To-Day Without Losing Their Voice In The Process.
+              So I Said Yes, And Now It's A Proper Offer.
+            </p>
+          </div>
+
+          {/* Bullet points */}
           <ul className="space-y-2 text-black/90 mb-8 text-xl">
-            <li>• AI Workflow Audit For Your Specific Business</li>
-            <li>• Prompting Frameworks Built Around Your Brand Voice</li>
-            <li>• Tools Stack And Step-By-Step Implementation</li>
+            {["AI Workflow Audit For Your Specific Business", "Prompting Frameworks Built Around Your Brand Voice", "Tools Stack And Step-By-Step Implementation"].map((item, idx) => (
+              <li
+                key={idx}
+                className={`transition-all duration-700 ease-out ${
+                  hasAnimated
+                    ? "opacity-100 translate-x-0"
+                    : "opacity-0 -translate-x-4"
+                }`}
+                style={{ transitionDelay: `${200 + idx * 100}ms` }}
+              >
+                • {item}
+              </li>
+            ))}
           </ul>
-  
-          <button className="text-xl bg-[#A6C437] text-black font-medium px-6 py-1.5 rounded-full border border-black shadow-sm hover:opacity-90 transition">
-            From £500 / 1:1 session
-          </button>
+
+          {/* Button */}
+          <div
+            className={`transition-all duration-700 delay-500 ease-out ${
+              hasAnimated
+                ? "opacity-100 translate-y-0"
+                : "opacity-0 translate-y-6"
+            }`}
+          >
+            <button className="text-xl bg-[#A6C437] text-black font-medium px-6 py-1.5 rounded-full border border-black shadow-sm hover:opacity-90 transition">
+              From £500 / 1:1 session
+            </button>
+          </div>
         </div>
   
         {/* RIGHT IPHONE MOCKUP - 3D Tilt following cursor */}
-        <div className="relative flex justify-end" ref={phoneContainerRef}>
+        <div 
+          className={`relative flex justify-end transition-all duration-800 delay-300 ease-out ${
+            hasAnimated
+              ? "opacity-100 translate-x-0"
+              : "opacity-0 translate-x-12"
+          }`}
+          ref={phoneContainerRef}
+        >
           <div 
             className="relative -mb-100"
             style={{

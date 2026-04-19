@@ -1,8 +1,10 @@
 "use client";
 
 import React, { useRef, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function Hero() {
+  const router = useRouter();
   const leftPolaroidRef = useRef<HTMLDivElement>(null);
   const rightPolaroidRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
@@ -12,6 +14,42 @@ export default function Hero() {
   const [isTyping, setIsTyping] = useState(true);
   const [showSharpestImage, setShowSharpestImage] = useState(false);
   const fullText = "Bea Trinidad · Type Harder Studio";
+
+  // CREATE CALENDAR EVENT - Using Google Calendar URL
+  const createCalendarEvent = () => {
+    // Get current date and time for the event (default to 1 hour from now)
+    const startDate = new Date();
+    startDate.setHours(startDate.getHours() + 1);
+    
+    // Set end time to 1 hour after start
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + 1);
+    
+    // Format dates for Google Calendar (YYYYMMDDTHHMMSSZ format)
+    const formatDateForGoogle = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+    
+    const startTime = formatDateForGoogle(startDate);
+    const endTime = formatDateForGoogle(endDate);
+    
+    // Create the Google Calendar URL
+    const url = 
+      "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+      "&text=Exploratory+Call" +
+      `&dates=${startTime}/${endTime}` +
+      "&details=Hi,+I'm+reaching+out+to+discuss+how+we+can+work+together+on+storytelling+and+communications." +
+      "&location=Google+Meet" +
+      "&add=bea@gmail.com";
+    
+    // Open in new window
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  // Navigate to work page
+  const navigateToWork = () => {
+    router.push('/work');
+  };
 
   useEffect(() => {
     if (isTyping) {
@@ -134,14 +172,14 @@ export default function Hero() {
         <div className="mt-6 sm:mt-7 md:mt-8 flex flex-col sm:flex-row gap-3 sm:gap-5 justify-center">
           <button 
             className="font-helvetica border-2 px-5 sm:px-6 py-2 rounded-full bg-yellow-400 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-sm sm:text-base text-black"
-            onClick={() => console.log('Work with me clicked')}
+            onClick={createCalendarEvent}
           >
             Work with me
           </button>
 
           <button 
             className="font-helvetica border-2 px-5 sm:px-6 py-2 rounded-full bg-green-200 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-sm sm:text-base text-black"
-            onClick={() => console.log('Read my thinking clicked')}
+            onClick={navigateToWork}
           >
             Read my thinking
           </button>

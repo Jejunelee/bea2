@@ -1,3 +1,8 @@
+"use client";
+
+import { useEffect, useRef } from "react";
+import { motion, useScroll, useTransform, useInView } from "framer-motion";
+
 export default function Belief() {
     const beliefs = [
         {
@@ -35,63 +40,137 @@ export default function Belief() {
         },
     ];
 
+    const containerRef = useRef(null);
+    const heroRef = useRef(null);
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start start", "end start"],
+    });
+
+    // Parallax transforms for hero section - NO FADE
+    const heroY = useTransform(scrollYProgress, [0, 1], [0, 150]); // Only moves up slightly
+
     return (
-        <section className="font-helvetica">
-            {/* HERO IMAGE */}
-            <div
-                className="h-[160px] flex items-center justify-center text-center relative"
+        <section ref={containerRef} className="font-helvetica overflow-hidden">
+            {/* HERO IMAGE with parallax - no fade */}
+            <motion.div
+                ref={heroRef}
+                className="h-[160px] flex items-center justify-center text-center relative overflow-hidden"
                 style={{
-                    backgroundImage: "url('/Landing/Vector.png')",
-                    backgroundSize: "contain",
-                    backgroundRepeat: "no-repeat",
-                    backgroundPosition: "center",
-                    backgroundColor: "#f3f3f3",
+                    y: heroY, // Only parallax movement, no opacity change
                 }}
             >
-                {/* overlay for readability */}
-                <div className="absolute inset-0 bg-white/60 backdrop-blur-sm" />
-
-                <div className="relative z-10">
-                    <p className="text-lg tracking-[0.1em] text-black/60">
-                        THINGS I ACTUALLY BELIEVE
-                    </p>
-
-                    <h2 className="text-black/80 text-4xl md:text-5xl font-medium">
-                        Opinions <span className="font-editorial italic">worth</span> having
-                    </h2>
+                <div
+                    className="absolute inset-0"
+                    style={{
+                        backgroundImage: "url('/Landing/Vector.png')",
+                        backgroundSize: "contain",
+                        backgroundRepeat: "no-repeat",
+                        backgroundPosition: "center",
+                        backgroundColor: "#f3f3f3",
+                    }}
+                >
+                    {/* overlay for readability */}
+                    <div className="absolute inset-0 bg-white/60 backdrop-blur-sm" />
                 </div>
-            </div>
 
-            {/* BELIEF CONTENT */}
+                <motion.div
+                    className="relative z-10"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                >
+                    <motion.p
+                        className="text-lg tracking-[0.1em] text-black/90"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.2 }}
+                    >
+                        THINGS I ACTUALLY BELIEVE
+                    </motion.p>
+
+                    <motion.h2
+                        className="text-black/80 text-4xl md:text-5xl font-medium"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6, delay: 0.4 }}
+                    >
+                        Opinions <span className="font-editorial italic">worth</span> having
+                    </motion.h2>
+                </motion.div>
+            </motion.div>
+
+            {/* BELIEF CONTENT with fade-in on scroll */}
             <div className="bg-black text-white py-24 px-6">
                 <div className="max-w-6xl mx-auto">
                     <div className="grid md:grid-cols-3 gap-12">
-                        {beliefs.map((belief, index) => (
-                            <div key={index}>
-                                <h3 className="text-4xl font-medium mb-4">
-                                    {belief.title}
-                                </h3>
+                        {beliefs.map((belief, index) => {
+                            const ref = useRef(null);
+                            const isInView = useInView(ref, { once: true, amount: 0.3 });
 
-                                <p className="text-[25px] leading-relaxed font-medium font-editorial">
-                                    {belief.headline}
-                                </p>
+                            return (
+                                <motion.div
+                                    key={index}
+                                    ref={ref}
+                                    initial={{ opacity: 0, y: 50 }}
+                                    animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+                                    transition={{ duration: 0.6, delay: index * 0.15, ease: "easeOut" }}
+                                >
+                                    <motion.h3
+                                        className="text-4xl font-medium mb-4"
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={isInView ? { opacity: 1, x: 0 } : {}}
+                                        transition={{ duration: 0.5, delay: index * 0.15 + 0.2 }}
+                                    >
+                                        {belief.title}
+                                    </motion.h3>
 
-                                {/* Fixed border - now spans full width */}
-                                <div className="border-b border-neutral-700 my-6 w-full"></div>
+                                    <motion.p
+                                        className="text-[25px] leading-relaxed font-medium font-editorial"
+                                        initial={{ opacity: 0 }}
+                                        animate={isInView ? { opacity: 1 } : {}}
+                                        transition={{ duration: 0.5, delay: index * 0.15 + 0.3 }}
+                                    >
+                                        {belief.headline}
+                                    </motion.p>
 
-                                <p className="text-white leading-tight text-[20px]">
-                                    {belief.description}
-                                </p>
-                            </div>
-                        ))}
+                                    <motion.div
+                                        className="border-b border-neutral-700 my-6 w-full"
+                                        initial={{ scaleX: 0 }}
+                                        animate={isInView ? { scaleX: 1 } : {}}
+                                        transition={{ duration: 0.6, delay: index * 0.15 + 0.4 }}
+                                        style={{ originX: 0 }}
+                                    />
+
+                                    <motion.p
+                                        className="text-white leading-tight text-[20px]"
+                                        initial={{ opacity: 0 }}
+                                        animate={isInView ? { opacity: 1 } : {}}
+                                        transition={{ duration: 0.5, delay: index * 0.15 + 0.5 }}
+                                    >
+                                        {belief.description}
+                                    </motion.p>
+                                </motion.div>
+                            );
+                        })}
                     </div>
 
                     {/* CTA BUTTON */}
-                    <div className="flex justify-center mt-16">
-                        <button className="font-helvetica border-3 border-white bg-[#ADDDB1] text-black px-6 py-1.5 rounded-full text-lg font-medium hover:bg-[#bdd8bf] transition">
+                    <motion.div
+                        className="flex justify-center mt-16"
+                        initial={{ opacity: 0, y: 30 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.3 }}
+                        transition={{ duration: 0.6, delay: 0.3 }}
+                    >
+                        <motion.button
+                            className="font-helvetica border-3 border-white bg-[#ADDDB1] text-black px-6 py-1.5 rounded-full text-lg font-medium hover:bg-[#bdd8bf] transition cursor-pointer"
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                        >
                             Read more on Substack →
-                        </button>
-                    </div>
+                        </motion.button>
+                    </motion.div>
                 </div>
             </div>
         </section>

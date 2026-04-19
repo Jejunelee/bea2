@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
 export default function Quote() {
@@ -8,8 +8,35 @@ export default function Quote() {
   
   const [displayedText, setDisplayedText] = useState("");
   const [isTypingComplete, setIsTypingComplete] = useState(false);
+  const [hasStartedTyping, setHasStartedTyping] = useState(false);
+  const sectionRef = useRef(null);
 
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasStartedTyping) {
+            setHasStartedTyping(true);
+          }
+        });
+      },
+      { threshold: 0.3 } // Start when 30% of the section is visible
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, [hasStartedTyping]);
+
+  useEffect(() => {
+    if (!hasStartedTyping) return;
+
     let index = 0;
     const timer = setInterval(() => {
       if (index < fullText.length) {
@@ -22,7 +49,7 @@ export default function Quote() {
     }, 50); // Adjust speed here (milliseconds per character)
 
     return () => clearInterval(timer);
-  }, []);
+  }, [hasStartedTyping]);
 
   // Function to render text with styling
   const renderStyledText = () => {
@@ -78,7 +105,7 @@ export default function Quote() {
   };
 
   return (
-    <section className="relative w-full h-screen flex items-center justify-center overflow-hidden font-helvetica">
+    <section ref={sectionRef} className="relative w-full h-screen flex items-center justify-center overflow-hidden font-helvetica">
       {/* Simple background gradient */}
       <div
         className="absolute inset-0"
@@ -117,7 +144,9 @@ export default function Quote() {
       {/* Content */}
       <div className="relative z-10 max-w-4xl px-6 text-center">
         <p className="text-[26px] md:text-[32px] leading-relaxed font-medium text-black">
-          {renderStyledText()}
+          {hasStartedTyping ? renderStyledText() : fullText.split('').map((char, i) => (
+            <span key={i} className="opacity-0">{char}</span>
+          ))}
         </p>
 
         {isTypingComplete && (

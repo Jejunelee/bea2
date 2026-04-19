@@ -1,34 +1,45 @@
+// components/Header2.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import UserTypeModal from "./UserTypeModal"; // Import the modal
 
 export default function Header2() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isDarkBackground, setIsDarkBackground] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
   const pathname = usePathname();
   
-  // Check if we're on the homepage
   const isHomepage = pathname === "/";
 
-  // Handle scroll effect and check background on scroll
+  // Handle user type selection
+  const handleUserTypeSelect = (userType: "brand" | "individual") => {
+    setIsModalOpen(false);
+    
+    // Add your navigation logic here
+    if (userType === "brand") {
+      window.location.href = "/brands";
+    } else {
+      window.location.href = "/people";
+    }
+  };
+
+  // Handle scroll effect (your existing code)
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 10);
       
-      // Check background color of the section the header is currently over
       const header = document.querySelector('nav');
       if (header) {
-        // Get the element directly below the header (what the header is overlapping)
         const headerRect = header.getBoundingClientRect();
         const centerX = headerRect.left + headerRect.width / 2;
-        const centerY = headerRect.bottom + 10; // Just below the header
+        const centerY = headerRect.bottom + 10;
         
         const elementAtPoint = document.elementFromPoint(centerX, centerY);
         if (elementAtPoint) {
-          // Find the nearest section or div with background
           let currentElement: Element | null = elementAtPoint;
           let bgColor = null;
           
@@ -53,13 +64,12 @@ export default function Header2() {
     };
     
     window.addEventListener("scroll", handleScroll);
-    // Call once on mount to set initial state
     handleScroll();
     
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Close menu on resize if screen becomes desktop
+  // Close menu on resize
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -100,7 +110,6 @@ export default function Header2() {
       <nav className={`fixed top-0 left-0 right-0 z-50 w-full transition-all duration-500 ${
         scrolled ? "py-3" : "py-0"
       }`}>
-        {/* Island container - appears on scroll */}
         <div className={`transition-all duration-500 ease-out ${
           scrolled 
             ? "max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8" 
@@ -113,7 +122,7 @@ export default function Header2() {
           }`}>
             <div className="max-w-[1400px] mx-auto w-full flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
               
-              {/* Logo - Responsive sizing with link to homepage */}
+              {/* Logo */}
               <Link href="/" className="flex items-center shrink-0 cursor-pointer">
                 <img 
                   src="/Logo.png" 
@@ -122,7 +131,7 @@ export default function Header2() {
                 />
               </Link>
 
-              {/* Desktop Navigation - Hidden on mobile/tablet */}
+              {/* Desktop Navigation */}
               <div className="hidden md:flex items-center gap-6 lg:gap-10">
                 <div className="flex items-center gap-6 lg:gap-10">
                   <a 
@@ -158,12 +167,15 @@ export default function Header2() {
                 </div>
               </div>
 
-              {/* CTA Button - Responsive sizing */}
-              <button className={`${
-                isDarkBackground && !scrolled
-                  ? "bg-white text-black hover:bg-gray-100" 
-                  : "bg-black text-white hover:bg-gray-800"
-              } text-xs sm:text-sm md:text-base px-4 sm:px-5 py-1.5 sm:py-2 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 shrink-0 font-medium`}>
+              {/* CTA Button - Opens Modal */}
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className={`${
+                  isDarkBackground && !scrolled
+                    ? "bg-white text-black hover:bg-gray-100" 
+                    : "bg-black text-white hover:bg-gray-800"
+                } text-xs sm:text-sm md:text-base px-4 sm:px-5 py-1.5 sm:py-2 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 shrink-0 font-medium`}
+              >
                 Start Here →
               </button>
 
@@ -200,7 +212,6 @@ export default function Header2() {
         isDarkBackground ? "bg-gray-900" : "bg-white"
       } ${isMenuOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex flex-col pt-20 px-6 gap-4">
-          {/* Mobile Logo with link */}
           <Link href="/" className={`pb-4 mb-2 border-b block ${
             isDarkBackground ? "border-gray-700" : "border-gray-100"
           }`} onClick={() => setIsMenuOpen(false)}>
@@ -211,7 +222,6 @@ export default function Header2() {
             />
           </Link>
           
-          {/* Mobile Navigation Links - Larger touch targets */}
           <a 
             href="brands" 
             className={`${
@@ -246,23 +256,36 @@ export default function Header2() {
             For Work
           </a>
 
-          {/* Mobile CTA */}
+          {/* Mobile CTA - Opens Modal */}
           <div className={`pt-6 mt-4 border-t ${
             isDarkBackground ? "border-gray-700" : "border-gray-100"
           }`}>
-            <button className={`w-full ${
-              isDarkBackground 
-                ? "bg-white text-black hover:bg-gray-100" 
-                : "bg-black text-white hover:bg-gray-800"
-            } text-base px-6 py-3 rounded-full transition-all font-medium`}>
+            <button 
+              onClick={() => {
+                setIsMenuOpen(false);
+                setIsModalOpen(true);
+              }}
+              className={`w-full ${
+                isDarkBackground 
+                  ? "bg-white text-black hover:bg-gray-100" 
+                  : "bg-black text-white hover:bg-gray-800"
+              } text-base px-6 py-3 rounded-full transition-all font-medium`}
+            >
               Start Here →
             </button>
           </div>
         </div>
       </div>
 
-      {/* Spacer to prevent content from hiding under fixed header */}
+      {/* Spacer */}
       <div className="h-14 sm:h-16 md:h-20"></div>
+
+      {/* Modal Component */}
+      <UserTypeModal 
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSelect={handleUserTypeSelect}
+      />
     </>
   );
 }
