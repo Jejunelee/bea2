@@ -29,13 +29,13 @@ export default function Loading() {
       });
     
     // Start exit animation after 2 seconds
-    const exitTimer = setTimeout(() => setIsExiting(true), 2000);
+    const exitTimer = setTimeout(() => setIsExiting(true), 3000);
     
     // Remove component after animation completes (2.5 seconds)
     const removeTimer = setTimeout(() => {
       setIsMounted(false);
       document.body.style.overflow = 'auto';
-    }, 2500);
+    }, 3500);
 
     return () => {
       clearTimeout(exitTimer);
