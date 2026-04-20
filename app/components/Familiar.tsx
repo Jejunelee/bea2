@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
 
 const cards = [
@@ -35,11 +35,125 @@ const cards = [
 ];
 
 export default function Familiar() {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const scrollToCard = (index: number) => {
     const element = document.getElementById(`card-${index}`);
     if (element) element.scrollIntoView({ behavior: "smooth" });
+    setActiveIndex(index);
   };
 
+  // ========== MOBILE LAYOUT (Completely Different) ==========
+  if (isMobile) {
+    return (
+      <section className="relative w-full bg-[white] font-helvetica pb-16">
+        {/* Mobile Header */}
+        <div className="sticky top-0 z-30 bg-[white] py-8 px-4 shadow-sm">
+          <div className="text-center">
+            <h2 className="text-black text-2xl font-medium">
+              Sounds <span className="italic font-normal font-editorial">familiar?</span>
+            </h2>
+            <p className="mt-2 text-black text-sm text-gray-600">
+              The things nobody says out loud, but everyone feels.
+            </p>
+          </div>
+        </div>
+
+        {/* Mobile Carousel / Swipe Cards */}
+        <div className="relative px-4 mt-6">
+          <div className="overflow-x-auto snap-x snap-mandatory scroll-smooth hide-scrollbar">
+            <div className="flex gap-4">
+              {cards.map((card, idx) => (
+                <div
+                  key={card.id}
+                  className="flex-shrink-0 w-full snap-center"
+                >
+                  <div className="bg-black rounded-2xl p-5">
+                    {/* Image */}
+                    <div className="relative w-full h-48 rounded-xl overflow-hidden mb-4">
+                      <Image 
+                        src={card.image} 
+                        alt={card.title} 
+                        fill 
+                        className="object-cover"
+                      />
+                    </div>
+
+                    {/* Arrow Icon */}
+                    <Image
+                      src={`/Landing/Icons/Arrow-${idx + 1}.png`}
+                      alt={`Arrow ${idx + 1}`}
+                      width={48}
+                      height={48}
+                      className="mb-3"
+                    />
+
+                    {/* Title */}
+                    <h3 className="text-white text-xl font-medium mb-3 leading-tight">
+                      "{card.title}"
+                    </h3>
+
+                    {/* Description */}
+                    <p className="text-white text-sm leading-relaxed">
+                      {card.description}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Mobile Dots Indicator */}
+          <div className="flex justify-center gap-2 mt-6">
+            {cards.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => {
+                  const container = document.querySelector('.overflow-x-auto');
+                  const cardWidth = window.innerWidth - 32;
+                  container?.scrollTo({ left: idx * cardWidth, behavior: 'smooth' });
+                  setActiveIndex(idx);
+                }}
+                className={`transition-all duration-300 ${
+                  activeIndex === idx 
+                    ? 'w-8 h-2 bg-black rounded-full' 
+                    : 'w-2 h-2 bg-gray-300 rounded-full'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile Swipe Hint */}
+        <div className="text-center mt-6 text-gray-400 text-xs">
+          ← Swipe to see more →
+        </div>
+
+        <style jsx>{`
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+          .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+        `}</style>
+      </section>
+    );
+  }
+
+  // ========== DESKTOP LAYOUT (EXACT Original) ==========
   return (
     <section className="relative w-full bg-[white] font-helvetica">
       {/* Sticky Heading */}
@@ -54,7 +168,7 @@ export default function Familiar() {
         </div>
       </div>
 
-      {/* Cards */}
+      {/* Cards - Original Sticky Scroll */}
       <div className="relative" style={{ height: `${cards.length * 60}vh` }}>
         {cards.map((card, idx) => (
           <div

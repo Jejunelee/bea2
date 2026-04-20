@@ -153,8 +153,8 @@ export default function GetStarted() {
           style={{
             left: cursorX,
             top: cursorY,
-            width: 80,
-            height: 80,
+            width: 160,
+            height: 160,
             borderRadius: "50%",
             transform: `translate(-50%, -50%) scale(${1 + percentY * 0.1})`,
             background:

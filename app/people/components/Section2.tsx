@@ -12,10 +12,21 @@ interface Episode {
 export default function Section2() {
   const sectionRef = useRef(null);
   const [hasAnimated, setHasAnimated] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
   const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const episodes: Episode[] = [
     {
       episodeNumber: 1,
@@ -39,14 +50,13 @@ export default function Section2() {
 
   // Create infinite loop by adding clones at both ends
   const extendedEpisodes: Episode[] = [
-    episodes[episodes.length - 1], // last episode clone at start
+    episodes[episodes.length - 1],
     ...episodes,
-    episodes[0]  // first episode clone at end
+    episodes[0]
   ];
   
-  // Adjust index to account for the clone at the beginning
   const getAdjustedIndex = useCallback((): number => {
-    return currentIndex + 1; // +1 because of the clone at index 0
+    return currentIndex + 1;
   }, [currentIndex]);
 
   const nextSlide = useCallback((): void => {
@@ -61,7 +71,7 @@ export default function Section2() {
     setCurrentIndex((prevIndex: number) => prevIndex - 1);
   }, [isTransitioning]);
 
-  // Handle infinite loop wrapping without visible jumps
+  // Handle infinite loop wrapping
   useEffect(() => {
     if (transitionTimeoutRef.current) {
       clearTimeout(transitionTimeoutRef.current);
@@ -69,25 +79,20 @@ export default function Section2() {
 
     if (isTransitioning) {
       transitionTimeoutRef.current = setTimeout(() => {
-        // When we go beyond the last real episode (past the clone)
         if (currentIndex >= episodes.length) {
-          // Jump back to the first real episode without animation
           setIsTransitioning(false);
           setCurrentIndex(0);
         } 
-        // When we go before the first real episode (into the starting clone)
         else if (currentIndex < 0) {
-          // Jump to the last real episode without animation
           setIsTransitioning(false);
           setCurrentIndex(episodes.length - 1);
         }
         else {
-          // Normal transition end
           setIsTransitioning(false);
         }
         
         transitionTimeoutRef.current = null;
-      }, 500); // Match this with the CSS transition duration
+      }, 500);
     }
 
     return () => {
@@ -97,7 +102,7 @@ export default function Section2() {
     };
   }, [currentIndex, episodes.length, isTransitioning]);
 
-  // Auto-play every 8 seconds (only start after animation is done)
+  // Auto-play
   useEffect(() => {
     if (!hasAnimated) return;
     
@@ -108,7 +113,7 @@ export default function Section2() {
     return () => clearInterval(interval);
   }, [nextSlide, hasAnimated]);
 
-  // Intersection Observer for scroll animation
+  // Intersection Observer
   useEffect(() => {
     const currentSection = sectionRef.current;
     if (!currentSection) return;
@@ -136,6 +141,176 @@ export default function Section2() {
     };
   }, [hasAnimated]);
 
+  // ========== MOBILE LAYOUT (Carousel on top, text below) ==========
+  if (isMobile) {
+    return (
+      <section 
+        ref={sectionRef}
+        className="w-full bg-black text-white py-16 px-4" 
+        style={{ fontFamily: 'Helvetica' }}
+      >
+        <div className="max-w-7xl mx-auto">
+          {/* CAROUSEL - On top */}
+          <div
+            className={`w-full transition-all duration-800 delay-300 ease-out mb-10 ${
+              hasAnimated
+                ? "opacity-100 translate-x-0"
+                : "opacity-0 translate-x-8"
+            }`}
+          >
+            <div className="w-full max-w-[340px] mx-auto">
+              <div className="overflow-hidden rounded-xl">
+                <div 
+                  className="flex transition-transform duration-500 ease-out"
+                  style={{ 
+                    transform: `translateX(-${getAdjustedIndex() * 100}%)`,
+                    transition: isTransitioning ? 'transform 500ms ease-out' : 'none'
+                  }}
+                >
+                  {extendedEpisodes.map((episode: Episode, idx: number) => (
+                    <div 
+                      key={idx} 
+                      className="flex-shrink-0 w-full"
+                      style={{ width: '100%' }}
+                    >
+                      <div className="w-full bg-white rounded-xl shadow-2xl overflow-hidden">
+                        {/* Episode title header - Smaller */}
+                        <div className="p-4 bg-gradient-to-r from-[#1DB954] to-[#191414]">
+                          <p className="text-white font-semibold text-xs">
+                            Episode {episode.episodeNumber}
+                          </p>
+                          <p className="text-white text-base font-bold">
+                            {episode.title}
+                          </p>
+                          <p className="text-white/80 text-xs">
+                            {episode.subtitle}
+                          </p>
+                        </div>
+                        
+                        <div className="pt-2 bg-black"></div>
+                        
+                        <iframe
+                          src={episode.embedUrl}
+                          width="100%"
+                          height="280"
+                          frameBorder="0"
+                          allowFullScreen
+                          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                          loading="lazy"
+                          className="w-full bg-black"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation buttons - Smaller */}
+            <div className="flex justify-center gap-3 mt-6 w-full">
+              <button 
+                onClick={prevSlide}
+                disabled={isTransitioning}
+                className="bg-black/60 hover:bg-[#F4C400] text-[#F4C400] hover:text-black p-2 rounded-full transition-all duration-300 shadow-lg backdrop-blur-sm border border-[#F4C400]/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Previous slide"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              
+              <button 
+                onClick={nextSlide}
+                disabled={isTransitioning}
+                className="bg-black/60 hover:bg-[#F4C400] text-[#F4C400] hover:text-black p-2 rounded-full transition-all duration-300 shadow-lg backdrop-blur-sm border border-[#F4C400]/30 disabled:opacity-50 disabled:cursor-not-allowed"
+                aria-label="Next slide"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* TEXT CONTENT - Below carousel */}
+          <div>
+            {/* Origin Series badge */}
+            <div
+              className={`transition-all duration-700 ease-out ${
+                hasAnimated
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-6"
+              }`}
+            >
+              <p className="text-sm tracking-widest uppercase text-white/70 mb-4">
+                Origin Series
+              </p>
+            </div>
+
+            {/* Heading */}
+            <div
+              className={`transition-all duration-700 delay-75 ease-out ${
+                hasAnimated
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-6"
+              }`}
+            >
+              <h2 className="text-2xl font-medium text-[#F4D35E] leading-tight mb-4">
+                Your Story On Camera. Done Properly.
+              </h2>
+            </div>
+
+            {/* Description - Condensed */}
+            <div
+              className={`transition-all duration-700 delay-150 ease-out ${
+                hasAnimated
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-6"
+              }`}
+            >
+              <p className="text-sm text-white/80 mb-4">
+                A 3-Part Founder Story Series Scripted And Built For Social. Your
+                Origin, Your Why, And Your World. This Is The Kind Of Content That
+                Makes People Follow You And Actually Stay.
+              </p>
+            </div>
+
+            {/* Bullet points - Smaller */}
+            <ul className="space-y-1.5 text-white/90 mb-6 text-sm">
+              {["Story Extraction And Scripting", "3-Episode Production Brief", "Distribution And Repurposing Guide"].map((item, idx) => (
+                <li
+                  key={idx}
+                  className={`transition-all duration-700 ease-out ${
+                    hasAnimated
+                      ? "opacity-100 translate-x-0"
+                      : "opacity-0 -translate-x-4"
+                  }`}
+                  style={{ transitionDelay: `${200 + idx * 100}ms` }}
+                >
+                  • {item}
+                </li>
+              ))}
+            </ul>
+
+            {/* Button */}
+            <div
+              className={`transition-all duration-700 delay-500 ease-out ${
+                hasAnimated
+                  ? "opacity-100 translate-y-0"
+                  : "opacity-0 translate-y-6"
+              }`}
+            >
+              <button className="text-sm bg-[#F4C400] text-black font-medium px-5 py-1.5 rounded-full border border-white shadow-sm hover:opacity-90 transition">
+                From £800 / project-based
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // ========== DESKTOP LAYOUT (Original) ==========
   return (
     <section 
       ref={sectionRef}
@@ -143,10 +318,9 @@ export default function Section2() {
       style={{ fontFamily: 'Helvetica' }}
     >
       <div className="max-w-7xl mx-auto px-6">
-        {/* Stack on mobile, side-by-side on large screens with proper gaps */}
         <div className="flex flex-col lg:flex-row lg:gap-12 items-center">
           
-          {/* LEFT CONTENT - takes full width on mobile, half on desktop */}
+          {/* LEFT CONTENT */}
           <div className="w-full lg:w-1/2 mb-12 lg:mb-0">
             {/* Origin Series badge */}
             <div
@@ -223,7 +397,7 @@ export default function Section2() {
             </div>
           </div>
 
-          {/* RIGHT CAROUSEL - takes full width on mobile, half on desktop */}
+          {/* RIGHT CAROUSEL */}
           <div
             className={`w-full lg:w-1/2 flex flex-col items-center transition-all duration-800 delay-300 ease-out ${
               hasAnimated
@@ -231,7 +405,6 @@ export default function Section2() {
                 : "opacity-0 translate-x-8"
             }`}
           >
-            {/* Carousel container - shows exactly one episode */}
             <div className="w-full max-w-[380px] mx-auto">
               <div className="overflow-hidden rounded-2xl">
                 <div 
@@ -248,7 +421,6 @@ export default function Section2() {
                       style={{ width: '100%' }}
                     >
                       <div className="w-full bg-white rounded-xl shadow-2xl overflow-hidden">
-                        {/* Episode title header */}
                         <div className="p-5 bg-gradient-to-r from-[#1DB954] to-[#191414]">
                           <p className="text-white font-semibold text-sm">
                             Episode {episode.episodeNumber}
@@ -261,7 +433,6 @@ export default function Section2() {
                           </p>
                         </div>
                         
-                        {/* Small padding between title header and Spotify embed */}
                         <div className="pt-2 bg-black"></div>
                         
                         <iframe
@@ -281,7 +452,6 @@ export default function Section2() {
               </div>
             </div>
 
-            {/* Navigation buttons */}
             <div className="flex justify-center gap-2 mt-8 w-full">
               <button 
                 onClick={prevSlide}

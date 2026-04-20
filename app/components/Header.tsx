@@ -167,10 +167,10 @@ export default function Header2() {
                 </div>
               </div>
 
-              {/* CTA Button - Opens Modal */}
+              {/* CTA Button - Hidden on mobile, visible on desktop */}
               <button 
                 onClick={() => setIsModalOpen(true)}
-                className={`${
+                className={`hidden md:block ${
                   isDarkBackground && !scrolled
                     ? "bg-white text-black hover:bg-gray-100" 
                     : "bg-black text-white hover:bg-gray-800"
@@ -209,7 +209,7 @@ export default function Header2() {
 
       {/* Mobile Menu Panel */}
       <div className={`fixed top-0 right-0 h-full w-full sm:w-80 z-50 shadow-2xl transition-transform duration-300 transform md:hidden ${
-        isDarkBackground ? "bg-gray-900" : "bg-white"
+        isDarkBackground ? "bg-neutral-900" : "bg-white"
       } ${isMenuOpen ? "translate-x-0" : "translate-x-full"}`}>
         <div className="flex flex-col pt-20 px-6 gap-4">
           <Link href="/" className={`pb-4 mb-2 border-b block ${
@@ -256,7 +256,7 @@ export default function Header2() {
             For Work
           </a>
 
-          {/* Mobile CTA - Opens Modal */}
+          {/* Mobile CTA - Kept in burger menu */}
           <div className={`pt-6 mt-4 border-t ${
             isDarkBackground ? "border-gray-700" : "border-gray-100"
           }`}>

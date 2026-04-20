@@ -33,9 +33,18 @@ export default function Stats() {
   const [counts, setCounts] = useState([0, 0, 0, 0]);
   const [isVisible, setIsVisible] = useState([false, false, false, false]);
   const [hasAnimated, setHasAnimated] = useState([false, false, false, false]);
+  const [isMobile, setIsMobile] = useState(false);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
-  const numbersRef = useRef<(HTMLHeadingElement | null)[]>([]);
-  const textsRef = useRef<(HTMLParagraphElement | null)[]>([]);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fade-in and counting animation
   useEffect(() => {
@@ -105,58 +114,44 @@ export default function Stats() {
     return () => observer.disconnect();
   }, [isVisible, hasAnimated, stats]);
 
-  // Parallax effect
-  useEffect(() => {
-    const updateParallax = () => {
-      const viewportHeight = window.innerHeight;
-      
-      cardsRef.current.forEach((card, i) => {
-        if (!card) return;
-        const rect = card.getBoundingClientRect();
-        const cardCenter = rect.top + rect.height / 2;
-        const viewportCenter = viewportHeight / 2;
-        const distanceFromCenter = (cardCenter - viewportCenter) / viewportHeight;
-        
-        const speed = 0.5 + i * 0.15;
-        const yOffset = distanceFromCenter * 30 * speed;
-        card.style.transform = `translateY(${yOffset}px)`;
-      });
-      
-      numbersRef.current.forEach((num) => {
-        if (!num) return;
-        const rect = num.getBoundingClientRect();
-        const itemCenter = rect.top + rect.height / 2;
-        const viewportCenter = viewportHeight / 2;
-        const distanceFromCenter = (itemCenter - viewportCenter) / viewportHeight;
-        
-        const yOffset = distanceFromCenter * -20 * 0.8;
-        num.style.transform = `translateY(${yOffset}px)`;
-      });
-      
-      textsRef.current.forEach((text) => {
-        if (!text) return;
-        const rect = text.getBoundingClientRect();
-        const itemCenter = rect.top + rect.height / 2;
-        const viewportCenter = viewportHeight / 2;
-        const distanceFromCenter = (itemCenter - viewportCenter) / viewportHeight;
-        
-        const opacity = 1 - Math.abs(distanceFromCenter) * 0.3;
-        const yOffset = distanceFromCenter * 10;
-        text.style.transform = `translateY(${yOffset}px)`;
-        text.style.opacity = Math.max(0.7, opacity).toString();
-      });
-    };
-    
-    window.addEventListener('scroll', updateParallax);
-    window.addEventListener('resize', updateParallax);
-    updateParallax();
-    
-    return () => {
-      window.removeEventListener('scroll', updateParallax);
-      window.removeEventListener('resize', updateParallax);
-    };
-  }, []);
+  // ========== MOBILE LAYOUT (2x2 Grid) ==========
+  if (isMobile) {
+    return (
+      <section className="w-full bg-[#FEFDF8] py-8 font-helvetica">
+        <div className="px-4">
+          <div className="grid grid-cols-2 gap-6 text-center">
+            {stats.map((item, index) => (
+              <div
+                key={index}
+                ref={(el) => { cardsRef.current[index] = el; }}
+                className={`
+                  flex flex-col items-center
+                  transition-all duration-700 ease-out
+                  ${isVisible[index] 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 translate-y-5'
+                  }
+                `}
+                style={{
+                  transitionDelay: `${index * 150}ms`,
+                }}
+              >
+                <h2 className="text-5xl font-editorial text-black mb-2">
+                  {counts[index]}{item.suffix}
+                </h2>
 
+                <p className="text-gray-800 text-xs leading-relaxed">
+                  {item.text}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // ========== DESKTOP LAYOUT ==========
   return (
     <section className="w-full bg-[#FEFDF8] py-10 font-helvetica overflow-hidden">
       <div className="max-w-7xl mx-auto px-6">
@@ -166,7 +161,7 @@ export default function Stats() {
               key={index}
               ref={(el) => { cardsRef.current[index] = el; }}
               className={`
-                flex flex-col items-center will-change-transform transition-all duration-700 ease-out
+                flex flex-col items-center transition-all duration-700 ease-out
                 ${isVisible[index] 
                   ? 'opacity-100 translate-x-0' 
                   : 'opacity-0 -translate-x-5'
@@ -176,17 +171,11 @@ export default function Stats() {
                 transitionDelay: `${index * 150}ms`,
               }}
             >
-              <h2
-                ref={(el) => { numbersRef.current[index] = el; }}
-                className="text-7xl md:text-8xl font-editorial text-black mb-4 will-change-transform transition-transform duration-75"
-              >
+              <h2 className="text-7xl md:text-8xl font-editorial text-black mb-4">
                 {counts[index]}{item.suffix}
               </h2>
 
-              <p
-                ref={(el) => { textsRef.current[index] = el; }}
-                className="text-gray-800 text-sm md:text-base leading-relaxed max-w-[220px] will-change-transform will-change-opacity transition-all duration-75"
-              >
+              <p className="text-gray-800 text-sm md:text-base leading-relaxed max-w-[220px]">
                 {item.text}
               </p>
             </div>

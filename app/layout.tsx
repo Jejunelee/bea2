@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
 import { helvetica, editorial } from "./utils/fonts/fonts";
-import Header from "@/app/components/Header"
+import LayoutWrapper from "./LayoutWrapper";
 
 import "./globals.css";
 
@@ -30,7 +30,9 @@ export default function RootLayout({
         h-full antialiased
       `}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <LayoutWrapper>{children}</LayoutWrapper>
+      </body>
     </html>
   );
 }
