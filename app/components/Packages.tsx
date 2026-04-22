@@ -2,8 +2,13 @@
 
 import { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
+import { supabase } from "@/app/lib/supabase/client";
+import type { PackagesSettings, PackagesItem } from "@/app/types/packages";
 
 export default function Packages() {
+  const [settings, setSettings] = useState<Partial<PackagesSettings>>({});
+  const [packages, setPackages] = useState<PackagesItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [emblaRef, emblaApi] = useEmblaCarousel({ 
     align: "start",
@@ -11,6 +16,29 @@ export default function Packages() {
     dragFree: false 
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // Fetch settings
+      const { data: settingsData } = await supabase
+        .from('packages_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      if (settingsData) setSettings(settingsData);
+
+      // Fetch packages
+      const { data: packagesData } = await supabase
+        .from('packages_items')
+        .select('*')
+        .order('display_order', { ascending: true });
+      if (packagesData) setPackages(packagesData);
+
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -37,49 +65,33 @@ export default function Packages() {
     };
   }, [emblaApi]);
 
-  const packages = [
-    {
-      id: 1,
-      tag: "For Brands",
-      tagColor: "#FED301",
-      tagSubtext: "For food businesses",
-      title: "You're posting. You're not growing. Let's fix the actual problem.",
-      description: "Most food and hospitality brands have a content output problem and a story clarity problem. I help them figure out what they actually stand for, build a system their team can run, and create the kind of content that builds real loyalty rather than just likes.",
-      bullets: [
-        "Brand storytelling and messaging",
-        "Content strategy and systems",
-        "Team training and SOPs",
-        "Origin video series production"
-      ],
-      buttonText: "See brand offers →",
-      buttonLink: "/brands",
-      bgImage: "/Landing/Package1.png"
-    },
-    {
-      id: 2,
-      tag: "For Individuals",
-      tagColor: "#B2D235",
-      tagSubtext: "For founders and professionals",
-      title: "Your work is exceptional. Does your online presence say that?",
-      description: "I work with ambitious people in food and hospitality who are doing extraordinary things and whose personal brand doesn't reflect that yet. The right story, told well, opens more doors than any CV or cold pitch ever will.",
-      bullets: [
-        "Origin story and narrative",
-        "Messaging audit & positioning",
-        "Personal brand strategy",
-        "AI tools for workflow"
-      ],
-      buttonText: "See individual offers →",
-      buttonLink: "/people",
-      bgImage: "/Landing/Package2.png"
-    }
-  ];
+  if (loading) {
+    return <div className="w-full py-16 bg-[#f5f3ef]"></div>;
+  }
 
-  // ========== MOBILE LAYOUT (Carousel) ==========
+  // Helper function to render title with italic words
+  const renderTitle = (title: string, italicWords: string[]) => {
+    const words = title.split(' ');
+    return words.map((word, i) => {
+      const isItalic = italicWords.some(italicWord => 
+        word.toLowerCase().includes(italicWord.toLowerCase())
+      );
+      return isItalic ? (
+        <em key={i} className="font-serif italic">{word} </em>
+      ) : (
+        <span key={i}>{word} </span>
+      );
+    });
+  };
+
+  // ========== MOBILE LAYOUT ==========
   if (isMobile) {
     return (
-      <section className="w-full py-12 px-4 bg-[#f5f3ef]">
+      <section 
+        className={`w-full ${settings.section_padding_mobile || 'py-12 px-4'}`}
+        style={{ backgroundColor: settings.background_color || '#f5f3ef' }}
+      >
         <div className="max-w-7xl mx-auto">
-          {/* Carousel */}
           <div className="relative">
             <div className="overflow-hidden" ref={emblaRef}>
               <div className="flex gap-4">
@@ -88,49 +100,41 @@ export default function Packages() {
                     <div
                       className="relative rounded-2xl border-2 border-black p-5 shadow-sm overflow-hidden h-full"
                       style={{
-                        backgroundImage: `url('${pkg.bgImage}')`,
+                        backgroundImage: `url('${pkg.bg_image_url}')`,
                         backgroundSize: "cover",
                         backgroundPosition: "center",
                       }}
                     >
-                      {/* Overlay */}
                       <div className="absolute inset-0 bg-white/40 backdrop-blur-md rounded-2xl" />
-
-                      {/* Content - Flex column for equal height */}
                       <div className="relative z-10 flex flex-col h-full">
-                        {/* Tag Row */}
                         <div className="flex items-center justify-between mb-3">
                           <span
                             className="px-3 py-0.5 text-xs font-semibold rounded-full border border-black"
-                            style={{ backgroundColor: pkg.tagColor, color: '#000000' }}
+                            style={{ backgroundColor: pkg.tag_color, color: '#000000' }}
                           >
                             {pkg.tag}
                           </span>
-                          <span className="text-xs text-black">{pkg.tagSubtext}</span>
+                          <span className="text-xs text-black">{pkg.tag_subtext}</span>
                         </div>
 
-                        {/* Title - Condensed for mobile */}
                         <h2 className="text-lg font-semibold text-black leading-tight mb-3">
-                          {pkg.title}
+                          {renderTitle(pkg.title, pkg.italic_words)}
                         </h2>
 
-                        {/* Description - Smaller */}
                         <p className="text-black mb-3 leading-relaxed text-xs opacity-80">
                           {pkg.description}
                         </p>
 
-                        {/* Bullet Points - 2 column grid */}
                         <div className="grid grid-cols-2 gap-x-3 gap-y-1 text-black mb-4 text-xs flex-grow">
                           {pkg.bullets.map((bullet, idx) => (
                             <li key={idx} className="list-none">• {bullet}</li>
                           ))}
                         </div>
 
-                        {/* Button - Stays at bottom */}
                         <div className="flex justify-end mt-auto">
-                          <a href={pkg.buttonLink}>
+                          <a href={pkg.button_link}>
                             <button className="bg-black text-white px-3 py-1.5 rounded-full text-xs hover:opacity-80 transition">
-                              {pkg.buttonText}
+                              {pkg.button_text}
                             </button>
                           </a>
                         </div>
@@ -141,7 +145,6 @@ export default function Packages() {
               </div>
             </div>
 
-            {/* Dots Indicator */}
             <div className="flex justify-center gap-2 mt-6">
               {packages.map((_, idx) => (
                 <button
@@ -162,67 +165,54 @@ export default function Packages() {
     );
   }
 
-  // ========== DESKTOP LAYOUT (Original) ==========
+  // ========== DESKTOP LAYOUT ==========
   return (
-    <section className="w-full py-16 px-6 bg-[#f5f3ef]">
+    <section 
+      className={`w-full ${settings.section_padding_desktop || 'py-16 px-6'}`}
+      style={{ backgroundColor: settings.background_color || '#f5f3ef' }}
+    >
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-6">
         {packages.map((pkg) => (
           <div
             key={pkg.id}
             className="relative rounded-2xl border-2 border-black p-6 shadow-sm overflow-hidden h-full"
             style={{
-              backgroundImage: `url('${pkg.bgImage}')`,
+              backgroundImage: `url('${pkg.bg_image_url}')`,
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
           >
-            {/* Overlay for readability */}
             <div className="absolute inset-0 bg-white/40 backdrop-blur-md rounded-2xl -z-0" />
 
-            {/* Content */}
             <div className="relative z-10 flex flex-col h-full">
-              {/* Tag Row */}
               <div className="flex items-center justify-between mb-4">
                 <span
                   className="px-3 py-0.5 text-xs font-semibold rounded-full border border-black"
-                  style={{ backgroundColor: pkg.tagColor, color: '#000000' }}
+                  style={{ backgroundColor: pkg.tag_color, color: '#000000' }}
                 >
                   {pkg.tag}
                 </span>
-                <span className="text-xs text-black">{pkg.tagSubtext}</span>
+                <span className="text-xs text-black">{pkg.tag_subtext}</span>
               </div>
 
-              {/* Title */}
               <h2 className="text-2xl md:text-3xl font-semibold text-black leading-tight mb-4">
-                {pkg.title.split(' ').map((word, i) => 
-                  word.toLowerCase() === 'exceptional' || 
-                  word.toLowerCase() === 'actual' ||
-                  word === 'problem' ||
-                  (i > 0 && word === 'fix') ? (
-                    <em key={i} className="font-serif italic">{word} </em>
-                  ) : (
-                    word + ' '
-                  )
-                )}
+                {renderTitle(pkg.title, pkg.italic_words)}
               </h2>
 
-              {/* Description */}
               <p className="text-black mb-4 leading-relaxed text-sm opacity-80">
                 {pkg.description}
               </p>
 
-              {/* Bullet Points */}
               <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-black mb-5 text-sm flex-grow">
                 {pkg.bullets.map((bullet, idx) => (
                   <li key={idx} className="list-none">• {bullet}</li>
                 ))}
               </div>
 
-              {/* Button */}
               <div className="flex justify-end mt-auto">
-                <a href={pkg.buttonLink}>
+                <a href={pkg.button_link}>
                   <button className="bg-black text-white px-4 py-1.5 rounded-full text-xs hover:opacity-80 transition">
-                    {pkg.buttonText}
+                    {pkg.button_text}
                   </button>
                 </a>
               </div>

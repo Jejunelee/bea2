@@ -2,6 +2,8 @@
 
 import React, { useRef, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from "@/app/lib/supabase/client";
+import type { HeroContent } from "@/app/types/hero";
 
 export default function Hero() {
   const router = useRouter();
@@ -10,14 +12,59 @@ export default function Hero() {
   const contentRef = useRef<HTMLDivElement>(null);
   const sectionRef = useRef<HTMLElement>(null);
 
+  // State for dynamic content
+  const [heroContent, setHeroContent] = useState<Partial<HeroContent>>({});
+  const [leftPolaroidImage, setLeftPolaroidImage] = useState("/1.JPG");
+  const [rightPolaroidImage, setRightPolaroidImage] = useState("/2.JPG");
+  const [sharpestImage, setSharpestImage] = useState("/Landing/HERO/1.png");
+  const [contentLoaded, setContentLoaded] = useState(false);
+
   // Typing animation state
   const [typedText, setTypedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   const [showSharpestImage, setShowSharpestImage] = useState(false);
   const [hasStartedAnimation, setHasStartedAnimation] = useState(false);
-  const fullText = "Bea Trinidad · Type Harder Studio";
+  const [fullText, setFullText] = useState("Bea Trinidad · Type Harder Studio");
 
-  // CREATE CALENDAR EVENT - Using Google Calendar URL
+  // Fetch content from Supabase
+  useEffect(() => {
+    const fetchHeroContent = async () => {
+      // Fetch text content
+      const { data: contentData } = await supabase
+        .from('hero_content')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      
+      if (contentData) {
+        setHeroContent(contentData);
+        setFullText(contentData.typed_text || "Bea Trinidad · Type Harder Studio");
+      }
+
+      // Fetch images
+      const { data: imagesData } = await supabase
+        .from('hero_images')
+        .select('*');
+      
+      if (imagesData) {
+        imagesData.forEach(img => {
+          if (img.image_key === 'left_polaroid' && img.image_url) {
+            setLeftPolaroidImage(img.image_url);
+          } else if (img.image_key === 'right_polaroid' && img.image_url) {
+            setRightPolaroidImage(img.image_url);
+          } else if (img.image_key === 'sharpest_image' && img.image_url) {
+            setSharpestImage(img.image_url);
+          }
+        });
+      }
+      
+      setContentLoaded(true);
+    };
+
+    fetchHeroContent();
+  }, []);
+
+  // CREATE CALENDAR EVENT
   const createCalendarEvent = () => {
     const startDate = new Date();
     startDate.setHours(startDate.getHours() + 1);
@@ -43,14 +90,13 @@ export default function Hero() {
     window.open(url, "_blank", "noopener,noreferrer");
   };
 
-  // Navigate to work page
   const navigateToWork = () => {
     router.push("/work");
   };
 
-  // Typing animation effect - only starts when section is in view
+  // Typing animation effect
   useEffect(() => {
-    if (!hasStartedAnimation) return;
+    if (!hasStartedAnimation || !contentLoaded) return;
 
     if (isTyping) {
       if (typedText.length < fullText.length) {
@@ -65,9 +111,9 @@ export default function Hero() {
         }, 100);
       }
     }
-  }, [typedText, isTyping, hasStartedAnimation]);
+  }, [typedText, isTyping, hasStartedAnimation, fullText, contentLoaded]);
 
-  // Scroll animation effect - responsive scroll limits
+  // Scroll animation effect (same as before)
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
@@ -106,7 +152,6 @@ export default function Hero() {
         const rightRotate = Math.max(0, -6 + scrollY * 0.02);
         const finalRotate = Math.min(0, rightRotate + maxRotateChange / 2);
         
-        // Different Y movement for mobile/tablet vs desktop
         const isDesktop = window.innerWidth >= 1024;
         const yMovement = isDesktop ? -rightMoveY : rightMoveY;
         
@@ -126,12 +171,12 @@ export default function Hero() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Intersection Observer to detect when section is in view
+  // Intersection Observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting && !hasStartedAnimation) {
+          if (entry.isIntersecting && !hasStartedAnimation && contentLoaded) {
             setHasStartedAnimation(true);
           }
         });
@@ -151,42 +196,46 @@ export default function Hero() {
         observer.unobserve(sectionRef.current);
       }
     };
-  }, [hasStartedAnimation]);
+  }, [hasStartedAnimation, contentLoaded]);
+
+  if (!contentLoaded) {
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  }
 
   return (
     <section
       ref={sectionRef}
       className="relative min-h-screen flex items-center lg:items-center items-start justify-center overflow-x-hidden overflow-y-visible px-4 sm:px-6 py-12 sm:py-16 font-helvetica"
     >
-      {/* Left polaroid - responsive positioning */}
+      {/* Left polaroid */}
       <div
         ref={leftPolaroidRef}
         className="absolute left-2 sm:left-4 md:left-8 lg:left-1 xl:left-4 bottom-20 sm:bottom-28 md:bottom-36 lg:bottom-40 xl:bottom-60 rotate-[6deg] bg-white p-1.5 sm:p-2 lg:p-2.5 pb-4 sm:pb-5 lg:pb-8 shadow-2xl rounded-sm transition-transform duration-75 will-change-transform cursor-pointer hover:scale-105 hover:z-30"
         style={{ transform: "rotate(6deg)", transition: "transform 0.1s linear" }}
       >
         <img
-          src="/1.JPG"
+          src={leftPolaroidImage}
           alt="Person"
           className="w-40 sm:w-32 md:w-40 lg:w-56 xl:w-64 h-40 sm:h-32 md:h-40 lg:h-56 xl:h-64 object-cover"
         />
         <div className="h-3 sm:h-4 lg:h-6"></div>
       </div>
 
-      {/* Right polaroid - different positioning for desktop vs mobile/tablet */}
+      {/* Right polaroid */}
       <div
         ref={rightPolaroidRef}
         className="absolute right-2 sm:right-4 md:right-8 lg:right-1 xl:right-2 lg:top-12 xl:top-14 bottom-20 sm:bottom-28 md:bottom-36 lg:bottom-auto rotate-[-6deg] bg-white p-1.5 sm:p-2 lg:p-2.5 pb-4 sm:pb-5 lg:pb-8 shadow-2xl rounded-sm transition-transform duration-75 will-change-transform cursor-pointer hover:scale-105 hover:z-30"
         style={{ transform: "rotate(-6deg)", transition: "transform 0.1s linear" }}
       >
         <img
-          src="/2.JPG"
+          src={rightPolaroidImage}
           alt="Person"
           className="w-40 sm:w-32 md:w-40 lg:w-56 xl:w-64 h-40 sm:h-32 md:h-40 lg:h-56 xl:h-64 object-cover"
         />
         <div className="h-3 sm:h-4 lg:h-6"></div>
       </div>
 
-      {/* Main Content - moved up on mobile/tablet only */}
+      {/* Main Content */}
       <div
         ref={contentRef}
         className="relative z-10 w-full max-w-3xl mx-auto text-center px-4 sm:px-6 transition-all duration-75 will-change-transform lg:mt-0 -mt-8 sm:-mt-12 md:-mt-16"
@@ -202,13 +251,13 @@ export default function Hero() {
         </h1>
 
         <h2 className="font-medium mt-2 sm:mt-3 md:mt-4 text-base sm:text-lg md:text-2xl lg:text-3xl xl:text-4xl leading-tight text-black">
-          Story is your{" "}
+          {heroContent.subheading_text?.split('sharpest')[0]}
           <span className="relative inline-block px-1 sm:px-2 text-black font-medium font-editorial italic">
             sharpest
             {hasStartedAnimation && showSharpestImage && (
               <span className="absolute inset-0 -z-10 overflow-hidden">
                 <img
-                  src="/Landing/HERO/1.png"
+                  src={sharpestImage}
                   alt=""
                   className="absolute inset-0 w-full h-full object-cover opacity-90 swipe-animation"
                   style={{
@@ -218,15 +267,12 @@ export default function Hero() {
                 />
               </span>
             )}
-          </span>{" "}
-          business tool.
+          </span>
+          {heroContent.subheading_text?.split('sharpest')[1]}
         </h2>
 
         <p className="font-helvetica mt-3 sm:mt-4 md:mt-6 text-xs sm:text-sm md:text-base text-black leading-relaxed max-w-2xl mx-auto px-2 sm:px-6">
-          I'm a communications strategist who helps food businesses and ambitious
-          professionals figure out what they actually stand for and say it in a
-          way that moves people. 12 years, 4 countries, one obsession: the
-          stories that make businesses grow.
+          {heroContent.description_text}
         </p>
 
         <div className="mt-5 sm:mt-6 md:mt-8 flex flex-col sm:flex-row gap-2 sm:gap-4 md:gap-5 justify-center items-center">
@@ -234,22 +280,21 @@ export default function Hero() {
             className="font-helvetica border-2 px-5 sm:px-6 md:px-7 py-2 sm:py-2.5 rounded-full bg-yellow-400 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-sm sm:text-base text-black w-full sm:w-auto cursor-pointer"
             onClick={createCalendarEvent}
           >
-            Work with me
+            {heroContent.button1_text}
           </button>
 
           <button
             className="font-helvetica border-2 px-5 sm:px-6 md:px-7 py-2 sm:py-2.5 rounded-full bg-green-200 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-sm sm:text-base text-black w-full sm:w-auto cursor-pointer"
             onClick={navigateToWork}
           >
-            Read my thinking
+            {heroContent.button2_text}
           </button>
         </div>
 
-        <p className="font-editorial mt-8 sm:mt-10 md:mt-16 lg:mt-24 xl:mt-32 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-black leading-relaxed">
-          Philippines · UK · Australia · Bhutan
-          <br />
-          12 years in food communications
-        </p>
+        <p 
+          className="font-editorial mt-8 sm:mt-10 md:mt-16 lg:mt-24 xl:mt-32 text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-black leading-relaxed"
+          dangerouslySetInnerHTML={{ __html: heroContent.footer_text || '' }}
+        />
       </div>
 
       <style jsx>{`

@@ -4,6 +4,8 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
+import { supabase } from "@/app/lib/supabase/client";
+import type { AboutMeSettings, AboutMeCountry, AboutMeParagraph, AboutMeImage } from "@/app/types/aboutme";
 
 export default function AboutMe() {
   // Component for Mac-like window header with image name
@@ -24,6 +26,49 @@ export default function AboutMe() {
     dragFree: false 
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
+  
+  // State for dynamic content
+  const [settings, setSettings] = useState<Partial<AboutMeSettings>>({});
+  const [countries, setCountries] = useState<AboutMeCountry[]>([]);
+  const [paragraphs, setParagraphs] = useState<AboutMeParagraph[]>([]);
+  const [images, setImages] = useState<AboutMeImage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // Fetch settings
+      const { data: settingsData } = await supabase
+        .from('about_me_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      if (settingsData) setSettings(settingsData);
+
+      // Fetch countries
+      const { data: countriesData } = await supabase
+        .from('about_me_countries')
+        .select('*')
+        .order('display_order', { ascending: true });
+      if (countriesData) setCountries(countriesData);
+
+      // Fetch paragraphs
+      const { data: paragraphsData } = await supabase
+        .from('about_me_paragraphs')
+        .select('*')
+        .order('display_order', { ascending: true });
+      if (paragraphsData) setParagraphs(paragraphsData);
+
+      // Fetch images
+      const { data: imagesData } = await supabase
+        .from('about_me_images')
+        .select('*');
+      if (imagesData) setImages(imagesData);
+
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -37,7 +82,7 @@ export default function AboutMe() {
 
   useEffect(() => {
     const currentSection = sectionRef.current;
-    if (!currentSection) return;
+    if (!currentSection || loading) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -57,7 +102,7 @@ export default function AboutMe() {
         observer.unobserve(currentSection);
       }
     };
-  }, [hasAnimated]);
+  }, [hasAnimated, loading]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -74,13 +119,29 @@ export default function AboutMe() {
     };
   }, [emblaApi]);
 
-  const images = [
-    { src: "/Landing/AboutMe/1.png", name: "cca.jpg" },
-    { src: "/Landing/AboutMe/2.png", name: "europe.jpg" },
-    { src: "/Landing/AboutMe/3.png", name: "tequila.jpg" },
-    { src: "/Landing/AboutMe/4.png", name: "bhutan.jpg" },
-    { src: "/Landing/AboutMe/5.png", name: "phstar.jpg" },
-    { src: "/Landing/AboutMe/6.png", name: "abroad.jpg" },
+  // Helper function to get image by key
+  const getImageByKey = (key: string) => images.find(img => img.image_key === key);
+
+  if (loading) {
+    return <div className="relative w-full py-24 bg-[#FEFDF8]"></div>;
+  }
+
+  // Get images
+  const ccaImage = getImageByKey('cca');
+  const europeImage = getImageByKey('europe');
+  const tequilaImage = getImageByKey('tequila');
+  const bhutanImage = getImageByKey('bhutan');
+  const phstarImage = getImageByKey('phstar');
+  const abroadImage = getImageByKey('abroad');
+
+  // Create images array for mobile carousel
+  const mobileImages = [
+    { src: ccaImage?.image_url || "/Landing/AboutMe/1.png", name: ccaImage?.image_name || "cca.jpg" },
+    { src: europeImage?.image_url || "/Landing/AboutMe/2.png", name: europeImage?.image_name || "europe.jpg" },
+    { src: tequilaImage?.image_url || "/Landing/AboutMe/3.png", name: tequilaImage?.image_name || "tequila.jpg" },
+    { src: bhutanImage?.image_url || "/Landing/AboutMe/4.png", name: bhutanImage?.image_name || "bhutan.jpg" },
+    { src: phstarImage?.image_url || "/Landing/AboutMe/5.png", name: phstarImage?.image_name || "phstar.jpg" },
+    { src: abroadImage?.image_url || "/Landing/AboutMe/6.png", name: abroadImage?.image_name || "abroad.jpg" },
   ];
 
   // ========== MOBILE LAYOUT (Carousel) ==========
@@ -94,13 +155,13 @@ export default function AboutMe() {
           {/* Title */}
           <div className="text-black text-center mb-4">
             <h2 className="text-2xl font-medium tracking-tight">
-              Hi,{" "}
+              {settings.title_prefix || 'Hi,'}{" "}
               <span className="relative inline-block">
                 <span className="relative z-10"> I'm </span>{" "}
-                <span className="relative z-10 font-editorial italic">Bea!</span>
+                <span className="relative z-10 font-editorial italic">{settings.title_name || 'Bea!'}</span>
                 <span className="absolute inset-0 -z-0 overflow-hidden">
                   <img
-                    src="/Landing/HERO/2.png"
+                    src={settings.highlight_image_url || "/Landing/HERO/2.png"}
                     alt=""
                     className={`absolute object-cover ${
                       hasAnimated ? "swipe-animation" : ""
@@ -125,17 +186,12 @@ export default function AboutMe() {
 
           {/* Country pills - compact */}
           <div className="flex flex-wrap justify-center gap-2 mb-6">
-            {[
-              { label: "Philippines", flag: "🇵🇭" },
-              { label: "United Kingdom", flag: "🇬🇧" },
-              { label: "Australia", flag: "🇦🇺" },
-              { label: "Bhutan", flag: "🇧🇹" },
-            ].map((item) => (
+            {countries.map((country) => (
               <span
-                key={item.label}
+                key={country.id}
                 className="px-3 py-1 rounded-full border border-black/20 bg-white shadow-sm text-gray-900 text-xs"
               >
-                {item.flag} {item.label}
+                {country.flag_emoji} {country.country_name}
               </span>
             ))}
           </div>
@@ -144,7 +200,7 @@ export default function AboutMe() {
           <div className="mb-8">
             <div className="overflow-hidden" ref={emblaRef}>
               <div className="flex gap-4">
-                {images.map((img, idx) => (
+                {mobileImages.map((img, idx) => (
                   <div key={idx} className="flex-[0_0_85%] min-w-0">
                     <div className="bg-white rounded-lg shadow-xl overflow-hidden" style={{ border: "3px solid #cccccc" }}>
                       <MacHeader imageName={img.name} />
@@ -164,7 +220,7 @@ export default function AboutMe() {
 
             {/* Dots Indicator */}
             <div className="flex justify-center gap-2 mt-4">
-              {images.map((_, idx) => (
+              {mobileImages.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => emblaApi?.scrollTo(idx)}
@@ -181,29 +237,11 @@ export default function AboutMe() {
 
           {/* Mobile Text - Condensed */}
           <div className="space-y-3 text-gray-800 leading-relaxed text-sm">
-            <p>
-              I grew up in the kitchen of the Philippines' first internationally
-              accredited culinary school. My grandmother founded it. My mother
-              runs it. I didn't plan to work in food — I just never really left.
-            </p>
-
-            <p>
-              Over the last 12 years, I've co-owned a tequila bar in Melbourne,
-              worked in account management at Fairfax Media, taught in Bhutan,
-              written a food column for Philippine Star, and built communications
-              for some of the most interesting food businesses in Asia and Europe.
-            </p>
-
-            <p>
-              Now I run Type Harder Studio — a fractional communications practice
-              based between London and Manila. I work with a small number of
-              founders and brands at any given time, going deep on story,
-              systems, and the kind of brand presence that compounds over time.
-            </p>
-
-            <p className="italic text-gray-700 text-xs">
-              "Always hungry. Always learning." is not a bio line. It's the operating system.
-            </p>
+            {paragraphs.map((para) => (
+              <p key={para.id} className={para.is_italic ? 'italic' : ''}>
+                {para.paragraph_text}
+              </p>
+            ))}
           </div>
         </div>
 
@@ -234,13 +272,13 @@ export default function AboutMe() {
         {/* Title */}
         <div className="text-black text-center mb-8">
           <h2 className="text-4xl md:text-5xl font-medium tracking-tight">
-            Hi,{" "}
+            {settings.title_prefix || 'Hi,'}{" "}
             <span className="relative inline-block">
               <span className="relative z-10"> I'm </span>{" "}
-              <span className="relative z-10 font-editorial italic">Bea!</span>
+              <span className="relative z-10 font-editorial italic">{settings.title_name || 'Bea!'}</span>
               <span className="absolute inset-0 -z-0 overflow-hidden">
                 <img
-                  src="/Landing/HERO/2.png"
+                  src={settings.highlight_image_url || "/Landing/HERO/2.png"}
                   alt=""
                   className={`absolute object-cover ${
                     hasAnimated ? "swipe-animation" : ""
@@ -265,17 +303,12 @@ export default function AboutMe() {
 
         {/* Country pills */}
         <div className="flex flex-wrap justify-center gap-3 mb-10 text-sm">
-          {[
-            { label: "Philippines", flag: "🇵🇭" },
-            { label: "United Kingdom", flag: "🇬🇧" },
-            { label: "Australia", flag: "🇦🇺" },
-            { label: "Bhutan", flag: "🇧🇹" },
-          ].map((item) => (
+          {countries.map((country) => (
             <span
-              key={item.label}
+              key={country.id}
               className="px-4 py-1.5 rounded-full border border-black/20 bg-white shadow-sm text-gray-900"
             >
-              {item.flag} {item.label}
+              {country.flag_emoji} {country.country_name}
             </span>
           ))}
         </div>
@@ -285,158 +318,149 @@ export default function AboutMe() {
           {/* Left images */}
           <div className="relative hidden md:block h-[480px]">
             {/* Bhutan image - behind cca */}
-            <div className="absolute top-50 left-50 w-28 z-0">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.9 }}
-                className="shadow-xl rounded-lg overflow-hidden"
-                style={{ border: "5px solid #cccccc" }}
-              >
-                <div className="relative w-full aspect-[4/4.5]">
-                  <Image
-                    src="/Landing/AboutMe/4.png"
-                    alt="bhutan"
-                    fill
-                    className="object-cover"
-                  />
+            {bhutanImage && (
+              <div className="absolute top-50 left-50 w-28 z-0">
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.9 }}
+                  className="shadow-xl rounded-lg overflow-hidden"
+                  style={{ border: "5px solid #cccccc" }}
+                >
+                  <div className="relative w-full aspect-[4/4.5]">
+                    <Image
+                      src={bhutanImage.image_url}
+                      alt="bhutan"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </motion.div>
+                <div className="text-center text-xs text-gray-500 mt-1">
+                  {bhutanImage.image_name}
                 </div>
-              </motion.div>
-              <div className="text-center text-xs text-gray-500 mt-1">
-                bhutan.jpg
               </div>
-            </div>
+            )}
 
             {/* cca image - on top of bhutan */}
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="absolute top-0 left-0 w-56 shadow-xl rounded-lg overflow-hidden bg-white z-10"
-            >
-              <MacHeader imageName="cca.jpg" />
-              <div className="relative w-full aspect-[4/4.5]">
-                <Image
-                  src="/Landing/AboutMe/1.png"
-                  alt="cca"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </motion.div>
+            {ccaImage && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="absolute top-0 left-0 w-56 shadow-xl rounded-lg overflow-hidden bg-white z-10"
+              >
+                <MacHeader imageName={ccaImage.image_name} />
+                <div className="relative w-full aspect-[4/4.5]">
+                  <Image
+                    src={ccaImage.image_url}
+                    alt="cca"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </motion.div>
+            )}
 
             {/* phstar image */}
-            <div className="absolute bottom-[-50] left-24 w-32 z-10">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7 }}
-                className="shadow-xl rounded-lg overflow-hidden"
-                style={{ border: "5px solid #cccccc" }}
-              >
-                <div className="relative w-full aspect-[4/4.5]">
-                  <Image
-                    src="/Landing/AboutMe/5.png"
-                    alt="phstar"
-                    fill
-                    className="object-cover"
-                  />
+            {phstarImage && (
+              <div className="absolute bottom-[-50] left-24 w-32 z-10">
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.7 }}
+                  className="shadow-xl rounded-lg overflow-hidden"
+                  style={{ border: "5px solid #cccccc" }}
+                >
+                  <div className="relative w-full aspect-[4/4.5]">
+                    <Image
+                      src={phstarImage.image_url}
+                      alt="phstar"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </motion.div>
+                <div className="text-center text-xs text-gray-500 mt-1">
+                  {phstarImage.image_name}
                 </div>
-              </motion.div>
-              <div className="text-center text-xs text-gray-500 mt-1">
-                phstar.jpg
               </div>
-            </div>
+            )}
 
             {/* abroad image */}
-            <div className="absolute bottom-5 left-0 w-28 z-10">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                className="shadow-xl rounded-lg overflow-hidden"
-                style={{ border: "5px solid #cccccc" }}
-              >
-                <div className="relative w-full aspect-[4/4.5]">
-                  <Image
-                    src="/Landing/AboutMe/6.png"
-                    alt="abroad"
-                    fill
-                    className="object-cover"
-                  />
+            {abroadImage && (
+              <div className="absolute bottom-5 left-0 w-28 z-10">
+                <motion.div
+                  initial={{ opacity: 0, y: 30 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8 }}
+                  className="shadow-xl rounded-lg overflow-hidden"
+                  style={{ border: "5px solid #cccccc" }}
+                >
+                  <div className="relative w-full aspect-[4/4.5]">
+                    <Image
+                      src={abroadImage.image_url}
+                      alt="abroad"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </motion.div>
+                <div className="text-center text-xs text-gray-500 mt-1">
+                  {abroadImage.image_name}
                 </div>
-              </motion.div>
-              <div className="text-center text-xs text-gray-500 mt-1">
-                abroad.jpg
               </div>
-            </div>
+            )}
           </div>
 
           {/* Text */}
           <div className="text-center space-y-6 text-gray-800 leading-relaxed">
-            <p>
-              I grew up in the kitchen of the Philippines' first internationally
-              accredited culinary school. My grandmother founded it. My mother
-              runs it. I didn't plan to work in food — I just never really left.
-            </p>
-
-            <p>
-              Over the last 12 years, I've co-owned a tequila bar in Melbourne,
-              worked in account management at Fairfax Media, taught in Bhutan,
-              written a food column for Philippine Star, and built communications
-              for some of the most interesting food businesses in Asia and
-              Europe.
-            </p>
-
-            <p>
-              Now I run Type Harder Studio — a fractional communications practice
-              based between London and Manila. I work with a small number of
-              founders and brands at any given time, going deep on story,
-              systems, and the kind of brand presence that compounds over time
-              rather than burns out.
-            </p>
-
-            <p className="italic text-gray-700">
-              "Always hungry. Always learning." is not a bio line. It's the
-              operating system.
-            </p>
+            {paragraphs.map((para) => (
+              <p key={para.id} className={para.is_italic ? 'italic text-gray-700' : ''}>
+                {para.paragraph_text}
+              </p>
+            ))}
           </div>
 
           {/* Right images */}
           <div className="relative hidden md:block h-[480px]">
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="absolute top-0 right-0 w-46 shadow-xl rounded-lg overflow-hidden bg-white"
-            >
-              <MacHeader imageName="europe.jpg" />
-              <div className="relative w-full aspect-[4/4.5]">
-                <Image
-                  src="/Landing/AboutMe/2.png"
-                  alt="europe"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </motion.div>
+            {europeImage && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6 }}
+                className="absolute top-0 right-0 w-46 shadow-xl rounded-lg overflow-hidden bg-white"
+              >
+                <MacHeader imageName={europeImage.image_name} />
+                <div className="relative w-full aspect-[4/4.5]">
+                  <Image
+                    src={europeImage.image_url}
+                    alt="europe"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </motion.div>
+            )}
 
-            <motion.div
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              className="absolute bottom-0 right-10 w-62 shadow-xl rounded-lg overflow-hidden bg-white"
-            >
-              <MacHeader imageName="tequila.jpg" />
-              <div className="relative w-full aspect-[4/4.5]">
-                <Image
-                  src="/Landing/AboutMe/3.png"
-                  alt="tequila"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-            </motion.div>
+            {tequilaImage && (
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7 }}
+                className="absolute bottom-0 right-10 w-62 shadow-xl rounded-lg overflow-hidden bg-white"
+              >
+                <MacHeader imageName={tequilaImage.image_name} />
+                <div className="relative w-full aspect-[4/4.5]">
+                  <Image
+                    src={tequilaImage.image_url}
+                    alt="tequila"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              </motion.div>
+            )}
           </div>
         </div>
       </div>

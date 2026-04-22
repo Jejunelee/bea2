@@ -1,40 +1,47 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { supabase } from '@/app/lib/supabase/client';
+import type { StatsSettings, StatsItem } from '@/app/types/stats';
 
 export default function Stats() {
-  const stats = [
-    {
-      number: "12+",
-      value: 12,
-      suffix: "+",
-      text: "Years in food and hospitality communications",
-    },
-    {
-      number: "4",
-      value: 4,
-      suffix: "",
-      text: "Countries lived and worked in: Philippines, UK, Australia, Bhutan",
-    },
-    {
-      number: "50+",
-      value: 50,
-      suffix: "+",
-      text: "Stories told in the food and beverage space, with more on the way",
-    },
-    {
-      number: "3",
-      value: 3,
-      suffix: "",
-      text: "Continents. One obsession: storytelling.",
-    },
-  ];
-
-  const [counts, setCounts] = useState([0, 0, 0, 0]);
-  const [isVisible, setIsVisible] = useState([false, false, false, false]);
-  const [hasAnimated, setHasAnimated] = useState([false, false, false, false]);
+  const [settings, setSettings] = useState<Partial<StatsSettings>>({});
+  const [stats, setStats] = useState<StatsItem[]>([]);
+  const [counts, setCounts] = useState<number[]>([]);
+  const [isVisible, setIsVisible] = useState<boolean[]>([]);
+  const [hasAnimated, setHasAnimated] = useState<boolean[]>([]);
   const [isMobile, setIsMobile] = useState(false);
+  const [loading, setLoading] = useState(true);
   const cardsRef = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // Fetch settings
+      const { data: settingsData } = await supabase
+        .from('stats_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      if (settingsData) setSettings(settingsData);
+
+      // Fetch stats items
+      const { data: statsData } = await supabase
+        .from('stats_items')
+        .select('*')
+        .order('display_order', { ascending: true });
+      
+      if (statsData) {
+        setStats(statsData);
+        setCounts(new Array(statsData.length).fill(0));
+        setIsVisible(new Array(statsData.length).fill(false));
+        setHasAnimated(new Array(statsData.length).fill(false));
+      }
+      
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -48,6 +55,8 @@ export default function Stats() {
 
   // Fade-in and counting animation
   useEffect(() => {
+    if (loading || stats.length === 0) return;
+
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -71,7 +80,7 @@ export default function Stats() {
                   return newState;
                 });
                 
-                const targetValue = stats[index].value;
+                const targetValue = stats[index].number_value;
                 const duration = 2000;
                 const stepTime = 20;
                 const steps = duration / stepTime;
@@ -112,17 +121,21 @@ export default function Stats() {
     });
 
     return () => observer.disconnect();
-  }, [isVisible, hasAnimated, stats]);
+  }, [isVisible, hasAnimated, stats, loading]);
+
+  if (loading) {
+    return <div className="w-full py-10" style={{ backgroundColor: '#FEFDF8' }}></div>;
+  }
 
   // ========== MOBILE LAYOUT (2x2 Grid) ==========
   if (isMobile) {
     return (
-      <section className="w-full bg-[#FEFDF8] py-8 font-helvetica">
+      <section className="w-full py-8 font-helvetica" style={{ backgroundColor: settings.background_color || '#FEFDF8' }}>
         <div className="px-4">
           <div className="grid grid-cols-2 gap-6 text-center">
             {stats.map((item, index) => (
               <div
-                key={index}
+                key={item.id}
                 ref={(el) => { cardsRef.current[index] = el; }}
                 className={`
                   flex flex-col items-center
@@ -136,11 +149,11 @@ export default function Stats() {
                   transitionDelay: `${index * 150}ms`,
                 }}
               >
-                <h2 className="text-5xl font-editorial text-black mb-2">
-                  {counts[index]}{item.suffix}
+                <h2 className="text-5xl font-editorial mb-2" style={{ color: settings.number_color || '#000000' }}>
+                  {counts[index]}{item.number_suffix}
                 </h2>
 
-                <p className="text-gray-800 text-xs leading-relaxed">
+                <p className="text-xs leading-relaxed" style={{ color: settings.text_color || '#1F2937' }}>
                   {item.text}
                 </p>
               </div>
@@ -153,12 +166,12 @@ export default function Stats() {
 
   // ========== DESKTOP LAYOUT ==========
   return (
-    <section className="w-full bg-[#FEFDF8] py-10 font-helvetica overflow-hidden">
+    <section className="w-full py-10 font-helvetica overflow-hidden" style={{ backgroundColor: settings.background_color || '#FEFDF8' }}>
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-10 text-center">
           {stats.map((item, index) => (
             <div
-              key={index}
+              key={item.id}
               ref={(el) => { cardsRef.current[index] = el; }}
               className={`
                 flex flex-col items-center transition-all duration-700 ease-out
@@ -171,11 +184,11 @@ export default function Stats() {
                 transitionDelay: `${index * 150}ms`,
               }}
             >
-              <h2 className="text-7xl md:text-8xl font-editorial text-black mb-4">
-                {counts[index]}{item.suffix}
+              <h2 className="text-7xl md:text-8xl font-editorial mb-4" style={{ color: settings.number_color || '#000000' }}>
+                {counts[index]}{item.number_suffix}
               </h2>
 
-              <p className="text-gray-800 text-sm md:text-base leading-relaxed max-w-[220px]">
+              <p className="text-sm md:text-base leading-relaxed max-w-[220px]" style={{ color: settings.text_color || '#1F2937' }}>
                 {item.text}
               </p>
             </div>

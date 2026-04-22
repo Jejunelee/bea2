@@ -3,8 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Image from "next/image";
+import { supabase } from "@/app/lib/supabase/client";
+import type { WorkedWithSettings, WorkedWithBrand } from "@/app/types/brandworkedwith";
 
 export default function WorkedWith() {
+  const [settings, setSettings] = useState<Partial<WorkedWithSettings>>({});
+  const [brands, setBrands] = useState<WorkedWithBrand[]>([]);
+  const [loading, setLoading] = useState(true);
   const sectionRef = useRef(null);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -15,6 +20,29 @@ export default function WorkedWith() {
     loop: true
   });
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // Fetch settings
+      const { data: settingsData } = await supabase
+        .from('worked_with_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      if (settingsData) setSettings(settingsData);
+
+      // Fetch brands
+      const { data: brandsData } = await supabase
+        .from('worked_with_brands')
+        .select('*')
+        .order('display_order', { ascending: true });
+      if (brandsData) setBrands(brandsData);
+
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -28,7 +56,7 @@ export default function WorkedWith() {
 
   useEffect(() => {
     const currentSection = sectionRef.current;
-    if (!currentSection) return;
+    if (!currentSection || loading) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -51,7 +79,7 @@ export default function WorkedWith() {
         observer.unobserve(currentSection);
       }
     };
-  }, [hasAnimated]);
+  }, [hasAnimated, loading]);
 
   useEffect(() => {
     if (!emblaApi) return;
@@ -68,19 +96,17 @@ export default function WorkedWith() {
     };
   }, [emblaApi]);
 
-  const brands = [
-    { name: "Brand 1", logo: "/WorkedWith/brand1.png" },
-    { name: "Brand 2", logo: "/WorkedWith/brand2.png" },
-    { name: "Brand 3", logo: "/WorkedWith/brand3.png" },
-    { name: "Brand 4", logo: "/WorkedWith/brand4.png" },
-  ];
+  if (loading) {
+    return <div className="w-full py-16" style={{ backgroundColor: '#000000' }}></div>;
+  }
 
-  // ========== MOBILE LAYOUT (Carousel) ==========
+  // ========== MOBILE LAYOUT ==========
   if (isMobile) {
     return (
       <section
         ref={sectionRef}
-        className="bg-black text-white py-12 px-4"
+        className="py-12 px-4"
+        style={{ backgroundColor: settings.background_color || '#000000' }}
       >
         <div className="max-w-6xl mx-auto">
           {/* Heading */}
@@ -91,9 +117,16 @@ export default function WorkedWith() {
                 : "opacity-0 translate-y-6"
             }`}
           >
-            <p className="text-base tracking-[0.1em] text-white/90 mb-3">
-              Some of the <span className="font-editorial italic font-semibold">brands</span> and{" "}
-              <span className="font-editorial italic font-semibold">people</span> I've worked with
+            <p className="text-base tracking-[0.1em] mb-3" style={{ color: settings.text_color || '#FFFFFF' }}>
+              {settings.heading_prefix || 'Some of the'}{" "}
+              <span className="font-editorial italic font-semibold" style={{ color: settings.text_color || '#FFFFFF' }}>
+                {settings.heading_brands_italic || 'brands'}
+              </span>{" "}
+              and{" "}
+              <span className="font-editorial italic font-semibold" style={{ color: settings.text_color || '#FFFFFF' }}>
+                {settings.heading_people_italic || 'people'}
+              </span>{" "}
+              {settings.heading_suffix || "I've worked with"}
             </p>
           </div>
 
@@ -105,7 +138,7 @@ export default function WorkedWith() {
                 : "opacity-0 scale-x-0"
             }`}
           >
-            <div className="border-b border-neutral-700 w-full mb-8" />
+            <div className="border-b w-full mb-8" style={{ borderColor: settings.divider_color || '#404040' }} />
           </div>
 
           {/* Carousel */}
@@ -114,29 +147,32 @@ export default function WorkedWith() {
               <div className="flex gap-3">
                 {brands.map((brand, index) => (
                   <div
-                    key={index}
+                    key={brand.id}
                     className="flex-[0_0_70%] min-w-0"
                   >
-                    <div
-                      className={`bg-neutral-800 aspect-square flex items-center justify-center rounded-lg transition-all duration-700 ease-out ${
+                    <a
+                      href={brand.website_url || '#'}
+                      target={brand.website_url ? "_blank" : undefined}
+                      rel="noopener noreferrer"
+                      className={`bg-neutral-800 aspect-square flex items-center justify-center rounded-lg transition-all duration-700 ease-out block ${
                         hasAnimated
                           ? "opacity-100 translate-y-0"
                           : "opacity-0 translate-y-8"
                       }`}
                       style={{ transitionDelay: `${150 + index * 100}ms` }}
                     >
-                      {/* Replace with Image when logos are ready */}
-                      {/* 
-                      <Image
-                        src={brand.logo}
-                        alt={brand.name}
-                        width={150}
-                        height={150}
-                        className="object-contain p-4"
-                      />
-                      */}
-                      <span className="text-neutral-500 text-sm">{brand.name}</span>
-                    </div>
+                      {brand.logo_url ? (
+                        <Image
+                          src={brand.logo_url}
+                          alt={brand.name}
+                          width={150}
+                          height={150}
+                          className="object-contain p-4"
+                        />
+                      ) : (
+                        <span className="text-neutral-500 text-sm">{brand.name}</span>
+                      )}
+                    </a>
                   </div>
                 ))}
               </div>
@@ -163,11 +199,12 @@ export default function WorkedWith() {
     );
   }
 
-  // ========== DESKTOP LAYOUT (Original) ==========
+  // ========== DESKTOP LAYOUT ==========
   return (
     <section
       ref={sectionRef}
-      className="mb-10 bg-black text-white py-16 px-6"
+      className="py-16 px-6"
+      style={{ backgroundColor: settings.background_color || '#000000' }}
     >
       <div className="max-w-6xl mx-auto">
         {/* Heading */}
@@ -178,9 +215,16 @@ export default function WorkedWith() {
               : "opacity-0 translate-y-6"
           }`}
         >
-          <p className="text-lg tracking-[0.1em] text-white/90 mb-4">
-            Some of the <span className="font-editorial italic font-semibold">brands</span> and{" "}
-            <span className="font-editorial italic font-semibold">people</span> I've worked with
+          <p className="text-lg tracking-[0.1em] mb-4" style={{ color: settings.text_color || '#FFFFFF' }}>
+            {settings.heading_prefix || 'Some of the'}{" "}
+            <span className="font-editorial italic font-semibold" style={{ color: settings.text_color || '#FFFFFF' }}>
+              {settings.heading_brands_italic || 'brands'}
+            </span>{" "}
+            and{" "}
+            <span className="font-editorial italic font-semibold" style={{ color: settings.text_color || '#FFFFFF' }}>
+              {settings.heading_people_italic || 'people'}
+            </span>{" "}
+            {settings.heading_suffix || "I've worked with"}
           </p>
         </div>
 
@@ -192,14 +236,17 @@ export default function WorkedWith() {
               : "opacity-0 scale-x-0"
           }`}
         >
-          <div className="border-b border-neutral-700 w-full mb-12" />
+          <div className="border-b w-full mb-12" style={{ borderColor: settings.divider_color || '#404040' }} />
         </div>
 
         {/* Logos grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
           {brands.map((brand, index) => (
-            <div
-              key={index}
+            <a
+              key={brand.id}
+              href={brand.website_url || '#'}
+              target={brand.website_url ? "_blank" : undefined}
+              rel="noopener noreferrer"
               className={`bg-neutral-800 aspect-square flex items-center justify-center rounded-lg transition-all duration-700 ease-out ${
                 hasAnimated
                   ? "opacity-100 translate-y-0"
@@ -207,18 +254,18 @@ export default function WorkedWith() {
               }`}
               style={{ transitionDelay: `${150 + index * 100}ms` }}
             >
-              {/* Replace with Image when logos are ready */}
-              {/* 
-              <Image
-                src={brand.logo}
-                alt={brand.name}
-                width={200}
-                height={200}
-                className="object-contain"
-              />
-              */}
-              <span className="text-neutral-500 text-sm">{brand.name}</span>
-            </div>
+              {brand.logo_url ? (
+                <Image
+                  src={brand.logo_url}
+                  alt={brand.name}
+                  width={200}
+                  height={200}
+                  className="object-contain p-4"
+                />
+              ) : (
+                <span className="text-neutral-500 text-sm">{brand.name}</span>
+              )}
+            </a>
           ))}
         </div>
       </div>

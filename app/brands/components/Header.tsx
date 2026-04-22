@@ -3,10 +3,29 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import Header from '@/app/components/Header';
+import { supabase } from "@/app/lib/supabase/client";
+import type { BrandHeaderSettings } from "@/app/types/brandheader";
 
 export default function BrandHeader() {
+  const [settings, setSettings] = useState<Partial<BrandHeaderSettings>>({});
+  const [loading, setLoading] = useState(true);
   const [showScrollIndicator, setShowScrollIndicator] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase
+        .from('brand_header_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      
+      if (data) setSettings(data);
+      setLoading(false);
+    };
+
+    fetchSettings();
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -32,7 +51,11 @@ export default function BrandHeader() {
     };
   }, []);
 
-  // ========== MOBILE LAYOUT (Condensed) ==========
+  if (loading) {
+    return <div className="relative w-full min-h-screen bg-white"></div>;
+  }
+
+  // ========== MOBILE LAYOUT ==========
   if (isMobile) {
     return (
       <section className="relative w-full min-h-[70vh] py-8 px-4 flex items-center justify-center overflow-hidden font-helvetica">
@@ -42,40 +65,46 @@ export default function BrandHeader() {
         <div
           className="absolute inset-0"
           style={{
-            background: "radial-gradient(circle at center, #e9c08f 0%, #ffffff 40%, #ffffff 60%)",
+            background: `radial-gradient(circle at center, ${settings.background_gradient_start || '#e9c08f'} 0%, ${settings.background_gradient_mid || '#ffffff'} 40%, ${settings.background_gradient_end || '#ffffff'} 60%)`,
           }}
         />
 
-        {/* Simple glow - reduced for mobile */}
+        {/* Simple glow */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-[400px] h-[400px] bg-[#e6ee9c]/30 blur-[100px] rounded-full" />
+          <div 
+            className="w-[400px] h-[400px] blur-[100px] rounded-full"
+            style={{ 
+              backgroundColor: `${settings.glow_color || '#e6ee9c'}`,
+              opacity: ((settings.glow_opacity || 30) / 100)
+            }}
+          />
         </div>
         
         {/* Content */}
         <div className="relative z-10 w-full px-4 text-center mt-4">
           
-          {/* Title - Condensed */}
+          {/* Title */}
           <h1 
             className="opacity-0 animate-fade-in-up text-3xl font-medium text-black leading-tight"
             style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
           >
-            Stop Guessing.{" "}
-            <span>Start Building.</span>
+            {settings.title_prefix || 'Stop Guessing.'}{" "}
+            <span>{settings.title_suffix || 'Start Building.'}</span>
           </h1>
 
-          {/* Description - Smaller text for mobile */}
+          {/* Description */}
           <p 
             className="opacity-0 animate-fade-in-up text-lg text-black leading-relaxed mt-4 px-2"
             style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
           >
-            Structured messaging and content systems that make every pitch, post, and partnership{" "}
-            <span className="font-editorial italic">work harder</span>
-            {" "}for your brand.
+            {settings.description_prefix || 'Structured messaging and content systems that make every pitch, post, and partnership'}{" "}
+            <span className="font-editorial italic">{settings.description_italic || 'work harder'}</span>
+            {" "}{settings.description_suffix || 'for your brand.'}
           </p>
 
         </div>
 
-        {/* Scroll down indicator - Smaller for mobile */}
+        {/* Scroll down indicator */}
         {showScrollIndicator && (
           <div 
             className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-10 opacity-0 animate-fade-in transition-opacity duration-500"
@@ -83,7 +112,7 @@ export default function BrandHeader() {
           >
             <div className="flex flex-col items-center gap-1 text-gray-600">
               <Image
-                src="/Landing/Icons/Arrow-5.png"
+                src={settings.scroll_arrow_icon_url || '/Landing/Icons/Arrow-5.png'}
                 alt="Scroll down"
                 width={40}
                 height={75}
@@ -139,7 +168,7 @@ export default function BrandHeader() {
     );
   }
 
-  // ========== DESKTOP LAYOUT (Original) ==========
+  // ========== DESKTOP LAYOUT ==========
   return (
     <section className="relative w-full min-h-[72vh] sm:min-h-[84vh] lg:min-h-[96vh] py-12 sm:py-16 px-4 sm:px-6 flex items-center justify-center overflow-hidden font-helvetica">
       <Header />
@@ -148,13 +177,19 @@ export default function BrandHeader() {
       <div
         className="absolute inset-0"
         style={{
-          background: "radial-gradient(circle at center, #e9c08f 0%, #ffffff 40%, #ffffff 60%)",
+          background: `radial-gradient(circle at center, ${settings.background_gradient_start || '#e9c08f'} 0%, ${settings.background_gradient_mid || '#ffffff'} 40%, ${settings.background_gradient_end || '#ffffff'} 60%)`,
         }}
       />
 
       {/* Simple glow */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div className="w-[700px] h-[700px] bg-[#e6ee9c]/30 blur-[140px] rounded-full" />
+        <div 
+          className="w-[700px] h-[700px] blur-[140px] rounded-full"
+          style={{ 
+            backgroundColor: `${settings.glow_color || '#e6ee9c'}`,
+            opacity: ((settings.glow_opacity || 30) / 100)
+          }}
+        />
       </div>
       
       {/* Content with staggered animations */}
@@ -165,10 +200,8 @@ export default function BrandHeader() {
           className="opacity-0 animate-fade-in-up text-4xl font-medium text-black leading-tight"
           style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
         >
-          Stop Guessing.{" "}
-          <span className="">
-            Start Building.
-          </span>
+          {settings.title_prefix || 'Stop Guessing.'}{" "}
+          <span>{settings.title_suffix || 'Start Building.'}</span>
         </h1>
 
         {/* Description */}
@@ -176,9 +209,9 @@ export default function BrandHeader() {
           className="opacity-0 animate-fade-in-up text-4xl text-black leading-tight px-2 sm:px-0 max-w-3xl mx-auto mt-6 font-medium"
           style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
         >
-          Structured messaging and content systems that make every pitch, post, and partnership{" "} <br />
-          <span className="font-editorial italic">work harder</span>
-          {" "}for your brand.
+          {settings.description_prefix || 'Structured messaging and content systems that make every pitch, post, and partnership'}{" "} <br />
+          <span className="font-editorial italic">{settings.description_italic || 'work harder'}</span>
+          {" "}{settings.description_suffix || 'for your brand.'}
         </p>
 
       </div>
@@ -191,7 +224,7 @@ export default function BrandHeader() {
         >
           <div className="flex flex-col items-center gap-2 text-gray-600">
             <Image
-              src="/Landing/Icons/Arrow-5.png"
+              src={settings.scroll_arrow_icon_url || '/Landing/Icons/Arrow-5.png'}
               alt="Scroll down arrow"
               width={64}
               height={120}

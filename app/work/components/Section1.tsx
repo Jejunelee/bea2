@@ -5,6 +5,8 @@ import Image from "next/image";
 import dynamic from 'next/dynamic';
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import useEmblaCarousel from "embla-carousel-react";
+import { supabase } from "@/app/lib/supabase/client";
+import type { SocialFeedSettings, SocialFeedPlatform, SocialFeedPost, SocialFeedSocialLink } from "@/app/types/worksection1";
 
 // Dynamically import embed components with SSR disabled
 const InstagramEmbed = dynamic(
@@ -49,83 +51,6 @@ interface LinkedInPost {
 }
 
 type SocialItem = InstagramPost | TikTokPost | LinkedInPost | SpotifyPodcast;
-
-// Sample data
-const instagramPosts: InstagramPost[] = [
-  {
-    url: "https://www.instagram.com/p/DOIvxV5jwiV/?igsh=MWZrNHlsc2xueWh1aQ==",
-    caption: "",
-    platform: "instagram",
-  },
-  {
-    url: "https://www.instagram.com/p/DPlcEkOjx2Q/?igsh=MnhsZmJhOWwzMTZx",
-    caption: "",
-    platform: "instagram",
-  },
-  {
-    url: "https://www.instagram.com/reel/DXO51dhExRk/?igsh=bXpoODFweDdvMXhw",
-    caption: "",
-    platform: "instagram",
-  },
-];
-
-const tiktokPosts: TikTokPost[] = [
-  {
-    url: "https://www.tiktok.com/@beatrinidad_/video/7593986097269476628",
-    caption: "",
-    platform: "tiktok",
-  },
-  {
-    url: "https://www.tiktok.com/@beatrinidad_/video/7596739853761514773",
-    caption: "",
-    platform: "tiktok",
-  },
-  {
-    url: "https://www.tiktok.com/@beatrinidad_/video/7586606077458894100",
-    caption: "",
-    platform: "tiktok",
-  },
-];
-
-const linkedinPosts: LinkedInPost[] = [
-  {
-    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7450417027036581888?collapsed=1",
-    postUrl: "https://www.linkedin.com/posts/beagtrinidad_working-in-hospitality-even-briefly-can-ugcPost-7450417027036581888-69rD",
-    caption: "",
-    platform: "linkedin",
-  },
-  {
-    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:7449709873270935552?collapsed=1",
-    postUrl: "https://www.linkedin.com/posts/beagtrinidad_ai-isnt-a-future-problem-its-already-reshaping-ugcPost-7449709873270935552-4aPm",
-    caption: "",
-    platform: "linkedin",
-  },
-  {
-    embedUrl: "https://www.linkedin.com/embed/feed/update/urn:li:share:7450089485696045056?collapsed=1",
-    postUrl: "https://www.linkedin.com/posts/beagtrinidad_networking-isnt-just-swapping-business-cards-ugcPost-7450089485696045056-1234",
-    caption: "",
-    platform: "linkedin",
-  },
-];
-
-const spotifyPodcasts: SpotifyPodcast[] = [
-  {
-    embedUrl: "https://open.spotify.com/embed/episode/5s5ZBx5isGUg2kActdsuln?utm_source=generator",
-    title: "",
-    platform: "spotify",
-  },
-  {
-    embedUrl: "https://open.spotify.com/embed/episode/2lmJJIIVlRcva6CiW9Z2tJ?si=61155a1a76694263",
-    title: "",
-    platform: "spotify",
-  },
-  {
-    embedUrl: "https://open.spotify.com/embed/episode/7gg812xfQA9gMKiB7XieOJ?si=07973a2e1e68461b",
-    title: "",
-    platform: "spotify",
-  },
-];
-
 type PlatformFilter = "all" | "instagram" | "tiktok" | "linkedin" | "spotify";
 
 // ==================== HELPER FUNCTIONS ====================
@@ -145,6 +70,11 @@ const filterItemsBySearch = <T extends SocialItem>(
 
 // ==================== MAIN COMPONENT ====================
 export default function SocialFeedPage() {
+  const [settings, setSettings] = useState<Partial<SocialFeedSettings>>({});
+  const [platforms, setPlatforms] = useState<SocialFeedPlatform[]>([]);
+  const [posts, setPosts] = useState<SocialFeedPost[]>([]);
+  const [socialLinks, setSocialLinks] = useState<SocialFeedSocialLink[]>([]);
+  const [loading, setLoading] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [activePlatform, setActivePlatform] = useState<PlatformFilter>("all");
@@ -157,6 +87,44 @@ export default function SocialFeedPage() {
     linkedin: false,
     spotify: false,
   });
+
+  useEffect(() => {
+    const fetchData = async () => {
+      // Fetch settings
+      const { data: settingsData } = await supabase
+        .from('social_feed_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      if (settingsData) setSettings(settingsData);
+
+      // Fetch platforms
+      const { data: platformsData } = await supabase
+        .from('social_feed_platforms')
+        .select('*')
+        .order('display_order', { ascending: true });
+      if (platformsData) setPlatforms(platformsData.filter(p => p.is_active));
+
+      // Fetch posts
+      const { data: postsData } = await supabase
+        .from('social_feed_posts')
+        .select('*')
+        .order('platform_key', { ascending: true })
+        .order('display_order', { ascending: true });
+      if (postsData) setPosts(postsData.filter(p => p.is_active));
+
+      // Fetch social links
+      const { data: socialLinksData } = await supabase
+        .from('social_feed_social_links')
+        .select('*')
+        .order('display_order', { ascending: true });
+      if (socialLinksData) setSocialLinks(socialLinksData.filter(l => l.is_active));
+
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -217,10 +185,44 @@ export default function SocialFeedPage() {
     }
   }, [activePlatform]);
 
-  const showInstagram = activePlatform === "all" || activePlatform === "instagram";
-  const showTikTok = activePlatform === "all" || activePlatform === "tiktok";
-  const showLinkedIn = activePlatform === "all" || activePlatform === "linkedin";
-  const showSpotify = activePlatform === "all" || activePlatform === "spotify";
+  // Transform posts into the format needed for rendering
+  const instagramPosts: InstagramPost[] = posts
+    .filter(p => p.platform_key === 'instagram' && p.post_url)
+    .map(p => ({
+      url: p.post_url!,
+      caption: p.caption || '',
+      platform: 'instagram' as const
+    }));
+
+  const tiktokPosts: TikTokPost[] = posts
+    .filter(p => p.platform_key === 'tiktok' && p.post_url)
+    .map(p => ({
+      url: p.post_url!,
+      caption: p.caption || '',
+      platform: 'tiktok' as const
+    }));
+
+  const linkedinPosts: LinkedInPost[] = posts
+    .filter(p => p.platform_key === 'linkedin' && p.embed_url)
+    .map(p => ({
+      embedUrl: p.embed_url!,
+      postUrl: p.post_url || p.embed_url!,
+      caption: p.caption || '',
+      platform: 'linkedin' as const
+    }));
+
+  const spotifyPodcasts: SpotifyPodcast[] = posts
+    .filter(p => p.platform_key === 'spotify' && p.embed_url)
+    .map(p => ({
+      embedUrl: p.embed_url!,
+      title: p.title || `Episode ${p.display_order}`,
+      platform: 'spotify' as const
+    }));
+
+  const showInstagram = (activePlatform === "all" || activePlatform === "instagram") && instagramPosts.length > 0;
+  const showTikTok = (activePlatform === "all" || activePlatform === "tiktok") && tiktokPosts.length > 0;
+  const showLinkedIn = (activePlatform === "all" || activePlatform === "linkedin") && linkedinPosts.length > 0;
+  const showSpotify = (activePlatform === "all" || activePlatform === "spotify") && spotifyPodcasts.length > 0;
 
   const filteredInstagramCount = filterItemsBySearch(instagramPosts, searchQuery).length;
   const filteredTikTokCount = filterItemsBySearch(tiktokPosts, searchQuery).length;
@@ -234,7 +236,7 @@ export default function SocialFeedPage() {
     (showSpotify && filteredSpotifyCount > 0);
 
   // Don't render content until mounted
-  if (!mounted) {
+  if (!mounted || loading) {
     return (
       <section className="w-full bg-gradient-to-br from-gray-50 to-gray-100 py-12 md:py-16">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
@@ -249,7 +251,9 @@ export default function SocialFeedPage() {
   // ========== MOBILE LAYOUT ==========
   if (isMobile) {
     return (
-      <section className="w-full bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4">
+      <section className="w-full py-8 px-4" style={{
+        background: `linear-gradient(to bottom right, ${settings.background_gradient_start || '#f9fafb'}, ${settings.background_gradient_end || '#f3f4f6'})`
+      }}>
         <div className="max-w-[1400px] mx-auto space-y-6">
           
           {/* SEARCH BAR */}
@@ -260,7 +264,7 @@ export default function SocialFeedPage() {
                 type="text"
                 value={searchQuery}
                 onChange={handleSearchChange}
-                placeholder="Search posts..."
+                placeholder={settings.search_placeholder || "Search posts..."}
                 className="w-full bg-white pl-10 pr-4 py-2.5 outline-none rounded-full text-sm text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-gray-300 transition-all shadow-sm border border-gray-200"
               />
               {searchQuery && (
@@ -274,27 +278,24 @@ export default function SocialFeedPage() {
             </div>
           </div>
 
-          {/* PLATFORM FILTER TABS - Horizontal scroll */}
+          {/* PLATFORM FILTER TABS */}
           <div className="overflow-x-auto pb-2 -mx-4 px-4">
             <div className="flex gap-2 min-w-max">
-              {[
-                { value: "all" as PlatformFilter, label: "All", icon: "fas fa-th-large", color: "gray-800" },
-                { value: "instagram" as PlatformFilter, label: "Instagram", icon: "fab fa-instagram", color: "pink-600" },
-                { value: "tiktok" as PlatformFilter, label: "TikTok", icon: "fab fa-tiktok", color: "black" },
-                { value: "linkedin" as PlatformFilter, label: "LinkedIn", icon: "fab fa-linkedin-in", color: "[#0A66C2]" },
-                { value: "spotify" as PlatformFilter, label: "Spotify", icon: "fab fa-spotify", color: "green-700" },
-              ].map((filter) => (
+              <button
+                onClick={() => setActivePlatform("all")}
+                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap ${activePlatform === "all" ? "bg-gray-800 text-white shadow-md" : "bg-white/50 text-black hover:bg-white hover:shadow-sm border border-black/10"}`}
+              >
+                <i className="fas fa-th-large mr-1.5 text-xs"></i>
+                All
+              </button>
+              {platforms.map(platform => (
                 <button
-                  key={filter.value}
-                  onClick={() => setActivePlatform(filter.value)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap ${
-                    activePlatform === filter.value
-                      ? `bg-${filter.color} text-white shadow-md`
-                      : "bg-white/50 text-black hover:bg-white hover:shadow-sm border border-black/10"
-                  }`}
+                  key={platform.platform_key}
+                  onClick={() => setActivePlatform(platform.platform_key as PlatformFilter)}
+                  className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 whitespace-nowrap ${activePlatform === platform.platform_key ? platform.icon_gradient + " text-white shadow-md" : "bg-white/50 text-black hover:bg-white hover:shadow-sm border border-black/10"}`}
                 >
-                  <i className={`${filter.icon} mr-1.5 text-xs`}></i>
-                  {filter.label}
+                  <i className={`${platform.icon_class} mr-1.5 text-xs`}></i>
+                  {platform.display_name}
                 </button>
               ))}
             </div>
@@ -307,14 +308,14 @@ export default function SocialFeedPage() {
               className="px-3 py-1.5 rounded-full text-xs bg-gray-200 hover:bg-gray-300 transition text-gray-700 flex items-center gap-1.5"
             >
               <i className="fas fa-expand-alt text-xs"></i>
-              Expand All
+              {settings.expand_all_text || "Expand All"}
             </button>
             <button
               onClick={collapseAll}
               className="px-3 py-1.5 rounded-full text-xs bg-gray-200 hover:bg-gray-300 transition text-gray-700 flex items-center gap-1.5"
             >
               <i className="fas fa-compress-alt text-xs"></i>
-              Collapse All
+              {settings.collapse_all_text || "Collapse All"}
             </button>
           </div>
 
@@ -322,15 +323,15 @@ export default function SocialFeedPage() {
           <div className="space-y-4">
             {showInstagram && (
               <MobileCollapsibleSection
-                title="Instagram Feed"
-                icon="fab fa-instagram"
-                iconBg="bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500"
+                title={platforms.find(p => p.platform_key === 'instagram')?.display_name || "Instagram Feed"}
+                icon={platforms.find(p => p.platform_key === 'instagram')?.icon_class || "fab fa-instagram"}
+                iconBg={platforms.find(p => p.platform_key === 'instagram')?.icon_gradient || "bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500"}
                 platform="instagram"
                 count={filteredInstagramCount}
                 isExpanded={expandedSections.instagram}
                 onToggle={() => toggleSection('instagram')}
-                followLink="https://www.instagram.com/beatrinidad_/"
-                followText="Follow →"
+                followLink={platforms.find(p => p.platform_key === 'instagram')?.follow_link || undefined}
+                followText={platforms.find(p => p.platform_key === 'instagram')?.follow_text || undefined}
               >
                 <MobileCarousel<InstagramPost>
                   items={filterItemsBySearch(instagramPosts, searchQuery)}
@@ -343,15 +344,15 @@ export default function SocialFeedPage() {
 
             {showTikTok && (
               <MobileCollapsibleSection
-                title="TikTok Moments"
-                icon="fab fa-tiktok"
-                iconBg="bg-black"
+                title={platforms.find(p => p.platform_key === 'tiktok')?.display_name || "TikTok Moments"}
+                icon={platforms.find(p => p.platform_key === 'tiktok')?.icon_class || "fab fa-tiktok"}
+                iconBg={platforms.find(p => p.platform_key === 'tiktok')?.icon_gradient || "bg-black"}
                 platform="tiktok"
                 count={filteredTikTokCount}
                 isExpanded={expandedSections.tiktok}
                 onToggle={() => toggleSection('tiktok')}
-                followLink="https://www.tiktok.com/@beatrinidad_/"
-                followText="Follow →"
+                followLink={platforms.find(p => p.platform_key === 'tiktok')?.follow_link || undefined}
+                followText={platforms.find(p => p.platform_key === 'tiktok')?.follow_text || undefined}
               >
                 <MobileCarousel<TikTokPost>
                   items={filterItemsBySearch(tiktokPosts, searchQuery)}
@@ -364,15 +365,15 @@ export default function SocialFeedPage() {
 
             {showLinkedIn && (
               <MobileCollapsibleSection
-                title="LinkedIn Insights"
-                icon="fab fa-linkedin-in"
-                iconBg="bg-gradient-to-r from-[#0A66C2] to-[#0A66C2]/90"
+                title={platforms.find(p => p.platform_key === 'linkedin')?.display_name || "LinkedIn Insights"}
+                icon={platforms.find(p => p.platform_key === 'linkedin')?.icon_class || "fab fa-linkedin-in"}
+                iconBg={platforms.find(p => p.platform_key === 'linkedin')?.icon_gradient || "bg-gradient-to-r from-[#0A66C2] to-[#0A66C2]/90"}
                 platform="linkedin"
                 count={filteredLinkedInCount}
                 isExpanded={expandedSections.linkedin}
                 onToggle={() => toggleSection('linkedin')}
-                followLink="https://www.linkedin.com/in/beatrinidad/"
-                followText="Connect →"
+                followLink={platforms.find(p => p.platform_key === 'linkedin')?.follow_link || undefined}
+                followText={platforms.find(p => p.platform_key === 'linkedin')?.follow_text || undefined}
               >
                 <MobileCarousel<LinkedInPost>
                   items={filterItemsBySearch(linkedinPosts, searchQuery)}
@@ -391,14 +392,14 @@ export default function SocialFeedPage() {
 
             {showSpotify && (
               <MobileCollapsibleSection
-                title="Spotify Podcasts"
-                icon="fab fa-spotify"
-                iconBg="bg-gradient-to-r from-green-600 to-green-700"
+                title={platforms.find(p => p.platform_key === 'spotify')?.display_name || "Spotify Podcasts"}
+                icon={platforms.find(p => p.platform_key === 'spotify')?.icon_class || "fab fa-spotify"}
+                iconBg={platforms.find(p => p.platform_key === 'spotify')?.icon_gradient || "bg-gradient-to-r from-green-600 to-green-700"}
                 platform="spotify"
                 count={filteredSpotifyCount}
                 isExpanded={expandedSections.spotify}
                 onToggle={() => toggleSection('spotify')}
-                followText="Available on Spotify"
+                followText={platforms.find(p => p.platform_key === 'spotify')?.follow_text || "Available on Spotify"}
                 isSpotify
               >
                 <MobileCarousel<SpotifyPodcast>
@@ -412,7 +413,7 @@ export default function SocialFeedPage() {
                       </div>
                       <div className="p-3">
                         <h3 className="text-xs font-bold text-gray-900 mb-2">
-                          {podcast.title || `Episode ${idx + 1}`}
+                          {podcast.title}
                         </h3>
                         <iframe
                           src={podcast.embedUrl}
@@ -435,55 +436,59 @@ export default function SocialFeedPage() {
             <div className="bg-white rounded-2xl p-8 text-center shadow-sm border border-gray-200">
               <i className="fas fa-search text-4xl text-gray-300 mb-3 block"></i>
               <p className="text-gray-600 text-sm">
-                No content found for "{searchQuery}"
+                {settings.no_results_text || "No content found for"} "{searchQuery}"
               </p>
               <button
                 onClick={clearSearch}
                 className="mt-4 px-4 py-1.5 bg-gray-900 hover:bg-gray-800 rounded-full text-xs text-white transition"
               >
-                Clear search
+                {settings.clear_search_text || "Clear search"}
               </button>
             </div>
           )}
 
-          {/* SOCIAL LINKS - YouTube & Substack */}
-          <div className="flex justify-center items-center gap-8 pt-6 border-t border-gray-200">
-            <a
-              href="https://www.youtube.com/@beagtrinidad"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex flex-col items-center gap-1 transition-transform hover:scale-105"
-            >
-              <div className="w-12 h-12 rounded-full bg-[#FF0000] flex items-center justify-center shadow-lg">
-                <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.376.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.376-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                </svg>
-              </div>
-              <span className="text-[10px] text-gray-600">Visit My Channel</span>
-            </a>
-
-            <a
-              href="https://onyourplate.substack.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group flex flex-col items-center gap-1 transition-transform hover:scale-105"
-            >
-              <div className="w-12 h-12 rounded-full bg-[#FF6719] flex items-center justify-center shadow-lg">
-                <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M22.5 3.75H1.5a1.5 1.5 0 0 0-1.5 1.5v13.5a1.5 1.5 0 0 0 1.5 1.5h21a1.5 1.5 0 0 0 1.5-1.5V5.25a1.5 1.5 0 0 0-1.5-1.5zm-21 1.5h21v2.25L12 13.875 1.5 7.5V5.25zm21 13.5h-21V9.75l10.5 6.375L22.5 9.75v9z"/>
-                </svg>
-              </div>
-              <span className="text-[10px] text-gray-600">Visit My Substack</span>
-            </a>
-          </div>
+          {/* SOCIAL LINKS */}
+          {socialLinks.length > 0 && (
+            <div className="flex justify-center items-center gap-8 pt-6 border-t border-gray-200">
+              {socialLinks.map((link) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col items-center gap-1 transition-transform hover:scale-105"
+                >
+                  <div 
+                    className="w-12 h-12 rounded-full flex items-center justify-center shadow-lg"
+                    style={{ backgroundColor: link.background_color }}
+                  >
+                    {link.name === 'YouTube' ? (
+                      <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.376.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.376-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                      </svg>
+                    ) : link.name === 'Substack' ? (
+                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M22.5 3.75H1.5a1.5 1.5 0 0 0-1.5 1.5v13.5a1.5 1.5 0 0 0 1.5 1.5h21a1.5 1.5 0 0 0 1.5-1.5V5.25a1.5 1.5 0 0 0-1.5-1.5zm-21 1.5h21v2.25L12 13.875 1.5 7.5V5.25zm21 13.5h-21V9.75l10.5 6.375L22.5 9.75v9z"/>
+                      </svg>
+                    ) : (
+                      <span className="text-white text-sm font-bold">{link.name.charAt(0)}</span>
+                    )}
+                  </div>
+                  <span className="text-[10px] text-gray-600">Visit My {link.name}</span>
+                </a>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     );
   }
 
-  // ========== DESKTOP LAYOUT (Original) ==========
+  // ========== DESKTOP LAYOUT ==========
   return (
-    <section className="w-full bg-gradient-to-br from-gray-50 to-gray-100 py-12 md:py-16 font-jost">
+    <section className="w-full py-12 md:py-16 font-jost" style={{
+      background: `linear-gradient(to bottom right, ${settings.background_gradient_start || '#f9fafb'}, ${settings.background_gradient_end || '#f3f4f6'})`
+    }}>
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 space-y-8 md:space-y-10">
         {/* SEARCH BAR */}
         <div className="flex justify-center">
@@ -493,7 +498,7 @@ export default function SocialFeedPage() {
               type="text"
               value={searchQuery}
               onChange={handleSearchChange}
-              placeholder="Search posts..."
+              placeholder={settings.search_placeholder || "Search posts..."}
               className="w-full bg-white pl-10 pr-4 py-3 outline-none rounded-full text-sm text-gray-900 placeholder:text-gray-400 focus:ring-2 focus:ring-gray-300 transition-all shadow-sm border border-gray-200"
             />
             {searchQuery && (
@@ -513,6 +518,8 @@ export default function SocialFeedPage() {
           onFilterChange={setActivePlatform}
           searchQuery={searchQuery}
           onClearSearch={clearSearch}
+          platforms={platforms}
+          settings={settings}
         />
 
         {/* EXPAND/COLLAPSE ALL BUTTONS */}
@@ -522,14 +529,14 @@ export default function SocialFeedPage() {
             className="px-4 py-2 rounded-full text-sm bg-gray-200 hover:bg-gray-300 transition text-gray-700 flex items-center gap-2"
           >
             <i className="fas fa-expand-alt text-xs"></i>
-            Expand All
+            {settings.expand_all_text || "Expand All"}
           </button>
           <button
             onClick={collapseAll}
             className="px-4 py-2 rounded-full text-sm bg-gray-200 hover:bg-gray-300 transition text-gray-700 flex items-center gap-2"
           >
             <i className="fas fa-compress-alt text-xs"></i>
-            Collapse All
+            {settings.collapse_all_text || "Collapse All"}
           </button>
         </div>
 
@@ -537,15 +544,15 @@ export default function SocialFeedPage() {
         <div className="space-y-4">
           {showInstagram && (
             <DesktopCollapsibleSection
-              title="Instagram Feed"
-              icon="fab fa-instagram"
-              iconBg="bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500"
+              title={platforms.find(p => p.platform_key === 'instagram')?.display_name || "Instagram Feed"}
+              icon={platforms.find(p => p.platform_key === 'instagram')?.icon_class || "fab fa-instagram"}
+              iconBg={platforms.find(p => p.platform_key === 'instagram')?.icon_gradient || "bg-gradient-to-r from-pink-500 via-purple-500 to-pink-500"}
               platform="instagram"
               count={filteredInstagramCount}
               isExpanded={expandedSections.instagram}
               onToggle={() => toggleSection('instagram')}
-              followLink="https://www.instagram.com/beatrinidad_/"
-              followText="Follow →"
+              followLink={platforms.find(p => p.platform_key === 'instagram')?.follow_link || undefined}
+              followText={platforms.find(p => p.platform_key === 'instagram')?.follow_text || undefined}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filterItemsBySearch(instagramPosts, searchQuery).map((post: InstagramPost, idx: number) => (
@@ -561,15 +568,15 @@ export default function SocialFeedPage() {
 
           {showTikTok && (
             <DesktopCollapsibleSection
-              title="TikTok Moments"
-              icon="fab fa-tiktok"
-              iconBg="bg-black"
+              title={platforms.find(p => p.platform_key === 'tiktok')?.display_name || "TikTok Moments"}
+              icon={platforms.find(p => p.platform_key === 'tiktok')?.icon_class || "fab fa-tiktok"}
+              iconBg={platforms.find(p => p.platform_key === 'tiktok')?.icon_gradient || "bg-black"}
               platform="tiktok"
               count={filteredTikTokCount}
               isExpanded={expandedSections.tiktok}
               onToggle={() => toggleSection('tiktok')}
-              followLink="https://www.tiktok.com/@beatrinidad_/"
-              followText="Follow →"
+              followLink={platforms.find(p => p.platform_key === 'tiktok')?.follow_link || undefined}
+              followText={platforms.find(p => p.platform_key === 'tiktok')?.follow_text || undefined}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filterItemsBySearch(tiktokPosts, searchQuery).map((post: TikTokPost, idx: number) => (
@@ -585,15 +592,15 @@ export default function SocialFeedPage() {
 
           {showLinkedIn && (
             <DesktopCollapsibleSection
-              title="LinkedIn Insights"
-              icon="fab fa-linkedin-in"
-              iconBg="bg-gradient-to-r from-[#0A66C2] to-[#0A66C2]/90"
+              title={platforms.find(p => p.platform_key === 'linkedin')?.display_name || "LinkedIn Insights"}
+              icon={platforms.find(p => p.platform_key === 'linkedin')?.icon_class || "fab fa-linkedin-in"}
+              iconBg={platforms.find(p => p.platform_key === 'linkedin')?.icon_gradient || "bg-gradient-to-r from-[#0A66C2] to-[#0A66C2]/90"}
               platform="linkedin"
               count={filteredLinkedInCount}
               isExpanded={expandedSections.linkedin}
               onToggle={() => toggleSection('linkedin')}
-              followLink="https://www.linkedin.com/in/beatrinidad/"
-              followText="Connect →"
+              followLink={platforms.find(p => p.platform_key === 'linkedin')?.follow_link || undefined}
+              followText={platforms.find(p => p.platform_key === 'linkedin')?.follow_text || undefined}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {filterItemsBySearch(linkedinPosts, searchQuery).map((post: LinkedInPost, idx: number) => (
@@ -616,14 +623,14 @@ export default function SocialFeedPage() {
 
           {showSpotify && (
             <DesktopCollapsibleSection
-              title="Spotify Podcasts"
-              icon="fab fa-spotify"
-              iconBg="bg-gradient-to-r from-green-600 to-green-700"
+              title={platforms.find(p => p.platform_key === 'spotify')?.display_name || "Spotify Podcasts"}
+              icon={platforms.find(p => p.platform_key === 'spotify')?.icon_class || "fab fa-spotify"}
+              iconBg={platforms.find(p => p.platform_key === 'spotify')?.icon_gradient || "bg-gradient-to-r from-green-600 to-green-700"}
               platform="spotify"
               count={filteredSpotifyCount}
               isExpanded={expandedSections.spotify}
               onToggle={() => toggleSection('spotify')}
-              followText="Available on Spotify"
+              followText={platforms.find(p => p.platform_key === 'spotify')?.follow_text || "Available on Spotify"}
               isSpotify
             >
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -636,7 +643,7 @@ export default function SocialFeedPage() {
                     </div>
                     <div className="p-4">
                       <h3 className="text-sm font-bold text-gray-900 mb-3">
-                        {podcast.title || `Episode ${idx + 1}`}
+                        {podcast.title}
                       </h3>
                       <div className="bg-gray-100 rounded-lg overflow-hidden">
                         <iframe
@@ -661,47 +668,49 @@ export default function SocialFeedPage() {
           <div className="bg-white rounded-2xl p-16 text-center shadow-sm border border-gray-200">
             <i className="fas fa-search text-5xl text-gray-300 mb-4 block"></i>
             <p className="text-gray-600 text-lg">
-              No content found for "{searchQuery}"
+              {settings.no_results_text || "No content found for"} "{searchQuery}"
             </p>
             <button
               onClick={clearSearch}
               className="mt-6 px-6 py-2 bg-gray-900 hover:bg-gray-800 rounded-full text-sm text-white transition"
             >
-              Clear search
+              {settings.clear_search_text || "Clear search"}
             </button>
           </div>
         )}
 
-        {/* SOCIAL LINKS - YouTube & Substack */}
-        <div className="flex justify-center items-center gap-12 pt-8 border-t border-gray-200">
-          <a
-            href="https://www.youtube.com/@beagtrinidad"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex flex-col items-center gap-2 transition-transform hover:scale-105"
-          >
-            <div className="w-16 h-16 rounded-full bg-[#FF0000] flex items-center justify-center shadow-lg transition-all group-hover:shadow-xl">
-              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.376.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.376-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-              </svg>
-            </div>
-            <span className="text-xs text-gray-600 font-medium">Visit My Channel</span>
-          </a>
-
-          <a
-            href="https://onyourplate.substack.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group flex flex-col items-center gap-2 transition-transform hover:scale-105"
-          >
-            <div className="w-16 h-16 rounded-full bg-[#FF6719] flex items-center justify-center shadow-lg transition-all group-hover:shadow-xl">
-              <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M22.5 3.75H1.5a1.5 1.5 0 0 0-1.5 1.5v13.5a1.5 1.5 0 0 0 1.5 1.5h21a1.5 1.5 0 0 0 1.5-1.5V5.25a1.5 1.5 0 0 0-1.5-1.5zm-21 1.5h21v2.25L12 13.875 1.5 7.5V5.25zm21 13.5h-21V9.75l10.5 6.375L22.5 9.75v9z"/>
-              </svg>
-            </div>
-            <span className="text-xs text-gray-600 font-medium">Visit My Substack</span>
-          </a>
-        </div>
+        {/* SOCIAL LINKS */}
+        {socialLinks.length > 0 && (
+          <div className="flex justify-center items-center gap-12 pt-8 border-t border-gray-200">
+            {socialLinks.map((link) => (
+              <a
+                key={link.id}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group flex flex-col items-center gap-2 transition-transform hover:scale-105"
+              >
+                <div 
+                  className="w-16 h-16 rounded-full flex items-center justify-center shadow-lg transition-all group-hover:shadow-xl"
+                  style={{ backgroundColor: link.background_color }}
+                >
+                  {link.name === 'YouTube' ? (
+                    <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.376.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.376-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                  ) : link.name === 'Substack' ? (
+                    <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M22.5 3.75H1.5a1.5 1.5 0 0 0-1.5 1.5v13.5a1.5 1.5 0 0 0 1.5 1.5h21a1.5 1.5 0 0 0 1.5-1.5V5.25a1.5 1.5 0 0 0-1.5-1.5zm-21 1.5h21v2.25L12 13.875 1.5 7.5V5.25zm21 13.5h-21V9.75l10.5 6.375L22.5 9.75v9z"/>
+                    </svg>
+                  ) : (
+                    <span className="text-white text-lg font-bold">{link.name.charAt(0)}</span>
+                  )}
+                </div>
+                <span className="text-xs text-gray-600 font-medium">Visit My {link.name}</span>
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -769,7 +778,7 @@ const MobileCollapsibleSection: React.FC<{
   );
 };
 
-// Mobile Carousel - Generic with proper typing
+// Mobile Carousel
 const MobileCarousel = <T,>({ 
   items, 
   renderItem 
@@ -846,44 +855,38 @@ const PlatformFilterTabs: React.FC<{
   onFilterChange: (filter: PlatformFilter) => void;
   searchQuery: string;
   onClearSearch: () => void;
-}> = ({ activeFilter, onFilterChange, searchQuery, onClearSearch }) => {
-  const filters: { value: PlatformFilter; label: string; icon: string }[] = [
-    { value: "all", label: "All", icon: "fas fa-th-large" },
-    { value: "instagram", label: "Instagram", icon: "fab fa-instagram" },
-    { value: "tiktok", label: "TikTok", icon: "fab fa-tiktok" },
-    { value: "linkedin", label: "LinkedIn", icon: "fab fa-linkedin-in" },
-    { value: "spotify", label: "Spotify", icon: "fab fa-spotify" },
-  ];
-
-  const getButtonClass = (filterValue: PlatformFilter) => {
+  platforms: SocialFeedPlatform[];
+  settings: Partial<SocialFeedSettings>;
+}> = ({ activeFilter, onFilterChange, searchQuery, onClearSearch, platforms, settings }) => {
+  const getButtonClass = (filterValue: PlatformFilter, platform?: SocialFeedPlatform) => {
     const baseClass = "px-5 py-2 rounded-full text-sm font-medium transition-all duration-200";
     if (activeFilter === filterValue) {
-      switch (filterValue) {
-        case "instagram":
-          return `${baseClass} bg-pink-600 text-white shadow-md`;
-        case "tiktok":
-          return `${baseClass} bg-black text-white shadow-md`;
-        case "linkedin":
-          return `${baseClass} bg-[#0A66C2] text-white shadow-md`;
-        case "spotify":
-          return `${baseClass} bg-green-700 text-white shadow-md`;
-        default:
-          return `${baseClass} bg-gray-800 text-white shadow-md`;
+      if (filterValue === "all") {
+        return `${baseClass} bg-gray-800 text-white shadow-md`;
       }
+      return `${baseClass} ${platform?.icon_gradient} text-white shadow-md`;
     }
     return `${baseClass} bg-white/50 text-black hover:bg-white hover:shadow-sm border border-black/10`;
   };
 
   return (
     <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
-      {filters.map((filter) => (
+      <button
+        key="all"
+        onClick={() => onFilterChange("all")}
+        className={getButtonClass("all")}
+      >
+        <i className="fas fa-th-large mr-2 text-xs"></i>
+        All
+      </button>
+      {platforms.map((platform) => (
         <button
-          key={filter.value}
-          onClick={() => onFilterChange(filter.value)}
-          className={getButtonClass(filter.value)}
+          key={platform.platform_key}
+          onClick={() => onFilterChange(platform.platform_key as PlatformFilter)}
+          className={getButtonClass(platform.platform_key as PlatformFilter, platform)}
         >
-          <i className={`${filter.icon} mr-2 text-xs`}></i>
-          {filter.label}
+          <i className={`${platform.icon_class} mr-2 text-xs`}></i>
+          {platform.display_name}
         </button>
       ))}
       {searchQuery && (

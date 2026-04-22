@@ -1,21 +1,40 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from 'react';
-
-interface Episode {
-  title: string;
-  subtitle: string;
-  embedUrl: string;
-  episodeNumber: number;
-}
+import { supabase } from "@/app/lib/supabase/client";
+import type { Section2Settings, Section2Episode } from "@/app/types/peoplesection2";
 
 export default function Section2() {
+  const [settings, setSettings] = useState<Partial<Section2Settings>>({});
+  const [episodes, setEpisodes] = useState<Section2Episode[]>([]);
+  const [loading, setLoading] = useState(true);
   const sectionRef = useRef(null);
   const [hasAnimated, setHasAnimated] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
   const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  useEffect(() => {
+    const fetchData = async () => {
+      const { data: settingsData } = await supabase
+        .from('section2_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      if (settingsData) setSettings(settingsData);
+
+      const { data: episodesData } = await supabase
+        .from('section2_episodes')
+        .select('*')
+        .order('display_order', { ascending: true });
+      if (episodesData) setEpisodes(episodesData);
+
+      setLoading(false);
+    };
+
+    fetchData();
+  }, []);
   
   useEffect(() => {
     const checkMobile = () => {
@@ -27,49 +46,28 @@ export default function Section2() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  const episodes: Episode[] = [
-    {
-      episodeNumber: 1,
-      title: "Episode 01 — Where It Started:",
-      subtitle: "The Origin",
-      embedUrl: "https://open.spotify.com/embed/episode/5s5ZBx5isGUg2kActdsuln?utm_source=generator"
-    },
-    {
-      episodeNumber: 2,
-      title: "Episode 02 — The Obsession:",
-      subtitle: "Why This, Why You",
-      embedUrl: "https://open.spotify.com/embed/episode/0987654321?utm_source=generator"
-    },
-    {
-      episodeNumber: 3,
-      title: "Episode 03 — The World:",
-      subtitle: "What Comes Next",
-      embedUrl: "https://open.spotify.com/embed/episode/5555555555?utm_source=generator"
-    }
-  ];
-
   // Create infinite loop by adding clones at both ends
-  const extendedEpisodes: Episode[] = [
+  const extendedEpisodes: Section2Episode[] = episodes.length > 0 ? [
     episodes[episodes.length - 1],
     ...episodes,
     episodes[0]
-  ];
+  ] : [];
   
   const getAdjustedIndex = useCallback((): number => {
     return currentIndex + 1;
   }, [currentIndex]);
 
   const nextSlide = useCallback((): void => {
-    if (isTransitioning) return;
+    if (isTransitioning || episodes.length === 0) return;
     setIsTransitioning(true);
     setCurrentIndex((prevIndex: number) => prevIndex + 1);
-  }, [isTransitioning]);
+  }, [isTransitioning, episodes.length]);
 
   const prevSlide = useCallback((): void => {
-    if (isTransitioning) return;
+    if (isTransitioning || episodes.length === 0) return;
     setIsTransitioning(true);
     setCurrentIndex((prevIndex: number) => prevIndex - 1);
-  }, [isTransitioning]);
+  }, [isTransitioning, episodes.length]);
 
   // Handle infinite loop wrapping
   useEffect(() => {
@@ -104,19 +102,19 @@ export default function Section2() {
 
   // Auto-play
   useEffect(() => {
-    if (!hasAnimated) return;
+    if (!hasAnimated || episodes.length === 0) return;
     
     const interval = setInterval(() => {
       nextSlide();
     }, 8000);
 
     return () => clearInterval(interval);
-  }, [nextSlide, hasAnimated]);
+  }, [nextSlide, hasAnimated, episodes.length]);
 
   // Intersection Observer
   useEffect(() => {
     const currentSection = sectionRef.current;
-    if (!currentSection) return;
+    if (!currentSection || loading) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -139,15 +137,28 @@ export default function Section2() {
         observer.unobserve(currentSection);
       }
     };
-  }, [hasAnimated]);
+  }, [hasAnimated, loading]);
 
-  // ========== MOBILE LAYOUT (Carousel on top, text below) ==========
+  if (loading) {
+    return <div className="w-full py-24" style={{ backgroundColor: '#000000' }}></div>;
+  }
+
+  const displayBullets = settings.bullets || [
+    "Story Extraction And Scripting",
+    "3-Episode Production Brief",
+    "Distribution And Repurposing Guide"
+  ];
+
+  // ========== MOBILE LAYOUT ==========
   if (isMobile) {
     return (
       <section 
         ref={sectionRef}
-        className="w-full bg-black text-white py-16 px-4" 
-        style={{ fontFamily: 'Helvetica' }}
+        className="w-full py-16 px-4" 
+        style={{ 
+          backgroundColor: settings.background_color || '#000000',
+          fontFamily: 'Helvetica' 
+        }}
       >
         <div className="max-w-7xl mx-auto">
           {/* CAROUSEL - On top */}
@@ -167,20 +178,19 @@ export default function Section2() {
                     transition: isTransitioning ? 'transform 500ms ease-out' : 'none'
                   }}
                 >
-                  {extendedEpisodes.map((episode: Episode, idx: number) => (
+                  {extendedEpisodes.map((episode: Section2Episode, idx: number) => (
                     <div 
                       key={idx} 
                       className="flex-shrink-0 w-full"
                       style={{ width: '100%' }}
                     >
                       <div className="w-full bg-white rounded-xl shadow-2xl overflow-hidden">
-                        {/* Episode title header - Smaller */}
                         <div className="p-4 bg-gradient-to-r from-[#1DB954] to-[#191414]">
                           <p className="text-white font-semibold text-xs">
-                            Episode {episode.episodeNumber}
+                            Episode {episode.episode_number}
                           </p>
                           <p className="text-white text-base font-bold">
-                            {episode.title}
+                            Episode {episode.episode_number} — {episode.title}
                           </p>
                           <p className="text-white/80 text-xs">
                             {episode.subtitle}
@@ -190,7 +200,7 @@ export default function Section2() {
                         <div className="pt-2 bg-black"></div>
                         
                         <iframe
-                          src={episode.embedUrl}
+                          src={episode.embed_url}
                           width="100%"
                           height="280"
                           frameBorder="0"
@@ -206,7 +216,6 @@ export default function Section2() {
               </div>
             </div>
 
-            {/* Navigation buttons - Smaller */}
             <div className="flex justify-center gap-3 mt-6 w-full">
               <button 
                 onClick={prevSlide}
@@ -234,7 +243,6 @@ export default function Section2() {
 
           {/* TEXT CONTENT - Below carousel */}
           <div>
-            {/* Origin Series badge */}
             <div
               className={`transition-all duration-700 ease-out ${
                 hasAnimated
@@ -242,12 +250,11 @@ export default function Section2() {
                   : "opacity-0 translate-y-6"
               }`}
             >
-              <p className="text-sm tracking-widest uppercase text-white/70 mb-4">
-                Origin Series
+              <p className="text-sm tracking-widest uppercase mb-4" style={{ color: settings.badge_text_color || '#FFFFFF' }}>
+                {settings.badge_text || 'Origin Series'}
               </p>
             </div>
 
-            {/* Heading */}
             <div
               className={`transition-all duration-700 delay-75 ease-out ${
                 hasAnimated
@@ -255,12 +262,13 @@ export default function Section2() {
                   : "opacity-0 translate-y-6"
               }`}
             >
-              <h2 className="text-2xl font-medium text-[#F4D35E] leading-tight mb-4">
-                Your Story On Camera. Done Properly.
+              <h2 className="text-2xl font-medium leading-tight mb-4" style={{ color: settings.title_color || '#F4D35E' }}>
+                {settings.title_prefix || 'Your Story On Camera.'}
+                <br />
+                {settings.title_suffix || 'Done Properly.'}
               </h2>
             </div>
 
-            {/* Description - Condensed */}
             <div
               className={`transition-all duration-700 delay-150 ease-out ${
                 hasAnimated
@@ -268,16 +276,13 @@ export default function Section2() {
                   : "opacity-0 translate-y-6"
               }`}
             >
-              <p className="text-sm text-white/80 mb-4">
-                A 3-Part Founder Story Series Scripted And Built For Social. Your
-                Origin, Your Why, And Your World. This Is The Kind Of Content That
-                Makes People Follow You And Actually Stay.
+              <p className="text-sm mb-4" style={{ color: settings.description_color || '#FFFFFF' }}>
+                {settings.description || 'A 3-Part Founder Story Series Scripted And Built For Social. Your Origin, Your Why, And Your World. This Is The Kind Of Content That Makes People Follow You And Actually Stay.'}
               </p>
             </div>
 
-            {/* Bullet points - Smaller */}
-            <ul className="space-y-1.5 text-white/90 mb-6 text-sm">
-              {["Story Extraction And Scripting", "3-Episode Production Brief", "Distribution And Repurposing Guide"].map((item, idx) => (
+            <ul className="space-y-1.5 mb-6 text-sm">
+              {displayBullets.map((item, idx) => (
                 <li
                   key={idx}
                   className={`transition-all duration-700 ease-out ${
@@ -285,14 +290,13 @@ export default function Section2() {
                       ? "opacity-100 translate-x-0"
                       : "opacity-0 -translate-x-4"
                   }`}
-                  style={{ transitionDelay: `${200 + idx * 100}ms` }}
+                  style={{ transitionDelay: `${200 + idx * 100}ms`, color: settings.bullet_color || '#FFFFFF' }}
                 >
                   • {item}
                 </li>
               ))}
             </ul>
 
-            {/* Button */}
             <div
               className={`transition-all duration-700 delay-500 ease-out ${
                 hasAnimated
@@ -300,8 +304,22 @@ export default function Section2() {
                   : "opacity-0 translate-y-6"
               }`}
             >
-              <button className="text-sm bg-[#F4C400] text-black font-medium px-5 py-1.5 rounded-full border border-white shadow-sm hover:opacity-90 transition">
-                From £800 / project-based
+              <button 
+                className="text-sm font-medium px-5 py-1.5 rounded-full border border-white shadow-sm transition"
+                style={{ 
+                  backgroundColor: settings.button_background_color || '#F4C400',
+                  color: settings.button_text_color || '#000000'
+                }}
+                onMouseEnter={(e) => {
+                  if (settings.button_hover_color) {
+                    e.currentTarget.style.backgroundColor = settings.button_hover_color;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = settings.button_background_color || '#F4C400';
+                }}
+              >
+                {settings.button_text || 'From £800 / project-based'}
               </button>
             </div>
           </div>
@@ -310,19 +328,21 @@ export default function Section2() {
     );
   }
 
-  // ========== DESKTOP LAYOUT (Original) ==========
+  // ========== DESKTOP LAYOUT ==========
   return (
     <section 
       ref={sectionRef}
-      className="w-full bg-black text-white py-24" 
-      style={{ fontFamily: 'Helvetica' }}
+      className="w-full py-24" 
+      style={{ 
+        backgroundColor: settings.background_color || '#000000',
+        fontFamily: 'Helvetica' 
+      }}
     >
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col lg:flex-row lg:gap-12 items-center">
           
           {/* LEFT CONTENT */}
           <div className="w-full lg:w-1/2 mb-12 lg:mb-0">
-            {/* Origin Series badge */}
             <div
               className={`transition-all duration-700 ease-out ${
                 hasAnimated
@@ -330,12 +350,11 @@ export default function Section2() {
                   : "opacity-0 translate-y-6"
               }`}
             >
-              <p className="text-2xl tracking-widest uppercase text-white/70 mb-6">
-                Origin Series
+              <p className="text-2xl tracking-widest uppercase mb-6" style={{ color: settings.badge_text_color || '#FFFFFF' }}>
+                {settings.badge_text || 'Origin Series'}
               </p>
             </div>
 
-            {/* Heading */}
             <div
               className={`transition-all duration-700 delay-75 ease-out ${
                 hasAnimated
@@ -343,14 +362,13 @@ export default function Section2() {
                   : "opacity-0 translate-y-6"
               }`}
             >
-              <h2 className="text-4xl md:text-5xl font-medium text-[#F4D35E] leading-tight mb-6">
-                Your Story On Camera.
+              <h2 className="text-4xl md:text-5xl font-medium leading-tight mb-6" style={{ color: settings.title_color || '#F4D35E' }}>
+                {settings.title_prefix || 'Your Story On Camera.'}
                 <br />
-                Done Properly.
+                {settings.title_suffix || 'Done Properly.'}
               </h2>
             </div>
 
-            {/* Description */}
             <div
               className={`transition-all duration-700 delay-150 ease-out ${
                 hasAnimated
@@ -358,17 +376,13 @@ export default function Section2() {
                   : "opacity-0 translate-y-6"
               }`}
             >
-              <p className="text-xl text-white/80 max-w-xl mb-6">
-                A 3-Part Founder Story Series Scripted And Built For Social. Your
-                Origin, Your Why, And Your World. This Is The Kind Of Content That
-                Makes People Follow You And Actually Stay — Because It Shows Them
-                Who You Are, Not Just What You Sell.
+              <p className="text-xl max-w-xl mb-6" style={{ color: settings.description_color || '#FFFFFF' }}>
+                {settings.description || 'A 3-Part Founder Story Series Scripted And Built For Social. Your Origin, Your Why, And Your World. This Is The Kind Of Content That Makes People Follow You And Actually Stay — Because It Shows Them Who You Are, Not Just What You Sell.'}
               </p>
             </div>
 
-            {/* Bullet points */}
-            <ul className="space-y-2 text-white/90 mb-8 text-xl">
-              {["Story Extraction And Scripting", "3-Episode Production Brief", "Distribution And Repurposing Guide"].map((item, idx) => (
+            <ul className="space-y-2 mb-8 text-xl">
+              {displayBullets.map((item, idx) => (
                 <li
                   key={idx}
                   className={`transition-all duration-700 ease-out ${
@@ -376,14 +390,13 @@ export default function Section2() {
                       ? "opacity-100 translate-x-0"
                       : "opacity-0 -translate-x-4"
                   }`}
-                  style={{ transitionDelay: `${200 + idx * 100}ms` }}
+                  style={{ transitionDelay: `${200 + idx * 100}ms`, color: settings.bullet_color || '#FFFFFF' }}
                 >
                   • {item}
                 </li>
               ))}
             </ul>
 
-            {/* Button */}
             <div
               className={`transition-all duration-700 delay-500 ease-out ${
                 hasAnimated
@@ -391,8 +404,22 @@ export default function Section2() {
                   : "opacity-0 translate-y-6"
               }`}
             >
-              <button className="text-xl bg-[#F4C400] text-black font-medium px-6 py-1.5 rounded-full border border-white shadow-sm hover:opacity-90 transition">
-                From £800 / project-based
+              <button 
+                className="text-xl font-medium px-6 py-1.5 rounded-full border border-white shadow-sm transition"
+                style={{ 
+                  backgroundColor: settings.button_background_color || '#F4C400',
+                  color: settings.button_text_color || '#000000'
+                }}
+                onMouseEnter={(e) => {
+                  if (settings.button_hover_color) {
+                    e.currentTarget.style.backgroundColor = settings.button_hover_color;
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = settings.button_background_color || '#F4C400';
+                }}
+              >
+                {settings.button_text || 'From £800 / project-based'}
               </button>
             </div>
           </div>
@@ -414,7 +441,7 @@ export default function Section2() {
                     transition: isTransitioning ? 'transform 500ms ease-out' : 'none'
                   }}
                 >
-                  {extendedEpisodes.map((episode: Episode, idx: number) => (
+                  {extendedEpisodes.map((episode: Section2Episode, idx: number) => (
                     <div 
                       key={idx} 
                       className="flex-shrink-0 w-full transition-transform duration-300 hover:scale-105"
@@ -423,10 +450,10 @@ export default function Section2() {
                       <div className="w-full bg-white rounded-xl shadow-2xl overflow-hidden">
                         <div className="p-5 bg-gradient-to-r from-[#1DB954] to-[#191414]">
                           <p className="text-white font-semibold text-sm">
-                            Episode {episode.episodeNumber}
+                            Episode {episode.episode_number}
                           </p>
                           <p className="text-white text-lg font-bold">
-                            {episode.title}
+                            Episode {episode.episode_number} — {episode.title}
                           </p>
                           <p className="text-white/80 text-sm">
                             {episode.subtitle}
@@ -436,7 +463,7 @@ export default function Section2() {
                         <div className="pt-2 bg-black"></div>
                         
                         <iframe
-                          src={episode.embedUrl}
+                          src={episode.embed_url}
                           width="100%"
                           height="352"
                           frameBorder="0"

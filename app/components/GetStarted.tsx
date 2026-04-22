@@ -1,25 +1,41 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { supabase } from "@/app/lib/supabase/client";
+import type { GetStartedSettings } from "@/app/types/getstarted";
 
 export default function GetStarted() {
+  const [settings, setSettings] = useState<Partial<GetStartedSettings>>({});
+  const [loading, setLoading] = useState(true);
   const sectionRef = useRef<HTMLElement>(null);
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [smoothPos, setSmoothPos] = useState({ x: 0, y: 0 });
   const [isInside, setIsInside] = useState(false);
   const [isHoveringButton, setIsHoveringButton] = useState(false);
 
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase
+        .from('get_started_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      
+      if (data) setSettings(data);
+      setLoading(false);
+    };
+
+    fetchSettings();
+  }, []);
+
   // CREATE CALENDAR EVENT - Using Google Calendar URL
   const createCalendarEvent = () => {
-    // Get current date and time for the event (default to 1 hour from now)
     const startDate = new Date();
     startDate.setHours(startDate.getHours() + 1);
     
-    // Set end time to 1 hour after start
     const endDate = new Date(startDate);
     endDate.setHours(endDate.getHours() + 1);
     
-    // Format dates for Google Calendar (YYYYMMDDTHHMMSSZ format)
     const formatDateForGoogle = (date: Date) => {
       return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
     };
@@ -27,16 +43,14 @@ export default function GetStarted() {
     const startTime = formatDateForGoogle(startDate);
     const endTime = formatDateForGoogle(endDate);
     
-    // Create the Google Calendar URL
     const url = 
       "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-      "&text=Exploratory+Call" +
+      `&text=${encodeURIComponent(settings.calendar_event_title || 'Exploratory Call')}` +
       `&dates=${startTime}/${endTime}` +
-      "&details=Hi,+I'm+reaching+you+from+your+website+and+I'm+interested." +
-      "&location=Google+Meet" +
-      "&add=bea@gmail.com";
+      `&details=${encodeURIComponent(settings.calendar_event_details || 'Hi, I\'m reaching you from your website and I\'m interested.')}` +
+      `&location=${encodeURIComponent(settings.calendar_event_location || 'Google Meet')}` +
+      `&add=${settings.calendar_event_email || 'bea@gmail.com'}`;
     
-    // Open in new window
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -79,6 +93,10 @@ export default function GetStarted() {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, []);
 
+  if (loading) {
+    return <div className="relative min-h-screen w-full bg-[#f5f3ef]"></div>;
+  }
+
   const percentX =
     sectionRef.current && smoothPos.x
       ? smoothPos.x / sectionRef.current.offsetWidth
@@ -111,9 +129,9 @@ export default function GetStarted() {
         background: `
           radial-gradient(
             circle at ${gradientX}% ${gradientY}%, 
-            #f5f3ef 0%,
-            #f5f3ef 40%,
-            #f5f3ef 100%
+            ${settings.background_color_start || '#f5f3ef'} 0%,
+            ${settings.background_color_mid || '#f5f3ef'} 40%,
+            ${settings.background_color_end || '#f5f3ef'} 100%
           )
         `,
       }}
@@ -175,10 +193,11 @@ export default function GetStarted() {
             ${(percentY - 0.5) * 8}px)`,
           }}
         >
-          Ready to get{" "}
+          {settings.title_prefix || 'Ready to get'}{" "}
           <span className="italic font-editorial font-medium">
-            started?
+            {settings.title_italic || 'started?'}
           </span>
+          {settings.title_suffix}
         </h2>
 
         <div
@@ -192,15 +211,23 @@ export default function GetStarted() {
             onClick={createCalendarEvent}
             onMouseEnter={() => setIsHoveringButton(true)}
             onMouseLeave={() => setIsHoveringButton(false)}
-            className="relative bg-black text-white px-8 py-4 rounded-full text-base font-medium transition-all duration-300 shadow-lg hover:shadow-xl overflow-hidden group"
+            className="relative rounded-full text-base font-medium transition-all duration-300 shadow-lg hover:shadow-xl overflow-hidden group"
             style={{
+              backgroundColor: settings.button_background_color || '#000000',
+              color: settings.button_text_color || '#FFFFFF',
               transform: `scale(${buttonScale})`,
+              padding: '1rem 2rem',
             }}
           >
-            <span className="absolute inset-0 bg-gradient-to-r from-amber-600 to-amber-800 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <span 
+              className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+              style={{
+                background: `linear-gradient(to right, ${settings.button_hover_color_start || '#d97706'}, ${settings.button_hover_color_end || '#92400e'})`,
+              }}
+            />
 
             <span className="relative z-10 flex items-center gap-2">
-              Book a call
+              {settings.button_text || 'Book a call'}
               <svg
                 className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
                 fill="none"

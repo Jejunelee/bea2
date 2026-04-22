@@ -1,0 +1,30 @@
+export interface Section3Settings {
+    id: number;
+    background_color: string;
+    text_color: string;
+    badge_text: string;
+    badge_text_color: string;
+    title_prefix: string;
+    title_suffix: string;
+    title_color: string;
+    description: string;
+    description_color: string;
+    bullets: string[];
+    bullet_color: string;
+    button_text: string;
+    button_background_color: string;
+    button_text_color: string;
+    button_hover_color: string;
+    phone_wallpaper_url: string;
+    phone_notification1_name: string;
+    phone_notification1_message: string;
+    phone_notification1_time: string;
+    phone_notification1_icon: string;
+    phone_notification2_name: string;
+    phone_notification2_message: string;
+    phone_notification2_time: string;
+    phone_notification2_icon: string;
+    phone_notification2_badge: string;
+    created_at: string;
+    updated_at: string;
+  }
