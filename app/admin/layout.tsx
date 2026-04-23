@@ -2,7 +2,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { supabase } from '@/app/lib/supabase/client';
 import Header from './Header';
 
@@ -14,29 +14,48 @@ export default function AdminLayout({
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
+  
+  // Check if we're on the login page
+  const isLoginPage = pathname === '/admin/login';
 
   useEffect(() => {
+    // Skip auth check on login page
+    if (isLoginPage) {
+      setLoading(false);
+      return;
+    }
+
     const getUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user || null);
       setLoading(false);
+      
+      // Redirect to login if no session
+      if (!session) {
+        router.push('/admin/login');
+      }
     };
     
     getUser();
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
+      if (!isLoginPage) {
+        setUser(session?.user || null);
+        if (!session) {
+          router.push('/admin/login');
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [router, isLoginPage]);
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    router.push('/admin/login');
-    router.refresh();
-  };
+  // For login page, just render children without Header
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
 
   if (loading) {
     return (
@@ -50,7 +69,7 @@ export default function AdminLayout({
   }
 
   if (!user) {
-    return null; // Will redirect in useEffect or show nothing
+    return null;
   }
 
   const userName = user.user_metadata?.full_name || user.email.split('@')[0];
@@ -60,7 +79,11 @@ export default function AdminLayout({
       <Header 
         userEmail={user.email}
         userName={userName}
-        onLogout={handleLogout}
+        onLogout={async () => {
+          await supabase.auth.signOut();
+          router.push('/admin/login');
+          router.refresh();
+        }}
       />
       <main>
         {children}

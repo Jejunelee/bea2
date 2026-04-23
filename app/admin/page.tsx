@@ -1,55 +1,11 @@
+// app/admin/page.tsx (or app/admin/dashboard/page.tsx)
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/app/lib/supabase/client';
-import Header from './Header';
 
 export default function AdminDashboard() {
   const [activeTab, setActiveTab] = useState('landing');
-  const [user, setUser] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
-
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Session error:', error);
-          router.push('/admin/login');
-          return;
-        }
-        
-        if (!session) {
-          console.log('No session found, redirecting to login');
-          router.push('/admin/login');
-        } else {
-          console.log('User authenticated:', session.user.email);
-          setUser(session.user);
-        }
-      } catch (err) {
-        console.error('Unexpected error:', err);
-        router.push('/admin/login');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    checkUser();
-  }, [router]);
-
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      router.push('/admin/login');
-      router.refresh();
-    } catch (err) {
-      console.error('Logout error:', err);
-    }
-  };
 
   const sections = {
     landing: [
@@ -101,29 +57,10 @@ export default function AdminDashboard() {
   const currentTab = tabs.find(tab => tab.id === activeTab);
   const currentColor = getColorClasses(currentTab?.color || 'purple');
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
-  const userName = user.user_metadata?.full_name || user.email.split('@')[0];
-
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Header userEmail={user.email} userName={userName} onLogout={handleLogout} />
-
+    <div className="px-6 py-8">
       {/* Tabs */}
-      <div className="bg-white border-b border-gray-200 sticky top-[73px] z-40">
+      <div className="bg-white border-b border-gray-200 rounded-t-lg">
         <div className="px-6">
           <div className="flex gap-8">
             {tabs.map((tab) => (
@@ -149,47 +86,45 @@ export default function AdminDashboard() {
       </div>
 
       {/* Content - Condensed List View */}
-      <div className="px-6 py-5">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-          {/* Section Header */}
-          <div className={`${currentColor.bg} px-5 py-3 border-b border-gray-200`}>
-            <div className="flex justify-between items-center">
-              <h2 className={`text-base font-semibold ${currentColor.active}`}>
-                {currentTab?.label}
-              </h2>
-              <p className="text-xs text-gray-500">
-                {sections[activeTab as keyof typeof sections].length} sections
-              </p>
-            </div>
+      <div className="bg-white rounded-b-lg shadow-sm border border-gray-200 border-t-0 overflow-hidden">
+        {/* Section Header */}
+        <div className={`${currentColor.bg} px-5 py-3 border-b border-gray-200`}>
+          <div className="flex justify-between items-center">
+            <h2 className={`text-base font-semibold ${currentColor.active}`}>
+              {currentTab?.label}
+            </h2>
+            <p className="text-xs text-gray-500">
+              {sections[activeTab as keyof typeof sections].length} sections
+            </p>
           </div>
+        </div>
 
-          {/* List Items - Compact */}
-          <div className="divide-y divide-gray-100">
-            {sections[activeTab as keyof typeof sections].map((item, index) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition group"
+        {/* List Items - Compact */}
+        <div className="divide-y divide-gray-100">
+          {sections[activeTab as keyof typeof sections].map((item, index) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex items-center justify-between px-5 py-3 hover:bg-gray-50 transition group"
+            >
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-gray-400 font-mono w-6">
+                  {(index + 1).toString().padStart(2, '0')}
+                </span>
+                <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">
+                  {item.title}
+                </span>
+              </div>
+              <svg 
+                className={`w-4 h-4 text-gray-400 group-hover:${currentColor.text} transition transform group-hover:translate-x-0.5`} 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24"
               >
-                <div className="flex items-center gap-3">
-                  <span className="text-xs text-gray-400 font-mono w-6">
-                    {(index + 1).toString().padStart(2, '0')}
-                  </span>
-                  <span className="text-sm text-gray-700 group-hover:text-gray-900 font-medium">
-                    {item.title}
-                  </span>
-                </div>
-                <svg 
-                  className={`w-4 h-4 text-gray-400 group-hover:${currentColor.text} transition transform group-hover:translate-x-0.5`} 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </Link>
-            ))}
-          </div>
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          ))}
         </div>
       </div>
     </div>
