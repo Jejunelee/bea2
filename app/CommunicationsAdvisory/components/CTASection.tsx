@@ -1,0 +1,186 @@
+// app/components/advisory/CTASection.tsx (fixed)
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { supabase } from "@/app/lib/supabase/client";
+import type { AdvisoryCTASettings } from "@/app/types/advisory";
+
+export default function CTASection() {
+  const [settings, setSettings] = useState<Partial<AdvisoryCTASettings>>({});
+  const [loading, setLoading] = useState(true);
+  const sectionRef = useRef(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase
+        .from('advisory_cta_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      
+      if (data) setSettings(data);
+      setLoading(false);
+    };
+
+    fetchSettings(); // Fixed: was fetchData() before
+  }, []);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  useEffect(() => {
+    const currentSection = sectionRef.current;
+    if (!currentSection || loading) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasAnimated) {
+            setHasAnimated(true);
+          }
+        });
+      },
+      { threshold: 0.2, rootMargin: "0px 0px -100px 0px" }
+    );
+
+    observer.observe(currentSection);
+    return () => { if (currentSection) observer.unobserve(currentSection); };
+  }, [hasAnimated, loading]);
+
+  const createCalendarEvent = () => {
+    const startDate = new Date();
+    startDate.setHours(startDate.getHours() + 1);
+    
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + 1);
+    
+    const formatDateForGoogle = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+    
+    const startTime = formatDateForGoogle(startDate);
+    const endTime = formatDateForGoogle(endDate);
+    
+    const url = 
+      "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+      `&text=${encodeURIComponent(settings.calendar_event_title || 'Communications Advisory Discovery Call')}` +
+      `&dates=${startTime}/${endTime}` +
+      `&details=${encodeURIComponent(settings.calendar_event_details || 'Hi, I\'m interested in Communications Advisory for my brand. Let\'s find a time to discuss.')}` +
+      `&location=${encodeURIComponent(settings.calendar_event_location || 'Google Meet')}` +
+      `&add=${settings.calendar_event_email || 'bea@gmail.com'}`;
+    
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  if (loading) {
+    return <div className="w-full py-16" style={{ backgroundColor: '#000000' }}></div>;
+  }
+
+  const headline = settings.headline || "Start the conversation";
+  const subheadline = settings.subheadline || "If you have a team around you, but you are making communications decisions without a senior partner who understands the food and hospitality industry, the first step is a 30-minute call.";
+  const buttonText = settings.button_text || "Book a call";
+
+  const headlineParts = headline.split("conversation");
+  const hasConversation = headlineParts.length > 1;
+
+  // ========== MOBILE LAYOUT ==========
+  if (isMobile) {
+    return (
+      <section ref={sectionRef} className="relative w-full py-20 px-4 overflow-hidden" style={{ backgroundColor: '#000000' }}>
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-white/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 right-0 w-60 h-60 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute top-0 left-0 w-60 h-60 bg-white/5 rounded-full blur-3xl" />
+        </div>
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
+          <div className={`transition-all duration-700 ease-out ${hasAnimated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
+            <h2 className="text-2xl font-medium text-white mb-3 font-helvetica tracking-tight">
+              {hasConversation ? (
+                <>
+                  {headlineParts[0]}
+                  <span className="font-editorial italic">conversation</span>
+                  {headlineParts[1]}
+                </>
+              ) : (
+                headline
+              )}
+            </h2>
+            <p className="text-base text-white/60 leading-relaxed mb-8 font-helvetica max-w-md mx-auto">
+              {subheadline}
+            </p>
+            <button
+              onClick={createCalendarEvent}
+              className="group relative rounded-full bg-white text-black text-base font-medium px-8 py-3 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 overflow-hidden"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                {buttonText}
+                <svg
+                  className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                </svg>
+              </span>
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // ========== DESKTOP LAYOUT ==========
+  return (
+    <section ref={sectionRef} className="relative w-full py-32 px-6 sm:px-8 lg:px-12 overflow-hidden" style={{ backgroundColor: '#000000' }}>
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-10 right-[15%] w-[300px] h-[300px] bg-white/8 rounded-full blur-3xl" />
+        <div className="absolute top-10 left-[10%] w-[250px] h-[250px] bg-white/8 rounded-full blur-3xl" />
+      </div>
+      <div className="relative z-10 max-w-5xl mx-auto text-center">
+        <div className={`transition-all duration-700 ease-out ${hasAnimated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-medium text-white mb-4 font-helvetica tracking-tight">
+            {hasConversation ? (
+              <>
+                {headlineParts[0]}
+                <span className="font-editorial italic">conversation</span>
+                {headlineParts[1]}
+              </>
+            ) : (
+              headline
+            )}
+          </h2>
+          <p className="text-lg md:text-xl lg:text-2xl text-white/60 leading-relaxed mb-10 font-helvetica max-w-3xl mx-auto">
+            {subheadline}
+          </p>
+          <button
+            onClick={createCalendarEvent}
+            className="group relative rounded-full bg-white text-black text-base md:text-lg lg:text-xl font-medium px-10 py-4 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 overflow-hidden"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              {buttonText}
+              <svg
+                className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 transition-transform duration-300 group-hover:translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </span>
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}

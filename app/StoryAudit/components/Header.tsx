@@ -1,0 +1,266 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import Header from '@/app/components/Header';
+import { supabase } from "@/app/lib/supabase/client";
+import type { AuditHeroSettings } from "@/app/types/audit";
+
+export default function AuditHero() {
+  const [settings, setSettings] = useState<Partial<AuditHeroSettings>>({});
+  const [loading, setLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      const { data } = await supabase
+        .from('audit_hero_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
+      
+      if (data) setSettings(data);
+      setLoading(false);
+    };
+
+    fetchSettings();
+  }, []);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const createCalendarEvent = () => {
+    const startDate = new Date();
+    startDate.setHours(startDate.getHours() + 1);
+    
+    const endDate = new Date(startDate);
+    endDate.setHours(endDate.getHours() + 1);
+    
+    const formatDateForGoogle = (date: Date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+    
+    const startTime = formatDateForGoogle(startDate);
+    const endTime = formatDateForGoogle(endDate);
+    
+    const url = 
+      "https://calendar.google.com/calendar/render?action=TEMPLATE" +
+      `&text=${encodeURIComponent(settings.calendar_event_title || 'Story Audit Discovery Call')}` +
+      `&dates=${startTime}/${endTime}` +
+      `&details=${encodeURIComponent(settings.calendar_event_details || 'Hi, I\'m interested in the Story Audit for my brand. Let\'s find a time to discuss.')}` +
+      `&location=${encodeURIComponent(settings.calendar_event_location || 'Google Meet')}` +
+      `&add=${settings.calendar_event_email || 'bea@gmail.com'}`;
+    
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  if (loading) {
+    return <div className="relative w-full min-h-screen bg-white"></div>;
+  }
+
+  // ========== MOBILE LAYOUT ==========
+  if (isMobile) {
+    return (
+      <section className="relative w-full min-h-screen py-12 px-4 flex flex-col items-center justify-center overflow-hidden font-helvetica">
+        <Header />
+        
+        <div
+          className="absolute inset-0"
+          style={{
+            background: `radial-gradient(circle at center, #ffffff 0%, #ffffff 25%, #fdf4e3 50%, #f0e0c4 75%, #e8c8a0 100%)`,
+          }}
+        />
+
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-[20%] left-[10%] w-[200px] h-[200px] bg-[#f0d5a8]/40 blur-[100px] rounded-full" />
+          <div className="absolute bottom-[10%] right-[15%] w-[250px] h-[250px] bg-[#e8b88a]/40 blur-[100px] rounded-full" />
+          <div className="absolute top-[60%] left-[30%] w-[180px] h-[180px] bg-[#fdf4e3]/50 blur-[80px] rounded-full" />
+          <div className="absolute top-[30%] right-[20%] w-[150px] h-[150px] bg-[#d4a574]/30 blur-[80px] rounded-full" />
+        </div>
+
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div 
+            className="w-[400px] h-[400px] blur-[100px] rounded-full"
+            style={{ 
+              backgroundColor: '#f0c090',
+              opacity: 0.35
+            }}
+          />
+        </div>
+        
+        <div className="relative z-10 w-full px-4 text-center">
+          
+          {/* Headline */}
+          <h1 
+            className="opacity-0 animate-fade-in-up text-2xl md:text-3xl text-black leading-tight"
+            style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
+          >
+            A <span className="font-editorial italic font-normal">clear-eyed</span> look at how your brand is communicating,{" "}
+            <span className="whitespace-normal">and a <span className="font-editorial italic font-normal">focused</span> plan for what to <span className="">fix first</span>.</span>
+          </h1>
+
+          {/* Description - NO font-editorial */}
+          <p 
+            className="opacity-0 animate-fade-in-up text-base text-black leading-relaxed mt-6 px-2"
+            style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
+          >
+            The Story Audit is a <span className="font-semibold">two-week diagnostic</span> of your full brand surface. I review every channel your brand currently lives on, identify what is <span className="font-semibold">working</span> and what is <span className="font-semibold text-red-600/70">costing you</span>, and give you a <span className="font-bold">30 to 90-day roadmap</span> of what to do next.
+            <br />
+            <br />
+            Built for <span className="font-bold">food and hospitality founders</span> who suspect their messaging is the bottleneck, but want a <span className="font-bold">second pair of eyes</span> before they spend the budget rebuilding it.
+          </p>
+
+          <div 
+            className="opacity-0 animate-fade-in-up mt-8"
+            style={{ animationDelay: "1.2s", animationFillMode: "forwards" }}
+          >
+            <button
+              onClick={createCalendarEvent}
+              className="group relative rounded-full bg-black text-white text-base font-medium px-6 py-2.5 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 overflow-hidden"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                Book your audit
+                <svg
+                  className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 8l4 4m0 0l-4 4m4-4H3"
+                  />
+                </svg>
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <style jsx>{`
+          @keyframes fadeInUp {
+            from {
+              opacity: 0;
+              transform: translateY(15px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+          
+          .animate-fade-in-up {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+          }
+        `}</style>
+      </section>
+    );
+  }
+
+  // ========== DESKTOP LAYOUT ==========
+  return (
+    <section className="relative w-full min-h-screen py-20 px-4 sm:px-6 flex flex-col items-center justify-center overflow-hidden font-helvetica">
+      <Header />
+      
+      <div
+        className="absolute inset-0"
+        style={{
+          background: `radial-gradient(circle at center, #ffffff 0%, #ffffff 25%, #fdf4e3 50%, #f0e0c4 75%, #e8c8a0 100%)`,
+        }}
+      />
+
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-[15%] left-[5%] w-[300px] h-[300px] bg-[#f0d5a8]/35 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[10%] right-[10%] w-[350px] h-[350px] bg-[#e8b88a]/35 blur-[120px] rounded-full" />
+        <div className="absolute top-[50%] left-[70%] w-[250px] h-[250px] bg-[#fdf4e3]/40 blur-[100px] rounded-full" />
+        <div className="absolute top-[70%] left-[15%] w-[200px] h-[200px] bg-[#d4a574]/30 blur-[100px] rounded-full" />
+        <div className="absolute top-[30%] right-[30%] w-[180px] h-[180px] bg-[#f0c090]/25 blur-[90px] rounded-full" />
+      </div>
+
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div 
+          className="w-[700px] h-[700px] blur-[140px] rounded-full"
+          style={{ 
+            backgroundColor: '#f0c090',
+            opacity: 0.3
+          }}
+        />
+      </div>
+      
+      <div className="relative z-10 w-full max-w-5xl px-6 text-center">
+        
+        {/* Headline */}
+        <h1 
+          className="opacity-0 animate-fade-in-up text-4xl md:text-5xl text-black leading-tight font-medium"
+          style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
+        >
+          A <span className="font-editorial italic font-normal">clear-eyed</span> look at how your brand is communicating,{" "}
+          <span>and a <span className="font-editorial italic font-normal">focused</span> plan for what to <span className="">fix first</span>.</span>
+        </h1>
+
+        {/* Description - NO font-editorial */}
+        <p 
+          className="opacity-0 animate-fade-in-up text-base md:text-lg text-black leading-relaxed mt-8"
+          style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
+        >
+          The Story Audit is a <span className="font-semibold">two-week diagnostic</span> of your full brand surface. I review every channel your brand currently lives on, identify what is <span className="font-semibold">working</span> and what is <span className="font-semibold text-red-600/70">costing you</span>, and give you a <span className="font-bold">30 to 90-day roadmap</span> of what to do next.
+          <br />
+          <br />
+          Built for <span className="font-bold">food and hospitality founders</span> who suspect their messaging is the bottleneck, but want a <span className="font-bold">second pair of eyes</span> before they spend the budget rebuilding it.
+        </p>
+
+        <div 
+          className="opacity-0 animate-fade-in-up mt-10"
+          style={{ animationDelay: "1.2s", animationFillMode: "forwards" }}
+        >
+          <button
+            onClick={createCalendarEvent}
+            className="group relative rounded-full bg-black text-white text-base md:text-lg font-medium px-8 py-3 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 overflow-hidden"
+          >
+            <span className="relative z-10 flex items-center gap-2">
+              Book your audit
+              <svg
+                className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:translate-x-1"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 8l4 4m0 0l-4 4m4-4H3"
+                />
+              </svg>
+            </span>
+          </button>
+        </div>
+
+      </div>
+
+      <style jsx>{`
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        .animate-fade-in-up {
+          animation: fadeInUp 1s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+      `}</style>
+    </section>
+  );
+}
