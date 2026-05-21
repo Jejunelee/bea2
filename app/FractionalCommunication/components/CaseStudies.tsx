@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { CaseStudySettings, CaseStudy } from "@/app/types/fractional";
+import type { CaseStudySettings, CaseStudy } from "@/app/types/FractionalCommunication/CaseStudies";
 
 export default function CaseStudies() {
   const [settings, setSettings] = useState<Partial<CaseStudySettings>>({});

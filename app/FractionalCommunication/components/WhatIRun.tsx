@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { FractionalServicesSettings, FractionalService } from "@/app/types/fractional";
+import type { FractionalServicesSettings, FractionalService } from "@/app/types/FractionalCommunication/WhatIRun";
 
 export default function WhatIRun() {
   const [settings, setSettings] = useState<Partial<FractionalServicesSettings>>({});

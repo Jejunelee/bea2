@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { FoundationGetSettings, FoundationGetItem } from "@/app/types/foundation";
+import type { FoundationGetSettings, FoundationGetItem } from "@/app/types/StoryFoundation/WhatYouGet";
 
 export default function WhatYouGet() {
   const [settings, setSettings] = useState<Partial<FoundationGetSettings>>({});

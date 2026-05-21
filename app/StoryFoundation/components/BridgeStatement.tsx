@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { BridgeStatementSettings } from "@/app/types/foundation";
+import type { BridgeStatementSettings } from "@/app/types/StoryFoundation/BridgeStatement";
 
 export default function BridgeStatement() {
   const [settings, setSettings] = useState<Partial<BridgeStatementSettings>>({});

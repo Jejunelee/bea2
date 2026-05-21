@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { FractionalHowItWorksSettings } from "@/app/types/fractional";
+import type { FractionalHowItWorksSettings } from "@/app/types/FractionalCommunication/HowThisWorks";
 
 export default function HowThisWorks() {
   const [settings, setSettings] = useState<Partial<FractionalHowItWorksSettings>>({});

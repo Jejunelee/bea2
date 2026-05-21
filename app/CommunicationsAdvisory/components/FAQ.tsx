@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { AdvisoryFAQSettings, AdvisoryFAQItem } from "@/app/types/advisory";
+import type { AdvisoryFAQSettings, AdvisoryFAQItem } from "@/app/types/CommunicationsAdvisory/FAQ";
 
 export default function FAQ() {
   const [settings, setSettings] = useState<Partial<AdvisoryFAQSettings>>({});

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { WhatIsReviewedSettings, ReviewArea } from "@/app/types/audit";
+import type { WhatIsReviewedSettings, ReviewArea } from "@/app/types/StoryAudit/WhatIsReviewed";
 
 export default function WhatIsReviewed() {
   const [settings, setSettings] = useState<Partial<WhatIsReviewedSettings>>({});

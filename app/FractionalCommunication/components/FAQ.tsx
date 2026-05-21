@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { FractionalFAQSettings, FractionalFAQItem } from "@/app/types/fractional";
+import type { FractionalFAQSettings, FractionalFAQItem } from "@/app/types/FractionalCommunication/FAQ";
 
 export default function FAQ() {
   const [settings, setSettings] = useState<Partial<FractionalFAQSettings>>({});

@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import Header from '@/app/components/Header';
 import { supabase } from "@/app/lib/supabase/client";
-import type { AdvisoryHeroSettings } from "@/app/types/advisory";
+import type { AdvisoryHeroSettings } from "@/app/types/CommunicationsAdvisory/Header";
 
 export default function AdvisoryHero() {
   const [settings, setSettings] = useState<Partial<AdvisoryHeroSettings>>({});

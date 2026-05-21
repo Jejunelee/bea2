@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import Header from '@/app/components/Header';
 import { supabase } from "@/app/lib/supabase/client";
-import type { FractionalHeroSettings } from "@/app/types/fractional";
+import type { FractionalHeroSettings } from "@/app/types/FractionalCommunication/Header";
 
 export default function FractionalHero() {
   const [settings, setSettings] = useState<Partial<FractionalHeroSettings>>({});

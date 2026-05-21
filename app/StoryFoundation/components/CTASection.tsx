@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { FoundationCTASettings } from "@/app/types/foundation";
+import type { FoundationCTASettings } from "@/app/types/StoryFoundation/CTASection";
 
 export default function CTASection() {
   const [settings, setSettings] = useState<Partial<FoundationCTASettings>>({});

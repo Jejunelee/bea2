@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { OutcomesSettings, Outcome } from "@/app/types/audit";
+import type { OutcomesSettings, Outcome } from "@/app/types/StoryAudit/Outcomes";
 
 export default function Outcomes() {
   const [settings, setSettings] = useState<Partial<OutcomesSettings>>({});

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { WhatYouGetSettings, Deliverable } from "@/app/types/audit";
+import type { WhatYouGetSettings, Deliverable } from "@/app/types/StoryAudit/WhatYouGet";
 
 export default function WhatYouGet() {
   const [settings, setSettings] = useState<Partial<WhatYouGetSettings>>({});

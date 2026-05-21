@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { FoundationWalkAwaySettings, WalkAwayItem } from "@/app/types/foundation";
+import type { FoundationWalkAwaySettings, WalkAwayItem } from "@/app/types/StoryFoundation/WhatYouWalkAwayWith";
 
 export default function WhatYouWalkAwayWith() {
   const [settings, setSettings] = useState<Partial<FoundationWalkAwaySettings>>({});

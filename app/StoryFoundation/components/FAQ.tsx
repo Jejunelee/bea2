@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { FoundationFAQSettings, FoundationFAQItem } from "@/app/types/foundation";
+import type { FoundationFAQSettings, FoundationFAQItem } from "@/app/types/StoryFoundation/FAQ";
 
 export default function FAQ() {
   const [settings, setSettings] = useState<Partial<FoundationFAQSettings>>({});

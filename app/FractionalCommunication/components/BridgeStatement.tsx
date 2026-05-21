@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { FractionalBridgeSettings } from "@/app/types/fractional";
+import type { FractionalBridgeSettings } from "@/app/types/FractionalCommunication/BridgeStatement";
 
 export default function BridgeStatement() {
   const [settings, setSettings] = useState<Partial<FractionalBridgeSettings>>({});

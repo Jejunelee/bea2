@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { FractionalGetSettings, FractionalGetItem } from "@/app/types/fractional";
+import type { FractionalGetSettings, FractionalGetItem } from "@/app/types/FractionalCommunication/WhatYouGet";
 
 export default function WhatYouGet() {
   const [settings, setSettings] = useState<Partial<FractionalGetSettings>>({});

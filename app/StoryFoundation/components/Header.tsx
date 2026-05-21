@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import Header from '@/app/components/Header';
 import { supabase } from "@/app/lib/supabase/client";
-import type { FoundationHeroSettings } from "@/app/types/foundation";
+import type { FoundationHeroSettings } from "@/app/types/StoryFoundation/Header";
 
 export default function FoundationHero() {
   const [settings, setSettings] = useState<Partial<FoundationHeroSettings>>({});

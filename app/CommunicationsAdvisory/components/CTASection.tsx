@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { AdvisoryCTASettings } from "@/app/types/advisory";
+import type { AdvisoryCTASettings } from "@/app/types/CommunicationsAdvisory/CTASection";
 
 export default function CTASection() {
   const [settings, setSettings] = useState<Partial<AdvisoryCTASettings>>({});

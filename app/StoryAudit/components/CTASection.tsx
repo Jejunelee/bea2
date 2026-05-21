@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { CTASectionSettings } from "@/app/types/audit";
+import type { CTASectionSettings } from "@/app/types/StoryAudit/CTASection";
 
 export default function CTASection() {
   const [settings, setSettings] = useState<Partial<CTASectionSettings>>({});

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { ConsiderThisIfSettings, ConsiderThisIfItem } from "@/app/types/audit";
+import type { ConsiderThisIfSettings, ConsiderThisIfItem } from "@/app/types/StoryAudit/ConsiderThisIf";
 
 export default function ConsiderThisIf() {
   const [settings, setSettings] = useState<Partial<ConsiderThisIfSettings>>({});

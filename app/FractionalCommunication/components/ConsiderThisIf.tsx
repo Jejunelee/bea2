@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { FractionalConsiderSettings, FractionalConsiderItem } from "@/app/types/fractional";
+import type { FractionalConsiderSettings, FractionalConsiderItem } from "@/app/types/FractionalCommunication/ConsiderThisIf";
 
 export default function ConsiderThisIf() {
   const [settings, setSettings] = useState<Partial<FractionalConsiderSettings>>({});

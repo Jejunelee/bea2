@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { TimelineSettings, TimelineWeek } from "@/app/types/audit";
+import type { TimelineSettings, TimelineWeek } from "@/app/types/StoryAudit/Timeline";
 
 export default function Timeline() {
   const [settings, setSettings] = useState<Partial<TimelineSettings>>({});

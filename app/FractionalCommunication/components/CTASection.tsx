@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { FractionalCTASettings } from "@/app/types/fractional";
+import type { FractionalCTASettings } from "@/app/types/FractionalCommunication/CTASection";
 
 export default function CTASection() {
   const [settings, setSettings] = useState<Partial<FractionalCTASettings>>({});

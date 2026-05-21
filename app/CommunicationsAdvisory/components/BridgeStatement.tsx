@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { AdvisoryBridgeSettings } from "@/app/types/advisory";
+import type { AdvisoryBridgeSettings } from "@/app/types/CommunicationsAdvisory/BridgeStatement";
 
 export default function BridgeStatement() {
   const [settings, setSettings] = useState<Partial<AdvisoryBridgeSettings>>({});

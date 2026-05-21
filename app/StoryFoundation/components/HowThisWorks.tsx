@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { HowThisWorksSettings } from "@/app/types/foundation";
+import type { HowThisWorksSettings } from "@/app/types/StoryFoundation/HowThisWorks";
 
 export default function HowThisWorks() {
   const [settings, setSettings] = useState<Partial<HowThisWorksSettings>>({});

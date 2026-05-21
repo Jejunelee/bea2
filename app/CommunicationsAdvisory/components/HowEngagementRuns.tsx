@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { AdvisoryEngagementSettings, EngagementStep } from "@/app/types/advisory";
+import type { AdvisoryEngagementSettings, EngagementStep } from "@/app/types/CommunicationsAdvisory/HowEngagementRuns";
 
 export default function HowEngagementRuns() {
   const [settings, setSettings] = useState<Partial<AdvisoryEngagementSettings>>({});

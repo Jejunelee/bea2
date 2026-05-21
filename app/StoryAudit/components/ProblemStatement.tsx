@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { ProblemStatementSettings } from "@/app/types/audit";
+import type { ProblemStatementSettings } from "@/app/types/StoryAudit/ProblemStatement";
 
 export default function ProblemStatement() {
   const [settings, setSettings] = useState<Partial<ProblemStatementSettings>>({});

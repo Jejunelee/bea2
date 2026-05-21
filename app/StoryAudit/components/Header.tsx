@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Header from '@/app/components/Header';
 import { supabase } from "@/app/lib/supabase/client";
-import type { AuditHeroSettings } from "@/app/types/audit";
+import type { AuditHeroSettings } from "@/app/types/StoryAudit/Header";
 
 export default function AuditHero() {
   const [settings, setSettings] = useState<Partial<AuditHeroSettings>>({});

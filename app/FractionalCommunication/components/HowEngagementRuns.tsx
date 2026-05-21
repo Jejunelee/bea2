@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { FractionalEngagementSettings, EngagementStep } from "@/app/types/fractional";
+import type { FractionalEngagementSettings, EngagementStep } from "@/app/types/FractionalCommunication/HowEngagementRuns";
 
 export default function HowEngagementRuns() {
   const [settings, setSettings] = useState<Partial<FractionalEngagementSettings>>({});

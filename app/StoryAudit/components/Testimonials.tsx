@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { TestimonialsSettings, Testimonial } from "@/app/types/audit";
+import type { TestimonialsSettings, Testimonial } from "@/app/types/StoryAudit/Testimonials";
 
 export default function Testimonials() {
   const [settings, setSettings] = useState<Partial<TestimonialsSettings>>({});

@@ -3,7 +3,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
-import type { AdvisoryIncludesSettings, AdvisoryInclude } from "@/app/types/advisory";
+import type { AdvisoryIncludesSettings, AdvisoryInclude } from "@/app/types/CommunicationsAdvisory/WhatAdvisoryIncludes";
 
 export default function WhatAdvisoryIncludes() {
   const [settings, setSettings] = useState<Partial<AdvisoryIncludesSettings>>({});
