@@ -421,7 +421,7 @@ export default function AdminQuotePage() {
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-gray-500">
-                    <span>Fast (100ms)</span>
+                    <span>Fast (100ms )</span>
                     <span>{settings.fade_delay || 200}ms</span>
                     <span>Slow (1000ms)</span>
                   </div>
