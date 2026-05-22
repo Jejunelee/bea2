@@ -94,6 +94,11 @@ export default function Hero() {
     router.push("/work");
   };
 
+  // Determine which buttons to show
+  const showButton1 = heroContent.button1_text && heroContent.button1_text.trim() !== '';
+  const showButton2 = heroContent.button2_text && heroContent.button2_text.trim() !== '';
+  const buttonsCount = (showButton1 ? 1 : 0) + (showButton2 ? 1 : 0);
+
   // Typing animation effect
   useEffect(() => {
     if (!hasStartedAnimation || !contentLoaded) return;
@@ -113,7 +118,7 @@ export default function Hero() {
     }
   }, [typedText, isTyping, hasStartedAnimation, fullText, contentLoaded]);
 
-  // Scroll animation effect (same as before)
+  // Scroll animation effect
   useEffect(() => {
     const handleScroll = () => {
       const scrollY = window.scrollY;
@@ -251,9 +256,9 @@ export default function Hero() {
         </h1>
 
         <h2 className="font-medium mt-2 sm:mt-3 md:mt-4 text-base sm:text-lg md:text-2xl lg:text-3xl xl:text-4xl leading-tight text-black">
-          {heroContent.subheading_text?.split('sharpest')[0]}
+          {heroContent.subheading_text?.split('Sharper')[0]}
           <span className="relative inline-block px-1 sm:px-2 text-black font-medium font-editorial italic">
-            sharpest
+            Sharper
             {hasStartedAnimation && showSharpestImage && (
               <span className="absolute inset-0 -z-10 overflow-hidden">
                 <img
@@ -268,27 +273,52 @@ export default function Hero() {
               </span>
             )}
           </span>
-          {heroContent.subheading_text?.split('sharpest')[1]}
+          {heroContent.subheading_text?.split('Sharper')[1]}
         </h2>
 
         <p className="font-helvetica mt-3 sm:mt-4 md:mt-6 text-xs sm:text-sm md:text-base text-black leading-relaxed max-w-2xl mx-auto px-2 sm:px-6">
           {heroContent.description_text}
         </p>
 
-        <div className="mt-5 sm:mt-6 md:mt-8 flex flex-col sm:flex-row gap-2 sm:gap-4 md:gap-5 justify-center items-center">
-          <button
-            className="font-helvetica border-2 px-5 sm:px-6 md:px-7 py-2 sm:py-2.5 rounded-full bg-yellow-400 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-sm sm:text-base text-black w-full sm:w-auto cursor-pointer"
-            onClick={createCalendarEvent}
-          >
-            {heroContent.button1_text}
-          </button>
+        {/* Dynamic Buttons Section */}
+        <div className={`mt-5 sm:mt-6 md:mt-8 flex justify-center items-center ${
+          buttonsCount === 1 ? 'w-full' : 'flex-col sm:flex-row gap-2 sm:gap-4 md:gap-5'
+        }`}>
+          {buttonsCount === 1 && showButton1 && (
+            <button
+              className="font-helvetica border-2 px-8 sm:px-10 md:px-12 py-3 sm:py-2 rounded-full bg-yellow-400 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-base sm:text-lg md:text-xl text-black w-full sm:w-auto min-w-[200px] sm:min-w-[250px] cursor-pointer"
+              onClick={createCalendarEvent}
+            >
+              {heroContent.button1_text}
+            </button>
+          )}
+          
+          {buttonsCount === 1 && showButton2 && (
+            <button
+              className="font-helvetica border-2 px-8 sm:px-10 md:px-12 py-2 sm:py-2 rounded-full bg-green-200 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-base sm:text-lg md:text-xl text-black w-full sm:w-auto min-w-[200px] sm:min-w-[250px] cursor-pointer"
+              onClick={navigateToWork}
+            >
+              {heroContent.button2_text}
+            </button>
+          )}
 
-          <button
-            className="font-helvetica border-2 px-5 sm:px-6 md:px-7 py-2 sm:py-2.5 rounded-full bg-green-200 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-sm sm:text-base text-black w-full sm:w-auto cursor-pointer"
-            onClick={navigateToWork}
-          >
-            {heroContent.button2_text}
-          </button>
+          {buttonsCount === 2 && (
+            <>
+              <button
+                className="font-helvetica border-2 px-5 sm:px-6 md:px-7 py-2 sm:py-2.5 rounded-full bg-yellow-400 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-sm sm:text-base text-black w-full sm:w-auto cursor-pointer"
+                onClick={createCalendarEvent}
+              >
+                {heroContent.button1_text}
+              </button>
+
+              <button
+                className="font-helvetica border-2 px-5 sm:px-6 md:px-7 py-2 sm:py-2.5 rounded-full bg-green-200 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-sm sm:text-base text-black w-full sm:w-auto cursor-pointer"
+                onClick={navigateToWork}
+              >
+                {heroContent.button2_text}
+              </button>
+            </>
+          )}
         </div>
 
         <p 

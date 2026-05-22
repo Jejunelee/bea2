@@ -157,7 +157,7 @@ export default function AboutMe() {
             <h2 className="text-2xl font-medium tracking-tight">
               {settings.title_prefix || 'Hi,'}{" "}
               <span className="relative inline-block">
-                <span className="relative z-10"> I'm </span>{" "}
+                <span className="relative z-10"> </span>{" "}
                 <span className="relative z-10 font-editorial italic">{settings.title_name || 'Bea!'}</span>
                 <span className="absolute inset-0 -z-0 overflow-hidden">
                   <img
@@ -274,7 +274,7 @@ export default function AboutMe() {
           <h2 className="text-4xl md:text-5xl font-medium tracking-tight">
             {settings.title_prefix || 'Hi,'}{" "}
             <span className="relative inline-block">
-              <span className="relative z-10"> I'm </span>{" "}
+              <span className="relative z-10"> </span>{" "}
               <span className="relative z-10 font-editorial italic">{settings.title_name || 'Bea!'}</span>
               <span className="absolute inset-0 -z-0 overflow-hidden">
                 <img

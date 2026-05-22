@@ -108,36 +108,44 @@ export default function AdminQuotePage() {
     setUploading(false);
   };
 
-  if (loading) return <div className="p-8 text-gray-700">Loading...</div>;
-
   const renderPreview = () => {
     const quoteText = settings.quote_text || '';
     const styledWords = settings.styled_words || [];
+    const lines = quoteText.split('\n');
     
-    let result = [];
-    let lastIndex = 0;
-    
-    for (const styled of styledWords) {
-      const index = quoteText.indexOf(styled.word, lastIndex);
-      if (index !== -1) {
-        if (index > lastIndex) {
-          result.push(quoteText.substring(lastIndex, index));
+    return lines.map((line, lineIndex) => {
+      let result = [];
+      let lastIndex = 0;
+      
+      for (const styled of styledWords) {
+        const index = line.indexOf(styled.word, lastIndex);
+        if (index !== -1) {
+          if (index > lastIndex) {
+            result.push(line.substring(lastIndex, index));
+          }
+          result.push(
+            <span key={`${lineIndex}-${index}`} className={styled.style}>
+              {styled.word}
+            </span>
+          );
+          lastIndex = index + styled.word.length;
         }
-        result.push(
-          <span key={index} className={styled.style}>
-            {styled.word}
-          </span>
-        );
-        lastIndex = index + styled.word.length;
       }
-    }
-    
-    if (lastIndex < quoteText.length) {
-      result.push(quoteText.substring(lastIndex));
-    }
-    
-    return result;
+      
+      if (lastIndex < line.length) {
+        result.push(line.substring(lastIndex));
+      }
+      
+      return (
+        <React.Fragment key={lineIndex}>
+          {result}
+          {lineIndex < lines.length - 1 && <br />}
+        </React.Fragment>
+      );
+    });
   };
+
+  if (loading) return <div className="p-8 text-gray-700">Loading...</div>;
 
   return (
     <div className="min-h-screen bg-white p-8">
@@ -159,12 +167,13 @@ export default function AdminQuotePage() {
             <textarea
               value={settings.quote_text || ''}
               onChange={(e) => setSettings({ ...settings, quote_text: e.target.value })}
-              rows={6}
+              rows={8}
               className="w-full p-2 border border-gray-300 rounded bg-white text-gray-800 focus:border-blue-400 focus:outline-none focus:ring-1 focus:ring-blue-400 font-mono text-sm"
-              placeholder="Enter your quote here..."
+              placeholder="Enter your quote here... Use Enter/Return for line breaks"
             />
             <p className="text-xs text-gray-500 mt-1">
-              Tip: Make sure the words you want to style appear exactly as written here
+              Tip: Make sure the words you want to style appear exactly as written here.<br/>
+              <strong className="text-blue-600">Press Enter/Return to create line breaks</strong> - the typing animation will automatically move to the next line.
             </p>
           </div>
         </div>
@@ -401,7 +410,7 @@ export default function AdminQuotePage() {
             }}
           >
             <p 
-              className="text-center font-medium"
+              className="text-center font-medium whitespace-pre-wrap"
               style={{ 
                 color: settings.text_color || '#000000',
                 fontSize: 'clamp(20px, 4vw, 32px)',
