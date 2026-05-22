@@ -36,29 +36,9 @@ export default function FractionalHero() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // UPDATED: Direct link to Google Calendar appointment page
   const createCalendarEvent = () => {
-    const startDate = new Date();
-    startDate.setHours(startDate.getHours() + 1);
-    
-    const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + 1);
-    
-    const formatDateForGoogle = (date: Date) => {
-      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    };
-    
-    const startTime = formatDateForGoogle(startDate);
-    const endTime = formatDateForGoogle(endDate);
-    
-    const url = 
-      "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-      `&text=${encodeURIComponent(settings.calendar_event_title || 'Fractional Comms Discovery Call')}` +
-      `&dates=${startTime}/${endTime}` +
-      `&details=${encodeURIComponent(settings.calendar_event_details || 'Hi, I\'m interested in Fractional Comms for my brand. Let\'s find a time to discuss.')}` +
-      `&location=${encodeURIComponent(settings.calendar_event_location || 'Google Meet')}` +
-      `&add=${settings.calendar_event_email || 'bea@gmail.com'}`;
-    
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open("https://calendar.app.google/kZ2VsHYE7Nz9WFZ77", "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
@@ -97,7 +77,7 @@ export default function FractionalHero() {
             className="opacity-0 animate-fade-in-up text-2xl md:text-3xl text-black leading-tight"
             style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
           >
-            A senior Brand & Comms Director <span className="font-editorial italic">embedded</span> in your business, without the full-time hire.
+            Senior Brand & Comms Director <span className="font-editorial italic">embedded</span> in your business, without the full-time hire.
           </h1>
 
           {/* Description: bold/semibold only, no font-editorial */}
@@ -105,10 +85,7 @@ export default function FractionalHero() {
             className="opacity-0 animate-fade-in-up text-base text-black leading-relaxed mt-6 px-2"
             style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
           >
-            Fractional Comms is a <span className="font-semibold">quarterly retainer</span> for <span className="font-bold">food-forward founders</span> who need ongoing communications leadership from someone who already understands the industry, can hold the strategy, run the work, and pull in specialists when needed.
-            <br />
-            <br />
-            Built for <span className="font-bold">founder-led brands</span> that have outgrown DIY communications and need <span className="font-semibold">one partner</span> running the messaging, the content, the partnerships, and the launches across every quarter.
+            Fractional Comms is a quarterly retainer for food-forward founders who've outgrown DIY communications and need an experienced partner to lead strategy, manage messaging, content, partnerships, and launches while pulling in specialists when needed.
           </p>
 
           <div 
@@ -178,7 +155,7 @@ export default function FractionalHero() {
           className="opacity-0 animate-fade-in-up text-4xl md:text-5xl lg:text-5xl text-black leading-tight font-medium"
           style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
         >
-          A senior Brand & Comms Director <span className="font-editorial italic">embedded</span> in your business, without the full-time hire.
+          Senior Brand & Comms Director <span className="font-editorial italic">embedded</span> in your business, without the full-time hire.
         </h1>
 
         {/* Description: bold/semibold only, no font-editorial */}
@@ -186,10 +163,7 @@ export default function FractionalHero() {
           className="opacity-0 animate-fade-in-up text-base md:text-lg lg:text-xl text-black leading-relaxed mt-8 max-w-4xl mx-auto"
           style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
         >
-          Fractional Comms is a <span className="font-semibold">quarterly retainer</span> for <span className="font-bold">food-forward founders</span> who need ongoing communications leadership from someone who already understands the industry, can hold the strategy, run the work, and pull in specialists when needed.
-          <br />
-          <br />
-          Built for <span className="font-bold">founder-led brands</span> that have outgrown DIY communications and need <span className="font-semibold">one partner</span> running the messaging, the content, the partnerships, and the launches across every quarter.
+          Fractional Comms is a quarterly retainer for food-forward founders who've outgrown DIY communications and need an experienced partner to lead strategy, manage messaging, content, partnerships, and launches while pulling in specialists when needed.
         </p>
 
         <div 

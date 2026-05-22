@@ -6,6 +6,7 @@ import WhatAdvisoryIncludes from "./components/WhatAdvisoryIncludes";
 import HowEngagementRuns from "./components/HowEngagementRuns";
 import FAQ from "./components/FAQ";
 import CTASection from "./components/CTASection";
+import Footer from "@/app/components/Footer"
 
 export default function AdvisoryPage() {
   return (
@@ -17,6 +18,7 @@ export default function AdvisoryPage() {
       <HowEngagementRuns />
       <FAQ />
       <CTASection />
+      <Footer />
     </main>
   );
 }

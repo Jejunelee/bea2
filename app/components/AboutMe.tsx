@@ -266,7 +266,7 @@ export default function AboutMe() {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full py-24 bg-[#FEFDF8] font-helvetica"
+      className="relative w-full py-24 bg-gradient-to-t from-[white] via-[white] to-white font-helvetica"
     >
       <div className="max-w-7xl mx-auto px-6 relative">
         {/* Title */}

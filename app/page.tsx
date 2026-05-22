@@ -12,6 +12,8 @@ import Belief from "./components/Belief"
 import GetStarted from "./components/GetStarted"
 import Packages from "./components/Packages"
 import Footer from "./components/Footer"
+import Newsletter from "./components/Newsletter"
+import Testimonial from "./components/Testimonial"
 
 export default function Home() {
   return (
@@ -19,14 +21,11 @@ export default function Home() {
       <Header />
       <Hero />
       <Ticker />
-      <Familiar />
       <Quote />
       <AboutMe />
-      <Stats />
-      <Latest />
-      <Belief />
-      <GetStarted />
+      <Testimonial />
       <Packages />
+      <Newsletter />
       <Footer />
     </div>
   );

@@ -18,7 +18,7 @@ export default function Footer() {
   // ========== MOBILE LAYOUT (Horizontal style) ==========
   if (isMobile) {
     return (
-      <footer className="w-full bg-[#ffc5d1] px-4 py-6">
+      <footer className="w-full bg-[white] px-4 py-6">
         <div className="max-w-7xl mx-auto">
           
           {/* Top Row: Logo and Picture */}

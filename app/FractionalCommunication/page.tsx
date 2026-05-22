@@ -9,6 +9,7 @@ import HowThisWorks from "./components/HowThisWorks";
 import CaseStudies from "./components/CaseStudies";
 import FAQ from "./components/FAQ";
 import CTASection from "./components/CTASection";
+import Footer from "@/app/components/Footer"
 
 export default function FractionalPage() {
   return (
@@ -23,6 +24,7 @@ export default function FractionalPage() {
       <CaseStudies />
       <FAQ />
       <CTASection />
+      <Footer />
     </main>
   );
 }

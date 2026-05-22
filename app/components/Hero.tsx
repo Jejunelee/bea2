@@ -64,30 +64,9 @@ export default function Hero() {
     fetchHeroContent();
   }, []);
 
-  // CREATE CALENDAR EVENT
+  // UPDATED: Direct link to Google Calendar appointment page
   const createCalendarEvent = () => {
-    const startDate = new Date();
-    startDate.setHours(startDate.getHours() + 1);
-
-    const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + 1);
-
-    const formatDateForGoogle = (date: Date) => {
-      return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-    };
-
-    const startTime = formatDateForGoogle(startDate);
-    const endTime = formatDateForGoogle(endDate);
-
-    const url =
-      "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-      "&text=Exploratory+Call" +
-      `&dates=${startTime}/${endTime}` +
-      "&details=Hi,+I'm+reaching+out+to+discuss+how+we+can+work+together+on+storytelling+and+communications." +
-      "&location=Google+Meet" +
-      "&add=bea@gmail.com";
-
-    window.open(url, "_blank", "noopener,noreferrer");
+    window.open("https://calendar.app.google/kZ2VsHYE7Nz9WFZ77", "_blank", "noopener,noreferrer");
   };
 
   const navigateToWork = () => {
@@ -129,17 +108,17 @@ export default function Hero() {
       let maxMoveX, maxMoveY, maxRotateChange;
 
       if (isMobile) {
-        maxMoveX = 60;
-        maxMoveY = 30;
-        maxRotateChange = 2;
-      } else if (isTablet) {
         maxMoveX = 120;
-        maxMoveY = 70;
-        maxRotateChange = 4;
+        maxMoveY = 60;
+        maxRotateChange = 3;
+      } else if (isTablet) {
+        maxMoveX = 180;
+        maxMoveY = 100;
+        maxRotateChange = 6;
       } else {
-        maxMoveX = 400;
-        maxMoveY = 120;
-        maxRotateChange = 8;
+        maxMoveX = 500;
+        maxMoveY = 180;
+        maxRotateChange = 12;
       }
 
       if (leftPolaroidRef.current) {
@@ -212,32 +191,32 @@ export default function Hero() {
       ref={sectionRef}
       className="relative min-h-screen flex items-center lg:items-center items-start justify-center overflow-x-hidden overflow-y-visible px-4 sm:px-6 py-12 sm:py-16 font-helvetica"
     >
-      {/* Left polaroid */}
+      {/* Left polaroid - Slightly reduced size */}
       <div
         ref={leftPolaroidRef}
-        className="absolute left-2 sm:left-4 md:left-8 lg:left-1 xl:left-4 bottom-20 sm:bottom-28 md:bottom-36 lg:bottom-40 xl:bottom-60 rotate-[6deg] bg-white p-1.5 sm:p-2 lg:p-2.5 pb-4 sm:pb-5 lg:pb-8 shadow-2xl rounded-sm transition-transform duration-75 will-change-transform cursor-pointer hover:scale-105 hover:z-30"
+        className="absolute -left-16 sm:-left-12 md:-left-8 lg:-left-4 xl:-left-2 bottom-20 sm:bottom-28 md:bottom-36 lg:bottom-40 xl:bottom-60 rotate-[6deg] bg-white p-2 sm:p-2.5 lg:p-3 pb-6 sm:pb-7 lg:pb-10 shadow-lg rounded-sm transition-transform duration-75 will-change-transform cursor-pointer hover:scale-105 hover:z-30"
         style={{ transform: "rotate(6deg)", transition: "transform 0.1s linear" }}
       >
         <img
           src={leftPolaroidImage}
           alt="Person"
-          className="w-40 sm:w-32 md:w-40 lg:w-56 xl:w-64 h-40 sm:h-32 md:h-40 lg:h-56 xl:h-64 object-cover"
+          className="w-56 sm:w-48 md:w-56 lg:w-64 xl:w-72 h-56 sm:h-48 md:h-56 lg:h-64 xl:h-72 object-cover"
         />
-        <div className="h-3 sm:h-4 lg:h-6"></div>
+        <div className="h-4 sm:h-5 lg:h-7"></div>
       </div>
 
-      {/* Right polaroid */}
+      {/* Right polaroid - Slightly reduced size */}
       <div
         ref={rightPolaroidRef}
-        className="absolute right-2 sm:right-4 md:right-8 lg:right-1 xl:right-2 lg:top-12 xl:top-14 bottom-20 sm:bottom-28 md:bottom-36 lg:bottom-auto rotate-[-6deg] bg-white p-1.5 sm:p-2 lg:p-2.5 pb-4 sm:pb-5 lg:pb-8 shadow-2xl rounded-sm transition-transform duration-75 will-change-transform cursor-pointer hover:scale-105 hover:z-30"
+        className="mb-4 absolute -right-16 sm:-right-12 md:-right-8 lg:-right-4 xl:-right-2 lg:top-12 xl:top-14 bottom-20 sm:bottom-28 md:bottom-36 lg:bottom-auto rotate-[-6deg] bg-white p-2 sm:p-2.5 lg:p-3 pb-6 sm:pb-7 lg:pb-10 shadow-lg rounded-sm transition-transform duration-75 will-change-transform cursor-pointer hover:scale-105 hover:z-30"
         style={{ transform: "rotate(-6deg)", transition: "transform 0.1s linear" }}
       >
         <img
           src={rightPolaroidImage}
           alt="Person"
-          className="w-40 sm:w-32 md:w-40 lg:w-56 xl:w-64 h-40 sm:h-32 md:h-40 lg:h-56 xl:h-64 object-cover"
+          className="w-56 sm:w-48 md:w-56 lg:w-64 xl:w-72 h-56 sm:h-48 md:h-56 lg:h-64 xl:h-72 object-cover"
         />
-        <div className="h-3 sm:h-4 lg:h-6"></div>
+        <div className="h-4 sm:h-5 lg:h-7"></div>
       </div>
 
       {/* Main Content */}
@@ -245,7 +224,8 @@ export default function Hero() {
         ref={contentRef}
         className="relative z-10 w-full max-w-3xl mx-auto text-center px-4 sm:px-6 transition-all duration-75 will-change-transform lg:mt-0 -mt-8 sm:-mt-12 md:-mt-16"
       >
-        <h1 className="text-base sm:text-xl md:text-2xl lg:text-3xl xl:text-5xl font-medium tracking-tight leading-tight text-black">
+        {/* Heading - Increased size on mobile */}
+        <h1 className="text-2xl sm:text-xl md:text-2xl lg:text-3xl xl:text-5xl font-medium tracking-tight leading-tight text-black">
           <br className="block sm:hidden" />
           <span className="whitespace-normal break-words inline-block max-w-full">
             {hasStartedAnimation ? typedText : ""}
@@ -255,7 +235,8 @@ export default function Hero() {
           </span>
         </h1>
 
-        <h2 className="font-medium mt-2 sm:mt-3 md:mt-4 text-base sm:text-lg md:text-2xl lg:text-3xl xl:text-4xl leading-tight text-black">
+        {/* Subheading - Increased size on mobile */}
+        <h2 className="font-medium mt-2 sm:mt-1 md:mt-1 text-xl sm:text-lg md:text-2xl lg:text-2xl xl:text-3xl leading-tight text-black">
           {heroContent.subheading_text?.split('Sharper')[0]}
           <span className="relative inline-block px-1 sm:px-2 text-black font-medium font-editorial italic">
             Sharper
@@ -276,13 +257,14 @@ export default function Hero() {
           {heroContent.subheading_text?.split('Sharper')[1]}
         </h2>
 
-        <p className="font-helvetica mt-3 sm:mt-4 md:mt-6 text-xs sm:text-sm md:text-base text-black leading-relaxed max-w-2xl mx-auto px-2 sm:px-6">
+        {/* Description text - Slightly increased on mobile */}
+        <p className="font-helvetica mt-4 sm:mt-4 md:mt-6 text-sm sm:text-sm md:text-base text-black leading-relaxed max-w-2xl mx-auto px-2 sm:px-6">
           {heroContent.description_text}
         </p>
 
         {/* Dynamic Buttons Section */}
-        <div className={`mt-5 sm:mt-6 md:mt-8 flex justify-center items-center ${
-          buttonsCount === 1 ? 'w-full' : 'flex-col sm:flex-row gap-2 sm:gap-4 md:gap-5'
+        <div className={`mt-6 sm:mt-6 md:mt-8 flex justify-center items-center ${
+          buttonsCount === 1 ? 'w-full' : 'flex-col sm:flex-row gap-3 sm:gap-4 md:gap-5'
         }`}>
           {buttonsCount === 1 && showButton1 && (
             <button
@@ -305,14 +287,14 @@ export default function Hero() {
           {buttonsCount === 2 && (
             <>
               <button
-                className="font-helvetica border-2 px-5 sm:px-6 md:px-7 py-2 sm:py-2.5 rounded-full bg-yellow-400 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-sm sm:text-base text-black w-full sm:w-auto cursor-pointer"
+                className="font-helvetica border-2 px-6 sm:px-6 md:px-7 py-2.5 sm:py-2.5 rounded-full bg-yellow-400 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-sm sm:text-base text-black w-full sm:w-auto cursor-pointer"
                 onClick={createCalendarEvent}
               >
                 {heroContent.button1_text}
               </button>
 
               <button
-                className="font-helvetica border-2 px-5 sm:px-6 md:px-7 py-2 sm:py-2.5 rounded-full bg-green-200 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-sm sm:text-base text-black w-full sm:w-auto cursor-pointer"
+                className="font-helvetica border-2 px-6 sm:px-6 md:px-7 py-2.5 sm:py-2.5 rounded-full bg-green-200 font-medium shadow-md hover:shadow-lg hover:opacity-90 transition-all duration-200 active:scale-95 text-sm sm:text-base text-black w-full sm:w-auto cursor-pointer"
                 onClick={navigateToWork}
               >
                 {heroContent.button2_text}

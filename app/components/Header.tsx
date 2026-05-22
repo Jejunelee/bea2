@@ -14,7 +14,7 @@ export default function Header2() {
   const [isServicesDropdownOpen, setIsServicesDropdownOpen] = useState(false);
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined); // Fixed type
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const pathname = usePathname();
   
   const isHomepage = pathname === "/";
@@ -25,6 +25,22 @@ export default function Header2() {
       window.location.href = "/brands";
     } else {
       window.location.href = "/people";
+    }
+  };
+
+  // Handle newsletter scroll
+  const handleNewsletterClick = () => {
+    if (isHomepage) {
+      // If on homepage, scroll to newsletter section
+      const newsletterSection = document.getElementById('newsletter-section');
+      if (newsletterSection) {
+        newsletterSection.scrollIntoView({ behavior: 'smooth' });
+      }
+      // Close mobile menu if open
+      setIsMenuOpen(false);
+    } else {
+      // If not on homepage, navigate to homepage with newsletter hash
+      window.location.href = "/#newsletter-section";
     }
   };
 
@@ -210,28 +226,19 @@ export default function Header2() {
               {/* Desktop Navigation */}
               <div className="hidden md:flex items-center gap-6 lg:gap-10">
                 <div className="flex items-center gap-6 lg:gap-10">
-                  <a 
-                    href="/brands" 
+                  {/* Home Link */}
+                  <Link 
+                    href="/" 
                     className={`${
                       isDarkBackground 
                         ? "text-white hover:text-gray-200" 
                         : "text-gray-800 hover:text-black"
                     } text-base lg:text-lg font-medium transition-all duration-200 hover:scale-105`}
                   >
-                    For Brands
-                  </a>
-                  <a 
-                    href="/people" 
-                    className={`${
-                      isDarkBackground 
-                        ? "text-white hover:text-gray-200" 
-                        : "text-gray-800 hover:text-black"
-                    } text-base lg:text-lg font-medium transition-all duration-200 hover:scale-105`}
-                  >
-                    For Individuals
-                  </a>
+                    Home
+                  </Link>
 
-                  {/* Services Dropdown - Enhanced */}
+                  {/* Services Dropdown - No Chevron */}
                   <div 
                     className="relative" 
                     ref={dropdownRef}
@@ -240,26 +247,16 @@ export default function Header2() {
                   >
                     <button
                       onClick={() => setIsServicesDropdownOpen(!isServicesDropdownOpen)}
-                      className={`flex items-center gap-1.5 group ${
+                      className={`${
                         isDarkBackground 
                           ? "text-white hover:text-gray-200" 
                           : "text-gray-800 hover:text-black"
-                      } text-base lg:text-lg font-medium transition-all duration-200`}
+                      } text-base lg:text-lg font-medium transition-all duration-200 hover:scale-105`}
                     >
                       Services
-                      <svg 
-                        className={`w-4 h-4 transition-all duration-300 ${
-                          isServicesDropdownOpen ? "rotate-180 opacity-100" : "rotate-0 opacity-70 group-hover:opacity-100"
-                        }`}
-                        fill="none" 
-                        stroke="currentColor" 
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
                     </button>
                     
-                    {/* Dropdown Menu - Enhanced */}
+                    {/* Dropdown Menu */}
                     <div 
                       className={`absolute top-full left-0 mt-2 w-80 rounded-2xl shadow-2xl overflow-hidden transition-all duration-300 ${
                         isServicesDropdownOpen 
@@ -332,29 +329,30 @@ export default function Header2() {
                     </div>
                   </div>
 
-                  <a 
-                    href="/work" 
+                  {/* Newsletter Link - Updated to scroll */}
+                  <button
+                    onClick={handleNewsletterClick}
                     className={`${
                       isDarkBackground 
                         ? "text-white hover:text-gray-200" 
                         : "text-gray-800 hover:text-black"
-                    } text-base lg:text-lg font-medium transition-all duration-200 hover:scale-105 whitespace-nowrap`}
+                    } text-base lg:text-lg font-medium transition-all duration-200 hover:scale-105 cursor-pointer`}
                   >
-                    My Work
-                  </a>
+                    Newsletter
+                  </button>
                 </div>
               </div>
 
-              {/* CTA Button - Hidden on mobile, visible on desktop */}
+              {/* Contact Button */}
               <button 
-                onClick={() => setIsModalOpen(true)}
+                onClick={() => window.location.href = "/Contact"}
                 className={`hidden md:block ${
                   isDarkBackground && !scrolled
                     ? "bg-white text-black hover:bg-gray-100" 
                     : "bg-black text-white hover:bg-gray-800"
                 } text-xs sm:text-sm md:text-base px-4 sm:px-5 py-1.5 sm:py-2 rounded-full transition-all duration-200 hover:scale-105 active:scale-95 shrink-0 font-medium`}
               >
-                Start Here →
+                Contact →
               </button>
 
               {/* Mobile Menu Button */}
@@ -399,31 +397,21 @@ export default function Header2() {
               className="h-10 w-auto"
             />
           </Link>
-          
-          <a 
-            href="/brands" 
-            className={`${
-              isDarkBackground 
-                ? "text-white hover:bg-gray-800" 
-                : "text-gray-800 hover:bg-gray-50 hover:text-black"
-            } text-xl font-medium py-3 px-2 rounded-lg transition-all`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            For Brands
-          </a>
-          <a 
-            href="/people" 
-            className={`${
-              isDarkBackground 
-                ? "text-white hover:bg-gray-800" 
-                : "text-gray-800 hover:bg-gray-50 hover:text-black"
-            } text-xl font-medium py-3 px-2 rounded-lg transition-all`}
-            onClick={() => setIsMenuOpen(false)}
-          >
-            For Individuals
-          </a>
 
-          {/* Services Dropdown in Mobile Menu - Enhanced */}
+          {/* Home Link - Mobile */}
+          <Link 
+            href="/" 
+            className={`${
+              isDarkBackground 
+                ? "text-white hover:bg-gray-800" 
+                : "text-gray-800 hover:bg-gray-50 hover:text-black"
+            } text-xl font-medium py-3 px-2 rounded-lg transition-all`}
+            onClick={() => setIsMenuOpen(false)}
+          >
+            Home
+          </Link>
+
+          {/* Services Dropdown in Mobile Menu - No Chevron */}
           <div className="flex flex-col">
             <button
               onClick={() => setIsMobileServicesOpen(!isMobileServicesOpen)}
@@ -481,26 +469,26 @@ export default function Header2() {
             </div>
           </div>
 
-          <a 
-            href="/work" 
+          {/* Newsletter Link - Mobile - Updated to scroll */}
+          <button
+            onClick={handleNewsletterClick}
             className={`${
               isDarkBackground 
                 ? "text-white hover:bg-gray-800" 
                 : "text-gray-800 hover:bg-gray-50 hover:text-black"
-            } text-xl font-medium py-3 px-2 rounded-lg transition-all`}
-            onClick={() => setIsMenuOpen(false)}
+            } text-xl font-medium py-3 px-2 rounded-lg transition-all w-full text-left cursor-pointer`}
           >
-            My Work
-          </a>
+            Newsletter
+          </button>
 
-          {/* Mobile CTA */}
+          {/* Mobile Contact Button */}
           <div className={`pt-6 mt-4 border-t ${
             isDarkBackground ? "border-gray-700" : "border-gray-100"
           }`}>
             <button 
               onClick={() => {
                 setIsMenuOpen(false);
-                setIsModalOpen(true);
+                window.location.href = "/contact";
               }}
               className={`w-full ${
                 isDarkBackground 
@@ -508,7 +496,7 @@ export default function Header2() {
                   : "bg-black text-white hover:bg-gray-800"
               } text-base px-6 py-3 rounded-full transition-all font-medium`}
             >
-              Start Here →
+              Contact →
             </button>
           </div>
         </div>

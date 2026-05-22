@@ -35,29 +35,9 @@ export default function AuditHero() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // UPDATED: Direct link to Google Calendar appointment page
   const createCalendarEvent = () => {
-    const startDate = new Date();
-    startDate.setHours(startDate.getHours() + 1);
-    
-    const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + 1);
-    
-    const formatDateForGoogle = (date: Date) => {
-      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    };
-    
-    const startTime = formatDateForGoogle(startDate);
-    const endTime = formatDateForGoogle(endDate);
-    
-    const url = 
-      "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-      `&text=${encodeURIComponent(settings.calendar_event_title || 'Story Audit Discovery Call')}` +
-      `&dates=${startTime}/${endTime}` +
-      `&details=${encodeURIComponent(settings.calendar_event_details || 'Hi, I\'m interested in the Story Audit for my brand. Let\'s find a time to discuss.')}` +
-      `&location=${encodeURIComponent(settings.calendar_event_location || 'Google Meet')}` +
-      `&add=${settings.calendar_event_email || 'bea@gmail.com'}`;
-    
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open("https://calendar.app.google/kZ2VsHYE7Nz9WFZ77", "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
@@ -105,15 +85,12 @@ export default function AuditHero() {
             <span className="whitespace-normal">and a <span className="font-editorial italic font-normal">focused</span> plan for what to <span className="">fix first</span>.</span>
           </h1>
 
-          {/* Description - NO font-editorial */}
+          {/* Description - single paragraph */}
           <p 
             className="opacity-0 animate-fade-in-up text-base text-black leading-relaxed mt-6 px-2"
             style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
           >
-            The Story Audit is a <span className="font-semibold">two-week diagnostic</span> of your full brand surface. I review every channel your brand currently lives on, identify what is <span className="font-semibold">working</span> and what is <span className="font-semibold text-red-600/70">costing you</span>, and give you a <span className="font-bold">30 to 90-day roadmap</span> of what to do next.
-            <br />
-            <br />
-            Built for <span className="font-bold">food and hospitality founders</span> who suspect their messaging is the bottleneck, but want a <span className="font-bold">second pair of eyes</span> before they spend the budget rebuilding it.
+            The Story Audit is a two-week diagnostic of your full brand surface. I review every channel your brand lives on, identify what's working and what's costing you, and deliver a clear 30–90 day roadmap for what to fix next. Built for food and hospitality founders who suspect their messaging is the bottleneck, but want a sharper second opinion before investing in a full rebuild.
           </p>
 
           <div 
@@ -205,15 +182,12 @@ export default function AuditHero() {
           <span>and a <span className="font-editorial italic font-normal">focused</span> plan for what to <span className="">fix first</span>.</span>
         </h1>
 
-        {/* Description - NO font-editorial */}
+        {/* Description - single paragraph */}
         <p 
           className="opacity-0 animate-fade-in-up text-base md:text-lg text-black leading-relaxed mt-8"
           style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
         >
-          The Story Audit is a <span className="font-semibold">two-week diagnostic</span> of your full brand surface. I review every channel your brand currently lives on, identify what is <span className="font-semibold">working</span> and what is <span className="font-semibold text-red-600/70">costing you</span>, and give you a <span className="font-bold">30 to 90-day roadmap</span> of what to do next.
-          <br />
-          <br />
-          Built for <span className="font-bold">food and hospitality founders</span> who suspect their messaging is the bottleneck, but want a <span className="font-bold">second pair of eyes</span> before they spend the budget rebuilding it.
+          The Story Audit is a two-week diagnostic of your full brand surface. I review every channel your brand lives on, identify what's working and what's costing you, and deliver a clear 30–90 day roadmap for what to fix next. Built for food and hospitality founders who suspect their messaging is the bottleneck, but want a sharper second opinion before investing in a full rebuild.
         </p>
 
         <div 

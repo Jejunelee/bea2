@@ -39,6 +39,8 @@ export default function AdminQuotePage() {
         background_gradient_mid: settings.background_gradient_mid,
         background_gradient_end: settings.background_gradient_end,
         typing_speed: settings.typing_speed,
+        typing_enabled: settings.typing_enabled,
+        fade_delay: settings.fade_delay,
         text_color: settings.text_color,
         text_size_desktop: settings.text_size_desktop,
         text_size_mobile: settings.text_size_mobile,
@@ -50,6 +52,7 @@ export default function AdminQuotePage() {
 
     if (error) {
       setMessage('Error saving settings');
+      console.error(error);
     } else {
       setMessage('Quote settings saved successfully!');
       setTimeout(() => setMessage(''), 3000);
@@ -111,38 +114,74 @@ export default function AdminQuotePage() {
   const renderPreview = () => {
     const quoteText = settings.quote_text || '';
     const styledWords = settings.styled_words || [];
-    const lines = quoteText.split('\n');
+    const typingEnabled = settings.typing_enabled ?? true;
     
-    return lines.map((line, lineIndex) => {
-      let result = [];
-      let lastIndex = 0;
-      
-      for (const styled of styledWords) {
-        const index = line.indexOf(styled.word, lastIndex);
-        if (index !== -1) {
-          if (index > lastIndex) {
-            result.push(line.substring(lastIndex, index));
+    if (!typingEnabled) {
+      // Preview for fade mode - show as paragraphs
+      const paragraphs = quoteText.split('\n').filter(p => p.trim().length > 0);
+      return paragraphs.map((paragraph, paraIndex) => {
+        let result = [];
+        let lastIndex = 0;
+        
+        for (const styled of styledWords) {
+          const index = paragraph.indexOf(styled.word, lastIndex);
+          if (index !== -1) {
+            if (index > lastIndex) {
+              result.push(paragraph.substring(lastIndex, index));
+            }
+            result.push(
+              <span key={`${paraIndex}-${index}`} className={styled.style}>
+                {styled.word}
+              </span>
+            );
+            lastIndex = index + styled.word.length;
           }
-          result.push(
-            <span key={`${lineIndex}-${index}`} className={styled.style}>
-              {styled.word}
-            </span>
-          );
-          lastIndex = index + styled.word.length;
         }
-      }
-      
-      if (lastIndex < line.length) {
-        result.push(line.substring(lastIndex));
-      }
-      
-      return (
-        <React.Fragment key={lineIndex}>
-          {result}
-          {lineIndex < lines.length - 1 && <br />}
-        </React.Fragment>
-      );
-    });
+        
+        if (lastIndex < paragraph.length) {
+          result.push(paragraph.substring(lastIndex));
+        }
+        
+        return (
+          <p key={paraIndex} className="mb-4">
+            {result}
+          </p>
+        );
+      });
+    } else {
+      // Preview for typing mode - show as continuous text with line breaks
+      const lines = quoteText.split('\n');
+      return lines.map((line, lineIndex) => {
+        let result = [];
+        let lastIndex = 0;
+        
+        for (const styled of styledWords) {
+          const index = line.indexOf(styled.word, lastIndex);
+          if (index !== -1) {
+            if (index > lastIndex) {
+              result.push(line.substring(lastIndex, index));
+            }
+            result.push(
+              <span key={`${lineIndex}-${index}`} className={styled.style}>
+                {styled.word}
+              </span>
+            );
+            lastIndex = index + styled.word.length;
+          }
+        }
+        
+        if (lastIndex < line.length) {
+          result.push(line.substring(lastIndex));
+        }
+        
+        return (
+          <React.Fragment key={lineIndex}>
+            {result}
+            {lineIndex < lines.length - 1 && <br />}
+          </React.Fragment>
+        );
+      });
+    }
   };
 
   if (loading) return <div className="p-8 text-gray-700">Loading...</div>;
@@ -173,7 +212,7 @@ export default function AdminQuotePage() {
             />
             <p className="text-xs text-gray-500 mt-1">
               Tip: Make sure the words you want to style appear exactly as written here.<br/>
-              <strong className="text-blue-600">Press Enter/Return to create line breaks</strong> - the typing animation will automatically move to the next line.
+              <strong className="text-blue-600">Press Enter/Return to create line breaks</strong> - these will become paragraphs when fade mode is enabled.
             </p>
           </div>
         </div>
@@ -325,21 +364,69 @@ export default function AdminQuotePage() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium mb-1 text-gray-700">Typing Speed</label>
-              <input
-                type="range"
-                min="10"
-                max="200"
-                value={settings.typing_speed || 50}
-                onChange={(e) => setSettings({ ...settings, typing_speed: parseInt(e.target.value) })}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>Fast (10ms)</span>
-                <span>{settings.typing_speed || 50}ms</span>
-                <span>Slow (200ms)</span>
+            {/* Typing Animation Toggle */}
+            <div className="border-t border-gray-200 pt-4">
+              <label className="block text-sm font-medium mb-2 text-gray-800">
+                Animation Settings
+              </label>
+              <div className="flex items-center gap-2 mb-3">
+                <input
+                  type="checkbox"
+                  checked={settings.typing_enabled ?? true}
+                  onChange={(e) => setSettings({ ...settings, typing_enabled: e.target.checked })}
+                  className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                />
+                <label className="text-sm text-gray-700 font-medium">Enable typing animation</label>
               </div>
+              <p className="text-xs text-gray-500 mb-3">
+                When disabled, paragraphs will fade in one by one
+              </p>
+
+              {/* Typing Speed - only show when typing is enabled */}
+              {(settings.typing_enabled ?? true) && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium mb-1 text-gray-700">Typing Speed (ms)</label>
+                  <input
+                    type="range"
+                    min="10"
+                    max="200"
+                    value={settings.typing_speed || 50}
+                    onChange={(e) => setSettings({ ...settings, typing_speed: parseInt(e.target.value) })}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Fast (10ms)</span>
+                    <span>{settings.typing_speed || 50}ms</span>
+                    <span>Slow (200ms)</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Fade Delay - only show when typing is disabled */}
+              {!(settings.typing_enabled ?? true) && (
+                <div className="mt-3">
+                  <label className="block text-sm font-medium mb-1 text-gray-700">
+                    Paragraph Fade Delay (ms)
+                  </label>
+                  <p className="text-xs text-gray-500 mb-2">
+                    Time between each paragraph fading in
+                  </p>
+                  <input
+                    type="range"
+                    min="100"
+                    max="3000"
+                    step="50"
+                    value={settings.fade_delay || 200}
+                    onChange={(e) => setSettings({ ...settings, fade_delay: parseInt(e.target.value) })}
+                    className="w-full"
+                  />
+                  <div className="flex justify-between text-xs text-gray-500">
+                    <span>Fast (100ms)</span>
+                    <span>{settings.fade_delay || 200}ms</span>
+                    <span>Slow (1000ms)</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -356,7 +443,9 @@ export default function AdminQuotePage() {
                 onChange={(e) => setSettings({ ...settings, show_arrow_icon: e.target.checked })}
                 className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
               />
-              <label className="text-sm font-medium text-gray-700">Show arrow icon after typing completes</label>
+              <label className="text-sm font-medium text-gray-700">
+                {settings.typing_enabled ? 'Show arrow icon after typing completes' : 'Show arrow icon after all paragraphs have faded in'}
+              </label>
             </div>
 
             {settings.show_arrow_icon && (
@@ -409,15 +498,15 @@ export default function AdminQuotePage() {
               background: `radial-gradient(circle at center, ${settings.background_gradient_start || '#f3f1df'} 0%, ${settings.background_gradient_mid || '#e6e9b8'} 50%, ${settings.background_gradient_end || '#e9c08f'} 100%)`,
             }}
           >
-            <p 
-              className="text-center font-medium whitespace-pre-wrap"
+            <div 
+              className="text-center font-medium"
               style={{ 
                 color: settings.text_color || '#000000',
                 fontSize: 'clamp(20px, 4vw, 32px)',
               }}
             >
               {renderPreview()}
-            </p>
+            </div>
             
             {settings.show_arrow_icon && settings.arrow_icon_url && (
               <div className="mt-12 flex justify-center">
@@ -429,6 +518,12 @@ export default function AdminQuotePage() {
               </div>
             )}
           </div>
+          
+          <p className="text-xs text-gray-500 mt-3 text-center">
+            {settings.typing_enabled ? 
+              'Preview shows how styled words will appear. The typing animation will play on the actual page.' : 
+              'Preview shows how styled words will appear. Paragraphs will fade in one by one on the actual page.'}
+          </p>
         </div>
 
         {/* Save Button */}
@@ -442,6 +537,20 @@ export default function AdminQuotePage() {
           </button>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes bounce {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-10px);
+          }
+        }
+        .animate-bounce {
+          animation: bounce 1s infinite;
+        }
+      `}</style>
     </div>
   );
 }

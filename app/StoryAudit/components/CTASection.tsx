@@ -63,29 +63,9 @@ export default function CTASection() {
     };
   }, [hasAnimated, loading]);
 
+  // UPDATED: Direct link to Google Calendar appointment page
   const createCalendarEvent = () => {
-    const startDate = new Date();
-    startDate.setHours(startDate.getHours() + 1);
-    
-    const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + 1);
-    
-    const formatDateForGoogle = (date: Date) => {
-      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    };
-    
-    const startTime = formatDateForGoogle(startDate);
-    const endTime = formatDateForGoogle(endDate);
-    
-    const url = 
-      "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-      `&text=${encodeURIComponent(settings.calendar_event_title || 'Story Audit Discovery Call')}` +
-      `&dates=${startTime}/${endTime}` +
-      `&details=${encodeURIComponent(settings.calendar_event_details || 'Hi, I\'m interested in the Story Audit for my brand. Let\'s find a time to discuss.')}` +
-      `&location=${encodeURIComponent(settings.calendar_event_location || 'Google Meet')}` +
-      `&add=${settings.calendar_event_email || 'bea@gmail.com'}`;
-    
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open("https://calendar.app.google/kZ2VsHYE7Nz9WFZ77", "_blank", "noopener,noreferrer");
   };
 
   if (loading) {

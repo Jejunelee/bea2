@@ -36,29 +36,9 @@ export default function AdvisoryHero() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // UPDATED: Direct link to Google Calendar appointment page
   const createCalendarEvent = () => {
-    const startDate = new Date();
-    startDate.setHours(startDate.getHours() + 1);
-    
-    const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + 1);
-    
-    const formatDateForGoogle = (date: Date) => {
-      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    };
-    
-    const startTime = formatDateForGoogle(startDate);
-    const endTime = formatDateForGoogle(endDate);
-    
-    const url = 
-      "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-      `&text=${encodeURIComponent(settings.calendar_event_title || 'Communications Advisory Discovery Call')}` +
-      `&dates=${startTime}/${endTime}` +
-      `&details=${encodeURIComponent(settings.calendar_event_details || 'Hi, I\'m interested in Communications Advisory for my brand. Let\'s find a time to discuss.')}` +
-      `&location=${encodeURIComponent(settings.calendar_event_location || 'Google Meet')}` +
-      `&add=${settings.calendar_event_email || 'bea@gmail.com'}`;
-    
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open("https://calendar.app.google/kZ2VsHYE7Nz9WFZ77", "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
@@ -97,7 +77,7 @@ export default function AdvisoryHero() {
             className="opacity-0 animate-fade-in-up text-2xl md:text-3xl text-black leading-tight"
             style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
           >
-            Strategic communications leadership for founders who have a team but need a <span className="font-editorial italic">sharper mind</span> in the room.
+            Communications leadership for founders who have a team but need a <span className="font-editorial italic">sharper mind</span> in the room.
           </h1>
 
           {/* Description: bold/semibold only, no font-editorial */}
@@ -105,10 +85,7 @@ export default function AdvisoryHero() {
             className="opacity-0 animate-fade-in-up text-base text-black leading-relaxed mt-6 px-2"
             style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
           >
-            Communications Advisory is a <span className="font-semibold">monthly retainer</span> for <span className="font-bold">food and hospitality founders</span> who are past the DIY stage, have people around them, but need a senior comms partner to hold the strategy, pressure-test decisions, and keep the brand sharp as the business grows.
-            <br />
-            <br />
-            You run the execution. <span className="font-semibold">I make sure you are running it in the right direction.</span>
+            Communications Advisory is a monthly retainer for food and hospitality founders who are past the DIY stage and already have a team, but need a senior comms partner to hold the strategy, pressure-test decisions, and keep the brand sharp as the business grows. Your team runs the execution — I make sure it's moving in the right direction.
           </p>
 
           <div 
@@ -178,7 +155,7 @@ export default function AdvisoryHero() {
           className="opacity-0 animate-fade-in-up text-4xl md:text-5xl lg:text-5xl text-black leading-tight font-medium"
           style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
         >
-          Strategic communications leadership for founders who have a team but need a <span className="font-editorial italic">sharper mind</span> in the room.
+          Communications leadership for <br /> founders who have a team but need a <br /> <span className="font-editorial italic">sharper mind</span> in the room.
         </h1>
 
         {/* Description: bold/semibold only, no font-editorial */}
@@ -186,10 +163,7 @@ export default function AdvisoryHero() {
           className="opacity-0 animate-fade-in-up text-base md:text-lg lg:text-xl text-black leading-relaxed mt-8 max-w-4xl mx-auto"
           style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
         >
-          Communications Advisory is a <span className="font-semibold">monthly retainer</span> for <span className="font-bold">food and hospitality founders</span> who are past the DIY stage, have people around them, but need a senior comms partner to hold the strategy, pressure-test decisions, and keep the brand sharp as the business grows.
-          <br />
-          <br />
-          You run the execution. <span className="font-semibold">I make sure you are running it in the right direction.</span>
+          Communications Advisory is a monthly retainer for food and hospitality founders who are past the DIY stage and already have a team, but need a senior comms partner to hold the strategy, pressure-test decisions, and keep the brand sharp as the business grows. Your team runs the execution — I make sure it's moving in the right direction.
         </p>
 
         <div 

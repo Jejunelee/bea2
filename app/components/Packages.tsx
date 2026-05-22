@@ -77,7 +77,7 @@ export default function Packages() {
         word.toLowerCase().includes(italicWord.toLowerCase())
       );
       return isItalic ? (
-        <em key={i} className="font-serif italic">{word} </em>
+        <em key={i} className="font-serif italic font-normal">{word} </em>
       ) : (
         <span key={i}>{word} </span>
       );

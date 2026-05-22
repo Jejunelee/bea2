@@ -36,29 +36,9 @@ export default function FoundationHero() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // UPDATED: Direct link to Google Calendar appointment page
   const createCalendarEvent = () => {
-    const startDate = new Date();
-    startDate.setHours(startDate.getHours() + 1);
-    
-    const endDate = new Date(startDate);
-    endDate.setHours(endDate.getHours() + 1);
-    
-    const formatDateForGoogle = (date: Date) => {
-      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
-    };
-    
-    const startTime = formatDateForGoogle(startDate);
-    const endTime = formatDateForGoogle(endDate);
-    
-    const url = 
-      "https://calendar.google.com/calendar/render?action=TEMPLATE" +
-      `&text=${encodeURIComponent(settings.calendar_event_title || 'Story Foundation Discovery Call')}` +
-      `&dates=${startTime}/${endTime}` +
-      `&details=${encodeURIComponent(settings.calendar_event_details || 'Hi, I\'m interested in the Story Foundation for my brand. Let\'s find a time to discuss.')}` +
-      `&location=${encodeURIComponent(settings.calendar_event_location || 'Google Meet')}` +
-      `&add=${settings.calendar_event_email || 'bea@gmail.com'}`;
-    
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open("https://calendar.app.google/kZ2VsHYE7Nz9WFZ77", "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
@@ -92,23 +72,20 @@ export default function FoundationHero() {
         </div>
         
         <div className="relative z-10 w-full px-4 text-center">
-          {/* Headline: font-editorial italic only, no bold */}
+          {/* Headline with font-editorial italic on key words */}
           <h1 
             className="opacity-0 animate-fade-in-up text-2xl md:text-3xl text-black leading-tight"
             style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
           >
-            A four to six-week messaging rebuild that delivers a brand story your team can use <span className="font-editorial italic">sustainably</span>, and three priority assets ready to ship.
+            <span className="font-editorial italic">4–6 week</span> messaging rebuild with a story your team can <span className="font-editorial italic">actually use</span>.
           </h1>
 
-          {/* Description: bold only, no font-editorial */}
+          {/* Description */}
           <p 
             className="opacity-0 animate-fade-in-up text-base text-black leading-relaxed mt-6 px-2"
             style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
           >
-            The Story Foundation takes you through the <span className="font-semibold">full audit</span>, builds your messaging architecture <span className="font-semibold">from the ground up</span>, and rolls it into <span className="font-bold">three rebuilt priority assets</span> your team can use immediately.
-            <br />
-            <br />
-            Built for <span className="font-bold">food-forward founders</span> who have outgrown their original brand story and are ready to do the messaging work <span className="font-semibold">properly, once</span>.
+            The Story Foundation starts with a full audit, rebuilds your messaging architecture from the ground up, and applies it across three priority assets your team can use immediately. Built for food-forward founders who have outgrown their original brand story and are ready to do the messaging work properly, once.
           </p>
 
           <div 
@@ -173,23 +150,20 @@ export default function FoundationHero() {
       </div>
       
       <div className="relative z-10 w-full max-w-5xl px-6 text-center">
-        {/* Headline: font-editorial italic only, no bold */}
+        {/* Headline with font-editorial italic on key words */}
         <h1 
           className="opacity-0 animate-fade-in-up text-4xl md:text-5xl text-black leading-tight font-medium"
           style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
         >
-          A four to six-week messaging rebuild that delivers a brand story your team can use <span className="font-editorial italic">sustainably</span>, and three priority assets ready to ship.
+          <span className="font-editorial italic">4–6 week</span> messaging rebuild with a story your team can <span className="font-editorial italic">actually use</span>.
         </h1>
 
-        {/* Description: bold only, no font-editorial */}
+        {/* Description */}
         <p 
           className="opacity-0 animate-fade-in-up text-base md:text-lg text-black leading-relaxed mt-8"
           style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
         >
-          The Story Foundation takes you through the <span className="font-semibold">full audit</span>, builds your messaging architecture <span className="font-semibold">from the ground up</span>, and rolls it into <span className="font-bold">three rebuilt priority assets</span> your team can use immediately.
-          <br />
-          <br />
-          Built for <span className="font-bold">food-forward founders</span> who have outgrown their original brand story and are ready to do the messaging work <span className="font-semibold">properly, once</span>.
+          The Story Foundation starts with a full audit, rebuilds your messaging architecture from the ground up, and applies it across three priority assets your team can use immediately. Built for food-forward founders who have outgrown their original brand story and are ready to do the messaging work properly, once.
         </p>
 
         <div 
