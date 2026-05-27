@@ -194,10 +194,10 @@ export default function TestimonialSlider() {
 
       {/* Condensed Ticker-style Infinite Scroll */}
       <div className="relative py-6 pb-12">
-        <div className="relative overflow-hidden">
+        <div className="relative overflow-visible">
           {/* Gradient overlays */}
-          <div className="absolute left-0 top-0 bottom-0 w-10 md:w-10 bg-gradient-to-r from-black to-transparent z-10 pointer-events-none"></div>
-          <div className="absolute right-0 top-0 bottom-0 w-10 md:w-10 bg-gradient-to-l from-black to-transparent z-10 pointer-events-none"></div>
+          <div className="absolute left-0 top-0 bottom-0 w-10 md:w-10 bg-gradient-to-r from-black to-transparent z-20 pointer-events-none"></div>
+          <div className="absolute right-0 top-0 bottom-0 w-10 md:w-10 bg-gradient-to-l from-black to-transparent z-20 pointer-events-none"></div>
           
           <div 
             className="flex animate-scroll"
@@ -212,10 +212,10 @@ export default function TestimonialSlider() {
             {[...displayTestimonials, ...displayTestimonials].map((testimonial, idx) => (
               <div
                 key={`${testimonial.id}-${idx}`}
-                className="w-[300px] md:w-[340px] lg:w-[360px] flex-shrink-0"
+                className="w-[300px] md:w-[340px] lg:w-[360px] flex-shrink-0 overflow-visible"
               >
                 {/* Condensed Card */}
-                <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm h-full flex flex-col transition-all duration-300 hover:shadow-md hover:scale-105">
+                <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm h-full flex flex-col transition-all duration-300 hover:shadow-md hover:scale-105 will-change-transform">
                   {/* Smaller Picture */}
                   <div className="flex justify-center mb-3">
                     <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden ring-3 ring-gray-100">
@@ -269,6 +269,22 @@ export default function TestimonialSlider() {
         
         .animate-scroll:hover {
           animation-play-state: paused;
+        }
+        
+        /* Ensure scaled cards appear above others and don't clip */
+        .animate-scroll > div {
+          transition: z-index 0s;
+        }
+        
+        .animate-scroll > div:hover {
+          z-index: 30;
+        }
+        
+        /* Prevent transform clipping on cards */
+        .animate-scroll > div > div {
+          transform-origin: center;
+          backface-visibility: hidden;
+          -webkit-font-smoothing: subpixel-antialiased;
         }
       `}</style>
     </section>

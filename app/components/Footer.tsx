@@ -130,14 +130,14 @@ export default function Footer() {
             </a>
 
             <a
-              href="#"
+              href="https://www.linkedin.com/in/beagtrinidad/"
               className="underline underline-offset-4 hover:opacity-70 transition"
             >
               LinkedIn
             </a>
 
             <a
-              href="#"
+              href="https://calendar.app.google/kZ2VsHYE7Nz9WFZ77"
               className="underline underline-offset-4 hover:opacity-70 transition"
             >
               Book a call

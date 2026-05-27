@@ -6,6 +6,7 @@ import WhatYouGet from "./components/WhatYouGet";
 import Timeline from "./components/Timeline";
 import Outcomes from "./components/Outcomes";
 import Testimonials from "./components/Testimonials";
+import Testimonial from "@/app/components/Testimonial";
 import FAQ from "./components/FAQ";
 import CTASection from "./components/CTASection"
 import Footer from "@/app/components/Footer"
@@ -20,7 +21,7 @@ export default function Home() {
       <WhatYouGet />
       <Timeline />
       <Outcomes />
-      <Testimonials />
+      <Testimonial />
       <FAQ />
       <CTASection />
       <Footer />

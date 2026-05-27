@@ -194,7 +194,7 @@ export default function Hero() {
       {/* Left polaroid - Slightly reduced size */}
       <div
         ref={leftPolaroidRef}
-        className="absolute -left-16 sm:-left-12 md:-left-8 lg:-left-4 xl:-left-2 bottom-20 sm:bottom-28 md:bottom-36 lg:bottom-40 xl:bottom-60 rotate-[6deg] bg-white p-2 sm:p-2.5 lg:p-3 pb-6 sm:pb-7 lg:pb-10 shadow-lg rounded-sm transition-transform duration-75 will-change-transform cursor-pointer hover:scale-105 hover:z-30"
+        className="absolute -left-16 sm:-left-12 md:-left-8 lg:-left-4 xl:-left-12 bottom-20 sm:bottom-28 md:bottom-36 lg:bottom-40 xl:bottom-60 rotate-[6deg] bg-white p-2 sm:p-2.5 lg:p-3 pb-6 sm:pb-7 lg:pb-10 shadow-lg rounded-sm transition-transform duration-75 will-change-transform cursor-pointer hover:scale-105 hover:z-30"
         style={{ transform: "rotate(6deg)", transition: "transform 0.1s linear" }}
       >
         <img
@@ -208,7 +208,7 @@ export default function Hero() {
       {/* Right polaroid - Slightly reduced size */}
       <div
         ref={rightPolaroidRef}
-        className="mb-4 absolute -right-16 sm:-right-12 md:-right-8 lg:-right-4 xl:-right-2 lg:top-12 xl:top-14 bottom-20 sm:bottom-28 md:bottom-36 lg:bottom-auto rotate-[-6deg] bg-white p-2 sm:p-2.5 lg:p-3 pb-6 sm:pb-7 lg:pb-10 shadow-lg rounded-sm transition-transform duration-75 will-change-transform cursor-pointer hover:scale-105 hover:z-30"
+        className="mb-4 absolute -right-16 sm:-right-12 md:-right-8 lg:-right-4 xl:-right-12 lg:top-12 xl:top-14 bottom-20 sm:bottom-28 md:bottom-36 lg:bottom-auto rotate-[-6deg] bg-white p-2 sm:p-2.5 lg:p-3 pb-6 sm:pb-7 lg:pb-10 shadow-lg rounded-sm transition-transform duration-75 will-change-transform cursor-pointer hover:scale-105 hover:z-30"
         style={{ transform: "rotate(-6deg)", transition: "transform 0.1s linear" }}
       >
         <img
@@ -222,10 +222,10 @@ export default function Hero() {
       {/* Main Content */}
       <div
         ref={contentRef}
-        className="relative z-10 w-full max-w-3xl mx-auto text-center px-4 sm:px-6 transition-all duration-75 will-change-transform lg:mt-0 -mt-8 sm:-mt-12 md:-mt-16"
+        className="relative z-10 w-full max-w-4xl mx-auto text-center px-4 sm:px-6 transition-all duration-75 will-change-transform lg:mt-0 -mt-8 sm:-mt-12 md:-mt-16"
       >
         {/* Heading - Increased size on mobile */}
-        <h1 className="text-2xl sm:text-xl md:text-2xl lg:text-3xl xl:text-5xl font-medium tracking-tight leading-tight text-black">
+        <h1 className="text-2xl sm:text-xl md:text-2xl lg:text-3xl xl:text-5xl font-semibold tracking-tight leading-tight text-black">
           <br className="block sm:hidden" />
           <span className="whitespace-normal break-words inline-block max-w-full">
             {hasStartedAnimation ? typedText : ""}
@@ -239,7 +239,7 @@ export default function Hero() {
         <h2 className="font-medium mt-2 sm:mt-1 md:mt-1 text-xl sm:text-lg md:text-2xl lg:text-2xl xl:text-3xl leading-tight text-black">
           {heroContent.subheading_text?.split('Sharper')[0]}
           <span className="relative inline-block px-1 sm:px-2 text-black font-medium font-editorial italic">
-            Sharper
+            
             {hasStartedAnimation && showSharpestImage && (
               <span className="absolute inset-0 -z-10 overflow-hidden">
                 <img

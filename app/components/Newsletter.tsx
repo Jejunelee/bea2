@@ -63,7 +63,7 @@ export default function Newsletter() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16 md:mb-20">
           <h2 className="font-editorial text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-normal text-black mb-4 sm:mb-6">
-            Type Harder, the Newsletter
+            Newsletter
           </h2>
           
           <p className="font-helvetica text-base sm:text-lg md:text-xl text-gray-700 mb-8 leading-relaxed">

@@ -224,14 +224,19 @@ export default function Contact() {
                   <span className="text-xs text-black/40 font-helvetica">LinkedIn</span>
                 </a>
 
-                <div className="group flex flex-col items-center gap-1 transition-all duration-200 hover:scale-105">
+                <a
+                  href="https://onyourplate.substack.com/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group flex flex-col items-center gap-1 transition-all duration-200 hover:scale-105"
+                >
                   <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center group-hover:bg-black/10 transition-colors">
                     <svg className="w-5 h-5 text-black/60" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M22.539 8.242a2.98 2.98 0 0 0-2.102-2.11C18.94 5.85 12 5.85 12 5.85s-6.94 0-8.437.282a2.98 2.98 0 0 0-2.102 2.11C1.18 9.73 1 12 1 12s.18 2.27.461 3.758a2.98 2.98 0 0 0 2.102 2.11C5.06 18.15 12 18.15 12 18.15s6.94 0 8.437-.282a2.98 2.98 0 0 0 2.102-2.11C22.82 14.27 23 12 23 12s-.18-2.27-.461-3.758zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/>
                     </svg>
                   </div>
                   <span className="text-xs text-black/40 font-helvetica">Substack</span>
-                </div>
+                </a>
               </div>
             </div>
           </div>
@@ -413,14 +418,19 @@ export default function Contact() {
                     <span className="text-sm text-black/50 font-helvetica group-hover:text-black/70 transition-colors">LinkedIn</span>
                   </a>
 
-                  <div className="group flex items-center gap-2 transition-all duration-200 hover:scale-105 cursor-pointer">
+                  <a
+                    href="https://onyourplate.substack.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group flex items-center gap-2 transition-all duration-200 hover:scale-105"
+                  >
                     <div className="w-8 h-8 rounded-full bg-black/5 flex items-center justify-center group-hover:bg-black/10 transition-colors">
                       <svg className="w-4 h-4 text-black/60" fill="currentColor" viewBox="0 0 24 24">
                         <path d="M22.539 8.242a2.98 2.98 0 0 0-2.102-2.11C18.94 5.85 12 5.85 12 5.85s-6.94 0-8.437.282a2.98 2.98 0 0 0-2.102 2.11C1.18 9.73 1 12 1 12s.18 2.27.461 3.758a2.98 2.98 0 0 0 2.102 2.11C5.06 18.15 12 18.15 12 18.15s6.94 0 8.437-.282a2.98 2.98 0 0 0 2.102-2.11C22.82 14.27 23 12 23 12s-.18-2.27-.461-3.758zM9.75 15.02V8.98L15.5 12l-5.75 3.02z"/>
                       </svg>
                     </div>
                     <span className="text-sm text-black/50 font-helvetica group-hover:text-black/70 transition-colors">Substack</span>
-                  </div>
+                  </a>
                 </div>
               </div>
             </div>
