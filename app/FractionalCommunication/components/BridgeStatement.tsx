@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
 import type { FractionalBridgeSettings } from "@/app/types/FractionalCommunication/BridgeStatement";
+import Image from "next/image";
 
 export default function BridgeStatement() {
   const [settings, setSettings] = useState<Partial<FractionalBridgeSettings>>({});
@@ -92,6 +93,16 @@ export default function BridgeStatement() {
                 That is what Fractional Comms is built for.
               </p>
             </div>
+
+            <div className="mt-8 w-full relative aspect-[16/9]">
+              <Image
+                src="/FractionalComms/1-3.png"
+                alt="Fractional communications bridge statement illustration"
+                fill
+                className=""
+                priority={false}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -128,7 +139,17 @@ export default function BridgeStatement() {
             <p className="text-xl md:text-2xl lg:text-3xl text-black font-medium leading-relaxed font-helvetica">
               That is what Fractional Comms is built for.
             </p>
-            <div className="w-16 h-px bg-black/15 mt-6" />
+            <div className="h-px bg-black/15 mt-6" />
+          </div>
+
+          <div className="mt-12 w-full relative aspect-[15/9]">
+            <Image
+              src="/FractionalComms/1-3.png"
+              alt="Fractional communications bridge statement illustration"
+              fill
+              className=""
+              priority={false}
+            />
           </div>
         </div>
       </div>

@@ -10,7 +10,7 @@ export default function TestimonialSlider() {
   const [testimonials, setTestimonials] = useState<TestimonialSlide[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Default testimonials with individual image paths
+  // Default testimonials with individual image paths - using public/Testimonials/
   const defaultTestimonials: (TestimonialSlide & { imagePath: string })[] = [
     {
       id: 1,
@@ -19,7 +19,7 @@ export default function TestimonialSlider() {
       role: "Culinary Director",
       company: "CCA Manila",
       display_order: 1,
-      imagePath: "/testimonial/1.png",
+      imagePath: "/Testimonials/5.png",
     },
     {
       id: 2,
@@ -28,7 +28,7 @@ export default function TestimonialSlider() {
       role: "CEO & Founder",
       company: "anana",
       display_order: 2,
-      imagePath: "/testimonial/2.png",
+      imagePath: "/Testimonials/6.png",
     },
     {
       id: 3,
@@ -37,7 +37,7 @@ export default function TestimonialSlider() {
       role: "Founder",
       company: "Access Travel, Explora Ahora & Happi Lab",
       display_order: 3,
-      imagePath: "/testimonial/3.png",
+      imagePath: "/Testimonials/2.png",
     },
     {
       id: 4,
@@ -46,7 +46,7 @@ export default function TestimonialSlider() {
       role: "Founder",
       company: "Jellytime, Sexytime Podcast & Celebrity",
       display_order: 4,
-      imagePath: "/testimonial/4.png",
+      imagePath: "/Testimonials/3.png",
     },
     {
       id: 5,
@@ -55,16 +55,7 @@ export default function TestimonialSlider() {
       role: "Founders",
       company: "Beauty Buddy",
       display_order: 5,
-      imagePath: "/testimonial/5.png",
-    },
-    {
-      id: 6,
-      quote: "Bea was invited to Bhutan in 2021 and 2022 to train nearly 100 young Bhutanese in storytelling and digital marketing through the Desuung Skilling Programme. Her practical approach included hands-on projects, such as helping a local green tea enterprise with product design and marketing in Trongsa District, ensuring tangible impact and contextualizing learning to the local environment.",
-      author: "Dasho Tashi Wangyal",
-      role: "",
-      company: "Bhutan Government",
-      display_order: 6,
-      imagePath: "/testimonial/6.png",
+      imagePath: "/Testimonials/7.png",
     },
     {
       id: 7,
@@ -73,16 +64,7 @@ export default function TestimonialSlider() {
       role: "Founder",
       company: "OmList",
       display_order: 7,
-      imagePath: "/testimonial/7.png",
-    },
-    {
-      id: 8,
-      quote: "Bea worked with us as a Newsletter Editor / Curator on our bestselling Substack, *Make Writing Your Job*. She was such an amazing addition to our team: always bringing her A-game and being awesome to work with. I highly recommend Bea for any writing, editing, or curating work you may have. She's a great team player and always open to feedback.",
-      author: "Amy Suto",
-      role: "Bestselling Author & Founder",
-      company: "",
-      display_order: 8,
-      imagePath: "/testimonial/8.png",
+      imagePath: "/Testimonials/4.png",
     },
   ];
 
@@ -106,7 +88,7 @@ export default function TestimonialSlider() {
       if (testimonialsData && testimonialsData.length > 0) {
         const testimonialsWithImages = testimonialsData.map(t => ({
           ...t,
-          imagePath: t.imagePath || `/testimonial/${t.id}.png`,
+          imagePath: t.imagePath || `/Testimonials/${t.id}.png`,
         }));
         setTestimonials(testimonialsWithImages);
       } else {
@@ -218,9 +200,9 @@ export default function TestimonialSlider() {
                 <div className="bg-white rounded-xl p-4 border border-gray-200 shadow-sm h-full flex flex-col transition-all duration-300 hover:shadow-md hover:scale-105 will-change-transform">
                   {/* Smaller Picture */}
                   <div className="flex justify-center mb-3">
-                    <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden ring-3 ring-gray-100">
+                    <div className="relative w-18 h-18 md:w-24 md:h-24 rounded-full overflow-hidden ring-3 ring-gray-100">
                       <Image
-                        src={testimonial.imagePath || `/testimonial/${testimonial.id}.png`}
+                        src={testimonial.imagePath || `/Testimonials/${testimonial.id}.png`}
                         alt={testimonial.author}
                         fill
                         className="object-cover"

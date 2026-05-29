@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
 import type { BridgeStatementSettings } from "@/app/types/StoryFoundation/BridgeStatement";
+import Image from "next/image";
 
 export default function BridgeStatement() {
   const [settings, setSettings] = useState<Partial<BridgeStatementSettings>>({});
@@ -93,6 +94,17 @@ export default function BridgeStatement() {
                 The Foundation is how you stop patching the brand and start operating from a single source of truth.
               </p>
             </div>
+
+            {/* Image Section - Mobile */}
+            <div className="mt-8 w-full relative aspect-[16/9]">
+              <Image
+                src="/StoryFoundation/1-1.png"
+                alt="Story Foundation bridge illustration showing brand transformation from audit to foundation"
+                fill
+                className=""
+                priority={false}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -133,6 +145,17 @@ export default function BridgeStatement() {
               The Foundation is how you stop patching the brand and start operating from a single source of truth.
             </p>
             <div className="w-16 h-px bg-black/15 mt-6" />
+          </div>
+
+          {/* Image Section - Desktop */}
+          <div className="mt-12 w-full relative aspect-[15/9]">
+            <Image
+              src="/StoryFoundation/1-1.png"
+              alt="Story Foundation bridge illustration showing brand transformation from scattered messaging to unified foundation"
+              fill
+              className=""
+              priority={false}
+            />
           </div>
         </div>
       </div>

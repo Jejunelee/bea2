@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
 import type { OutcomesSettings, Outcome } from "@/app/types/StoryAudit/Outcomes";
+import Image from "next/image";
 
 export default function Outcomes() {
   const [settings, setSettings] = useState<Partial<OutcomesSettings>>({});
@@ -208,6 +209,17 @@ export default function Outcomes() {
                 </p>
               </div>
             </div>
+
+            {/* Image Section - Mobile (like BridgeStatement) */}
+            <div className="mt-8 w-full relative aspect-[16/9]">
+              <Image
+                src="/StoryAudit/3-1.png"
+                alt="Story audit outcomes illustration showing brand transformation and clarity"
+                fill
+                className=""
+                priority={false}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -275,6 +287,17 @@ export default function Outcomes() {
                 {renderProcessNote(processNoteText)}
               </p>
             </div>
+          </div>
+
+          {/* Image Section - Desktop (like BridgeStatement) */}
+          <div className="mt-12 w-full relative aspect-[15/9]">
+            <Image
+              src="/StoryAudit/3-1.png"
+              alt="Story audit outcomes illustration showing brand transformation, clarity, and actionable roadmap"
+              fill
+              className=""
+              priority={false}
+            />
           </div>
         </div>
       </div>

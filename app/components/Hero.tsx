@@ -235,27 +235,29 @@ export default function Hero() {
           </span>
         </h1>
 
-        {/* Subheading - Increased size on mobile */}
-        <h2 className="font-medium mt-2 sm:mt-1 md:mt-1 text-xl sm:text-lg md:text-2xl lg:text-2xl xl:text-3xl leading-tight text-black">
-          {heroContent.subheading_text?.split('Sharper')[0]}
-          <span className="relative inline-block px-1 sm:px-2 text-black font-medium font-editorial italic">
-            
-            {hasStartedAnimation && showSharpestImage && (
-              <span className="absolute inset-0 -z-10 overflow-hidden">
-                <img
-                  src={sharpestImage}
-                  alt=""
-                  className="absolute inset-0 w-full h-full object-cover opacity-90 swipe-animation"
-                  style={{
-                    objectPosition: "center",
-                    clipPath: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)",
-                  }}
-                />
-              </span>
-            )}
-          </span>
-          {heroContent.subheading_text?.split('Sharper')[1]}
-        </h2>
+     {/* Subheading - Increased size on mobile, constrained width and centered */}
+<h2 className="font-medium mt-2 sm:mt-1 md:mt-1 text-xl sm:text-lg md:text-2xl lg:text-2xl xl:text-3xl leading-tight text-black">
+  <span className="block lg:max-w-xl xl:max-w-2xl mx-auto px-4 sm:px-6">
+    {heroContent.subheading_text?.split('Sharper')[0]}
+    <span className="relative inline-block px-1 sm:px-2 text-black font-medium font-editorial italic">
+      
+      {hasStartedAnimation && showSharpestImage && (
+        <span className="absolute inset-0 -z-10 overflow-hidden">
+          <img
+            src={sharpestImage}
+            alt=""
+            className="absolute inset-0 w-full h-full object-cover opacity-90 swipe-animation"
+            style={{
+              objectPosition: "center",
+              clipPath: "polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%)",
+            }}
+          />
+        </span>
+      )}
+    </span>
+    {heroContent.subheading_text?.split('Sharper')[1]}
+  </span>
+</h2>
 
         {/* Description text - Slightly increased on mobile */}
         <p className="font-helvetica mt-4 sm:mt-4 md:mt-6 text-sm sm:text-sm md:text-base text-black leading-relaxed max-w-2xl mx-auto px-2 sm:px-6">

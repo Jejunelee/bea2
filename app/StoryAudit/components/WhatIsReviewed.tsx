@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
 import type { WhatIsReviewedSettings, ReviewArea } from "@/app/types/StoryAudit/WhatIsReviewed";
+import Image from "next/image";
 
 export default function WhatIsReviewed() {
   const [settings, setSettings] = useState<Partial<WhatIsReviewedSettings>>({});
@@ -180,6 +181,35 @@ export default function WhatIsReviewed() {
                 </div>
               ))}
             </div>
+
+            {/* Image + Quote Section - Mobile (stacked, below the list) */}
+            <div className="mt-12">
+              {/* Image Container - using aspect-[16/9] like WhatIRun mobile */}
+              <div className="w-full relative aspect-[16/9] rounded-lg overflow-hidden shadow-lg mb-6">
+                <Image
+                  src="/StoryAudit/2.png"
+                  alt="Story audit review process illustration showing brand analysis"
+                  fill
+                  className="object-cover"
+                  style={{ objectPosition: '50% 30%' }}
+                  priority={false}
+                />
+              </div>
+              
+              {/* Quote Container */}
+              <div className="relative bg-black/5 rounded-lg p-6">
+                <svg className="w-6 h-6 text-[#e9c08f]/50 absolute top-4 left-4" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                </svg>
+                <p className="text-base italic text-black/80 leading-relaxed font-editorial px-4 py-8">
+                  Most brands don't have a story problem. They have a clarity problem. The audit shows you exactly where the story is breaking down.
+                </p>
+                <svg className="w-6 h-6 text-[#e9c08f]/50 absolute bottom-4 right-4 rotate-180" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+                </svg>
+                <div className="mt-2 w-12 h-px bg-[#e9c08f] mx-auto" />
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -216,7 +246,8 @@ export default function WhatIsReviewed() {
               : "opacity-0 translate-y-8"
           }`}
         >
-          <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
+          {/* Review Areas Grid */}
+          <div className="grid md:grid-cols-2 gap-8 lg:gap-12 mb-16">
             {displayAreas.map((area, idx) => (
               <div
                 key={area.id}
@@ -243,6 +274,34 @@ export default function WhatIsReviewed() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Image + Quote Section - Desktop (side-by-side grid layout like WhatIRun) */}
+          <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* Image Container - using aspect-[11/12] like WhatIRun desktop (portrait orientation) */}
+            <div className=" w-full relative aspect-[11/12] rounded-lg overflow-hidden shadow-lg order-1">
+              <Image
+                src="/StoryAudit/2.png"
+                alt="Story audit review process illustration showing brand analysis across different channels"
+                fill
+                className="object-cover"
+                priority={false}
+              />
+            </div>
+            
+            {/* Quote Container */}
+            <div className="relative bg-black/5 rounded-lg p-8 py-24 order-2">
+              <svg className="w-8 h-8 text-[#e9c08f]/50 absolute top-6 left-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+              </svg>
+              <p className="text-xl lg:text-3xl italic text-black/80 leading-relaxed font-editorial px-6 py-20">
+                Most brands don't have a story problem. They have a clarity problem. The audit shows you exactly where the story is breaking down.
+              </p>
+              <svg className="w-8 h-8 text-[#e9c08f]/50 absolute bottom-6 right-6 rotate-180" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+              </svg>
+              <div className="mt-4 w-12 h-px bg-[#e9c08f] mx-auto" />
+            </div>
           </div>
         </div>
       </div>

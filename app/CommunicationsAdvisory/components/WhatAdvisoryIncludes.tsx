@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
 import type { AdvisoryIncludesSettings, AdvisoryInclude } from "@/app/types/CommunicationsAdvisory/WhatAdvisoryIncludes";
+import Image from "next/image";
 
 export default function WhatAdvisoryIncludes() {
   const [settings, setSettings] = useState<Partial<AdvisoryIncludesSettings>>({});
@@ -104,6 +105,7 @@ export default function WhatAdvisoryIncludes() {
             <h2 className="text-xl font-medium text-black tracking-tight font-helvetica">What Advisory <span className="font-editorial italic">includes</span></h2>
             <div className="w-12 h-px bg-black/20 mx-auto mt-3" />
           </div>
+
           <div className={`transition-all duration-700 ease-out ${hasAnimated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
             <div className="space-y-6">
               {displayIncludes.map((item, idx) => (
@@ -123,6 +125,32 @@ export default function WhatAdvisoryIncludes() {
               ))}
             </div>
           </div>
+
+          {/* Image and quote section - mobile (stacked, below the list) */}
+          <div className="mt-10">
+            <div className="w-full relative aspect-[16/9] rounded-lg overflow-hidden shadow-lg mb-6">
+              <Image
+                src="/CommsAdvisory/2.png"
+                alt="Communications advisory services illustration"
+                fill
+                className="object-cover"
+                priority={false}
+              />
+            </div>
+            <div className="relative bg-black/5 rounded-lg p-6">
+              <svg className="w-6 h-6 text-[#e9c08f]/50 absolute top-4 left-4" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+              </svg>
+              <p className="text-base italic text-black/80 leading-relaxed font-editorial px-4 py-8">
+                A senior partner who has already built brands in this category — not someone learning your industry on your time.
+              </p>
+              <svg className="w-6 h-6 text-[#e9c08f]/50 absolute bottom-4 right-4 rotate-180" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+              </svg>
+              <div className="mt-2 w-12 h-px bg-[#e9c08f] mx-auto" />
+            </div>
+          </div>
+
           <div className="mt-8 pt-4 border-t border-black/10">
             <p className="text-sm text-black/50 leading-relaxed font-helvetica">
               If you need someone in the business running the work, I'd recommend <a href="/fractional" className="text-black underline font-medium">Fractional Comms →</a>
@@ -146,6 +174,7 @@ export default function WhatAdvisoryIncludes() {
           </h2>
           <div className="w-16 h-px bg-black/20 mx-auto mt-4" />
         </div>
+
         <div className={`transition-all duration-700 ease-out ${hasAnimated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <div className="grid md:grid-cols-2 gap-8 lg:gap-10">
             {displayIncludes.map((item, idx) => (
@@ -168,6 +197,32 @@ export default function WhatAdvisoryIncludes() {
               </div>
             ))}
           </div>
+
+          {/* Image left, quote right - desktop version (below the list) */}
+          <div className="mt-16 grid md:grid-cols-2 gap-8 lg:gap-12 items-center">
+            <div className="w-full relative aspect-[11/12] rounded-lg overflow-hidden shadow-lg">
+              <Image
+                src="/CommsAdvisory/2.png"
+                alt="Communications advisory services illustration"
+                fill
+                className="object-cover"
+                priority={false}
+              />
+            </div>
+            <div className="relative bg-black/5 rounded-lg p-8">
+              <svg className="w-8 h-8 text-[#e9c08f]/50 absolute top-6 left-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+              </svg>
+              <p className="text-xl lg:text-4xl italic text-black/80 leading-relaxed font-editorial px-6 py-28">
+                A senior partner who has already built brands in this category — not someone learning your industry on your time.
+              </p>
+              <svg className="w-8 h-8 text-[#e9c08f]/50 absolute bottom-6 right-6 rotate-180" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+              </svg>
+              <div className="mt-4 w-12 h-px bg-[#e9c08f] mx-auto" />
+            </div>
+          </div>
+
           <div className="mt-12 pt-8 border-t border-black/10 text-center">
             <p className="text-base md:text-lg text-black/50 leading-relaxed font-helvetica">
               If you need someone in the business running the work, I'd recommend <a href="/FractionalCommunication" className="text-black underline font-medium hover:no-underline transition-all">Fractional Comms →</a>

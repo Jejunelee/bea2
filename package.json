@@ -23,7 +23,8 @@
     "react-device-mockup": "^1.0.0",
     "react-dom": "19.2.4",
     "react-responsive-carousel": "^3.2.23",
-    "react-social-media-embed": "^2.5.18"
+    "react-social-media-embed": "^2.5.18",
+    "resend": "^6.12.4"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

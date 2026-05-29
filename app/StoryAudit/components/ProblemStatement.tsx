@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/app/lib/supabase/client";
 import type { ProblemStatementSettings } from "@/app/types/StoryAudit/ProblemStatement";
+import Image from "next/image";
 
 export default function ProblemStatement() {
   const [settings, setSettings] = useState<Partial<ProblemStatementSettings>>({});
@@ -135,6 +136,17 @@ export default function ProblemStatement() {
                 The audit is how you find out exactly where the story is breaking down, and what to do about it.
               </p>
             </div>
+
+            {/* Image Section - Mobile */}
+            <div className="mt-8 w-full relative aspect-[16/9]">
+              <Image
+                src="/StoryAudit/1-1.png"
+                alt="Problem statement illustration showing fragmented brand messaging"
+                fill
+                className=""
+                priority={false}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -211,6 +223,17 @@ export default function ProblemStatement() {
               </p>
               <div className="w-full h-px bg-black/15 mt-5" />
             </div>
+          </div>
+
+          {/* Image Section - Desktop */}
+          <div className="mt-12 w-full relative aspect-[15/9]">
+            <Image
+              src="/StoryAudit/1-1.png"
+              alt="Problem statement illustration showing fragmented brand messaging across different channels"
+              fill
+              className=""
+              priority={false}
+            />
           </div>
         </div>
       </div>
