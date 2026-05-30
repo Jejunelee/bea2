@@ -1,4 +1,3 @@
-// components/Header2.tsx
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
@@ -28,20 +27,11 @@ export default function Header2() {
     }
   };
 
-  // Handle newsletter scroll
+  // Handle newsletter click - opens Substack in new tab
   const handleNewsletterClick = () => {
-    if (isHomepage) {
-      // If on homepage, scroll to newsletter section
-      const newsletterSection = document.getElementById('newsletter-section');
-      if (newsletterSection) {
-        newsletterSection.scrollIntoView({ behavior: 'smooth' });
-      }
-      // Close mobile menu if open
-      setIsMenuOpen(false);
-    } else {
-      // If not on homepage, navigate to homepage with newsletter hash
-      window.location.href = "/#newsletter-section";
-    }
+    window.open('https://onyourplate.substack.com/', '_blank');
+    // Close mobile menu if open
+    setIsMenuOpen(false);
   };
 
   // Handle dropdown hover with delay
@@ -329,7 +319,7 @@ export default function Header2() {
                     </div>
                   </div>
 
-                  {/* Newsletter Link - Updated to scroll */}
+                  {/* Newsletter Link - Opens Substack */}
                   <button
                     onClick={handleNewsletterClick}
                     className={`${
@@ -469,7 +459,7 @@ export default function Header2() {
             </div>
           </div>
 
-          {/* Newsletter Link - Mobile - Updated to scroll */}
+          {/* Newsletter Link - Mobile - Opens Substack */}
           <button
             onClick={handleNewsletterClick}
             className={`${
