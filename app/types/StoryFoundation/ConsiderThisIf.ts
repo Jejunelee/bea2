@@ -1,17 +1,22 @@
-// /apps/types/StoryFoundation/ConsiderThisIf.ts
-
 export interface FoundationConsiderSettings {
-    id: number;
-    title?: string | null;
-    subtitle?: string | null;
-    created_at?: string;
-    updated_at?: string;
-  }
-  
-  export interface FoundationConsiderItem {
-    id: number;
-    text: string;
-    display_order: number;
-    created_at?: string;
-    updated_at?: string;
-  }
+  id: number;
+  section_title: string;
+  italic_word: string;
+  background_color: string;
+  text_color: string;
+  muted_text_color: string;
+  accent_color: string;
+  glow_intensity: number;
+  icon_color: string;
+  emphasis_words: string[];
+  created_at: string;
+  updated_at: string;
+}
+
+export interface FoundationConsiderItem {
+  id: number;
+  text: string;
+  display_order: number;
+  created_at: string;
+  updated_at: string;
+}

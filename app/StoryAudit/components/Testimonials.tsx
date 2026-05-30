@@ -12,18 +12,6 @@ export default function Testimonials() {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Default testimonials fallback
-  const defaultTestimonials: Testimonial[] = [
-    {
-      id: 1,
-      quote: "The audit gave me clarity I'd been missing for two years. Within weeks, we had a completely different response from press and partners.",
-      author: "Angely Dub",
-      role: "Founder",
-      company: "",
-      display_order: 1,
-    },
-  ];
-
   useEffect(() => {
     const fetchData = async () => {
       const { data: settingsData } = await supabase
@@ -41,8 +29,6 @@ export default function Testimonials() {
       
       if (testimonialsData && testimonialsData.length > 0) {
         setTestimonials(testimonialsData);
-      } else {
-        setTestimonials(defaultTestimonials);
       }
 
       setLoading(false);
@@ -88,43 +74,75 @@ export default function Testimonials() {
     };
   }, [hasAnimated, loading]);
 
+  // FIXED: Loading state with hardcoded color
   if (loading) {
-    return <div className="w-full py-16" style={{ backgroundColor: '#f5f3ef' }}></div>;
+    return (
+      <div 
+        className="w-full py-16 animate-pulse" 
+        style={{ backgroundColor: '#f5f3ef' }}
+      />
+    );
   }
 
-  const displayTestimonials = testimonials.length > 0 ? testimonials : defaultTestimonials;
+  const displayTestimonials = testimonials.length > 0 ? testimonials : [];
   const count = displayTestimonials.length;
 
-  // Determine grid layout based on number of testimonials
-  const getGridClass = () => {
-    if (count === 1) return "md:grid-cols-1 max-w-3xl mx-auto";
-    if (count === 2) return "md:grid-cols-2 max-w-4xl mx-auto";
-    return "md:grid-cols-3 max-w-6xl mx-auto";
+  // Dynamic styles
+  const gradientStart = settings.background_gradient_start || '#ffffff';
+  const gradientMiddle = settings.background_gradient_middle || '#f5f3ef';
+  const gradientEnd = settings.background_gradient_end || '#f5f3ef';
+  const backgroundGradient = `linear-gradient(to bottom, ${gradientStart} 0%, ${gradientMiddle} 30%, ${gradientEnd} 100%)`;
+  
+  const textColorStyle = {
+    color: settings.text_color || '#000000',
   };
+  
+  const mutedTextColorStyle = {
+    color: settings.muted_text_color || 'rgba(0, 0, 0, 0.7)',
+  };
+  
+  const authorTextColorStyle = {
+    color: settings.author_text_color || 'rgba(0, 0, 0, 0.4)',
+  };
+  
+  const accentColor = settings.accent_color || '#e9c08f';
+  const glowIntensity = (settings.glow_intensity || 30) / 100;
+  
+  // Get content from settings or use defaults
+  const sectionTitle = settings.section_title || "What clients say";
+  const italicWord = settings.italic_word || "clients";
+  const titleParts = sectionTitle.split(italicWord);
+  
+  const quoteEmphasisPhrases = settings.quote_emphasis_phrases || [
+    "clarity I'd been missing",
+    "completely different response"
+  ];
 
   // Helper to render quote with emphasis on key phrases
   const renderQuoteWithEmphasis = (quote: string) => {
-    const emphasisPhrases = [
-      "clarity I'd been missing",
-      "completely different response"
-    ];
+    if (!quoteEmphasisPhrases.length) return quote;
 
     let result = [];
     let lastIndex = 0;
+    let quoteLower = quote.toLowerCase();
+    const sortedPhrases = [...quoteEmphasisPhrases].sort((a, b) => b.length - a.length);
     
-    for (const phrase of emphasisPhrases) {
-      const index = quote.toLowerCase().indexOf(phrase.toLowerCase());
+    for (const phrase of sortedPhrases) {
+      const phraseLower = phrase.toLowerCase();
+      const index = quoteLower.indexOf(phraseLower);
+      
       if (index !== -1) {
         if (index > lastIndex) {
           result.push(quote.substring(lastIndex, index));
         }
         const foundPhrase = quote.substring(index, index + phrase.length);
         result.push(
-          <span key={index} className="font-editorial italic text-black">
+          <span key={index} className="font-editorial italic" style={textColorStyle}>
             {foundPhrase}
           </span>
         );
         lastIndex = index + phrase.length;
+        quoteLower = quoteLower.substring(lastIndex);
       }
     }
     
@@ -135,29 +153,64 @@ export default function Testimonials() {
     return result.length > 0 ? result : quote;
   };
 
+  // Determine grid layout based on number of testimonials
+  const getGridClass = () => {
+    if (count === 1) return "md:grid-cols-1 max-w-3xl mx-auto";
+    if (count === 2) return "md:grid-cols-2 max-w-4xl mx-auto";
+    return "md:grid-cols-3 max-w-6xl mx-auto";
+  };
+
+  if (displayTestimonials.length === 0) {
+    return (
+      <section
+        ref={sectionRef}
+        className="relative w-full py-16 px-4 overflow-hidden"
+        style={{ background: backgroundGradient }}
+      >
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
+          <p style={textColorStyle}>No testimonials available yet.</p>
+        </div>
+      </section>
+    );
+  }
+
   // ========== MOBILE LAYOUT ==========
   if (isMobile) {
     return (
       <section
         ref={sectionRef}
         className="relative w-full py-16 px-4 overflow-hidden"
-        style={{ 
-          background: `linear-gradient(to bottom, #ffffff 0%, #f5f3ef 30%, #f5f3ef 100%)`,
-        }}
+        style={{ background: backgroundGradient }}
       >
         {/* Warm glow blobs */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-0 w-64 h-64 bg-[#e9c08f]/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#e6ee9c]/20 rounded-full blur-3xl" />
+          <div 
+            className="absolute top-0 left-0 w-64 h-64 rounded-full blur-3xl"
+            style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 40).toString(16).padStart(2, '0')}` }}
+          />
+          <div 
+            className="absolute bottom-0 right-0 w-80 h-80 rounded-full blur-3xl"
+            style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 30).toString(16).padStart(2, '0')}` }}
+          />
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto">
           {/* Header */}
           <div className="mb-8 text-center">
-            <h2 className="text-xl font-medium text-black tracking-tight font-helvetica">
-              What <span className="font-editorial italic">clients</span> say
+            <h2 
+              className="text-xl font-medium tracking-tight font-helvetica"
+              style={textColorStyle}
+            >
+              {titleParts[0]}
+              <span className="font-editorial italic" style={textColorStyle}>
+                {italicWord}
+              </span>
+              {titleParts[1]}
             </h2>
-            <div className="w-12 h-px bg-black/20 mx-auto mt-3" />
+            <div 
+              className="w-12 h-px mx-auto mt-3"
+              style={{ backgroundColor: `${settings.text_color}20` }}
+            />
           </div>
 
           <div
@@ -179,12 +232,20 @@ export default function Testimonials() {
                   style={{ transitionDelay: `${idx * 100}ms` }}
                 >
                   <div className="text-center">
-                    <p className="text-xl text-black/70 leading-relaxed font-helvetica mb-4">
+                    <p 
+                      className="text-xl leading-relaxed font-helvetica mb-4"
+                      style={mutedTextColorStyle}
+                    >
                       {renderQuoteWithEmphasis(testimonial.quote)}
                     </p>
                     {testimonial.author && (
-                      <p className="text-base text-black/40 font-helvetica">
+                      <p 
+                        className="text-base font-helvetica"
+                        style={authorTextColorStyle}
+                      >
                         — {testimonial.author}
+                        {testimonial.role && `, ${testimonial.role}`}
+                        {testimonial.company && `, ${testimonial.company}`}
                       </p>
                     )}
                   </div>
@@ -202,24 +263,41 @@ export default function Testimonials() {
     <section
       ref={sectionRef}
       className="relative w-full py-28 px-6 overflow-hidden"
-      style={{ 
-        background: `linear-gradient(to bottom, #ffffff 0%, #f5f3ef 30%, #f5f3ef 100%)`,
-      }}
+      style={{ background: backgroundGradient }}
     >
       {/* Warm glow blobs */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-[10%] w-[300px] h-[300px] bg-[#e9c08f]/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-[10%] w-[400px] h-[400px] bg-[#e6ee9c]/20 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/40 rounded-full blur-3xl" />
+        <div 
+          className="absolute top-20 left-[10%] w-[300px] h-[300px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 40).toString(16).padStart(2, '0')}` }}
+        />
+        <div 
+          className="absolute bottom-20 right-[10%] w-[400px] h-[400px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 30).toString(16).padStart(2, '0')}` }}
+        />
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${settings.text_color}05` }}
+        />
       </div>
 
       <div className="relative z-10 mx-auto">
         {/* Header */}
         <div className="mb-12 text-center">
-          <h2 className="text-2xl md:text-3xl font-medium text-black tracking-tight font-helvetica">
-            What <span className="font-editorial italic">clients</span> say
+          <h2 
+            className="text-2xl md:text-3xl font-medium tracking-tight font-helvetica"
+            style={textColorStyle}
+          >
+            {titleParts[0]}
+            <span className="font-editorial italic" style={textColorStyle}>
+              {italicWord}
+            </span>
+            {titleParts[1]}
           </h2>
-          <div className="w-16 h-px bg-black/20 mx-auto mt-4" />
+          <div 
+            className="w-16 h-px mx-auto mt-4"
+            style={{ backgroundColor: `${settings.text_color}20` }}
+          />
         </div>
 
         <div
@@ -241,13 +319,21 @@ export default function Testimonials() {
                 style={{ transitionDelay: `${idx * 100}ms` }}
               >
                 <div className="text-center">
-                  <p className="text-2xl md:text-3xl text-black/70 leading-relaxed font-helvetica mb-5">
+                  <p 
+                    className="text-2xl md:text-3xl leading-relaxed font-helvetica mb-5"
+                    style={mutedTextColorStyle}
+                  >
                     {renderQuoteWithEmphasis(testimonial.quote)}
                   </p>
                   {testimonial.author && (
                     <div className="pt-4">
-                      <p className="text-base md:text-lg text-black/40 font-helvetica">
+                      <p 
+                        className="text-base md:text-lg font-helvetica"
+                        style={authorTextColorStyle}
+                      >
                         — {testimonial.author}
+                        {testimonial.role && `, ${testimonial.role}`}
+                        {testimonial.company && `, ${testimonial.company}`}
                       </p>
                     </div>
                   )}

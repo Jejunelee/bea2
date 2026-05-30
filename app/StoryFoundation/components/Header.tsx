@@ -1,4 +1,3 @@
-// app/foundation/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -36,14 +35,86 @@ export default function FoundationHero() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // UPDATED: Direct link to Google Calendar appointment page
   const createCalendarEvent = () => {
-    window.open("https://calendar.app.google/kZ2VsHYE7Nz9WFZ77", "_blank", "noopener,noreferrer");
+    const bookingUrl = settings.booking_url || "https://calendar.app.google/kZ2VsHYE7Nz9WFZ77";
+    window.open(bookingUrl, "_blank", "noopener,noreferrer");
   };
 
   if (loading) {
-    return <div className="relative w-full min-h-screen bg-white"></div>;
+    return (
+      <div 
+        className="relative w-full min-h-screen" 
+        style={{ backgroundColor: settings.background_color || '#ffffff' }}
+      />
+    );
   }
+
+  // Dynamic styles
+  const gradientColors = settings.background_gradient_colors || [
+    '#ffffff',
+    '#ffffff',
+    '#fdf4e3',
+    '#f0e0c4',
+    '#e8c8a0'
+  ];
+  
+  const backgroundGradient = `radial-gradient(circle at center, ${gradientColors.join(', ')})`;
+  
+  const textColorStyle = {
+    color: settings.text_color || '#000000',
+  };
+  
+  const descriptionColorStyle = {
+    color: settings.muted_text_color || 'rgba(0, 0, 0, 0.8)',
+  };
+  
+  const accentColor = settings.accent_color || '#e9c08f';
+  
+  const buttonStyle = {
+    backgroundColor: settings.button_background_color || '#000000',
+    color: settings.button_text_color || '#ffffff',
+  };
+  
+  // Get content from settings or use defaults
+  const headline = settings.headline || "4–6 week messaging rebuild with a story your team can actually use.";
+  const italicWords = settings.italic_words || ['4–6 week', 'actually use'];
+  const description = settings.description || "The Story Foundation starts with a full audit, rebuilds your messaging architecture from the ground up, and applies it across three priority assets your team can use immediately. Built for food-forward founders who have outgrown their original brand story and are ready to do the messaging work properly, once.";
+  const buttonText = settings.button_text || "Book a call";
+
+  // Helper to render headline with italic emphasis
+  const renderHeadline = () => {
+    if (!italicWords.length) return headline;
+
+    let result = [];
+    let lastIndex = 0;
+    let headlineLower = headline.toLowerCase();
+    const sortedWords = [...italicWords].sort((a, b) => b.length - a.length);
+    
+    for (const word of sortedWords) {
+      const wordLower = word.toLowerCase();
+      const index = headlineLower.indexOf(wordLower);
+      
+      if (index !== -1) {
+        if (index > lastIndex) {
+          result.push(headline.substring(lastIndex, index));
+        }
+        const foundWord = headline.substring(index, index + word.length);
+        result.push(
+          <span key={index} className="font-editorial italic" style={textColorStyle}>
+            {foundWord}
+          </span>
+        );
+        lastIndex = index + word.length;
+        headlineLower = headlineLower.substring(lastIndex);
+      }
+    }
+    
+    if (lastIndex < headline.length) {
+      result.push(headline.substring(lastIndex));
+    }
+    
+    return result.length > 0 ? result : headline;
+  };
 
   // ========== MOBILE LAYOUT ==========
   if (isMobile) {
@@ -53,40 +124,62 @@ export default function FoundationHero() {
         
         <div
           className="absolute inset-0"
-          style={{
-            background: `radial-gradient(circle at center, #ffffff 0%, #ffffff 25%, #fdf4e3 50%, #f0e0c4 75%, #e8c8a0 100%)`,
-          }}
+          style={{ background: backgroundGradient }}
         />
 
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-[20%] left-[10%] w-[200px] h-[200px] bg-[#f0d5a8]/40 blur-[100px] rounded-full" />
-          <div className="absolute bottom-[10%] right-[15%] w-[250px] h-[250px] bg-[#e8b88a]/40 blur-[100px] rounded-full" />
-          <div className="absolute top-[60%] left-[30%] w-[180px] h-[180px] bg-[#fdf4e3]/50 blur-[80px] rounded-full" />
+          <div 
+            className="absolute top-[20%] left-[10%] w-[200px] h-[200px] rounded-full blur-[100px]"
+            style={{ backgroundColor: `${accentColor}40` }}
+          />
+          <div 
+            className="absolute bottom-[10%] right-[15%] w-[250px] h-[250px] rounded-full blur-[100px]"
+            style={{ backgroundColor: `${accentColor}35` }}
+          />
+          <div 
+            className="absolute top-[60%] left-[30%] w-[180px] h-[180px] rounded-full blur-[80px]"
+            style={{ backgroundColor: `${accentColor}30` }}
+          />
         </div>
 
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div 
             className="w-[400px] h-[400px] blur-[100px] rounded-full"
-            style={{ backgroundColor: '#f0c090', opacity: 0.35 }}
+            style={{ 
+              backgroundColor: settings.glow_color || '#f0c090',
+              opacity: (settings.glow_intensity || 35) / 100
+            }}
           />
         </div>
         
         <div className="relative z-10 w-full px-4 text-center">
-          {/* Headline with font-editorial italic on key words */}
+          {/* Headline */}
           <h1 
-            className="opacity-0 animate-fade-in-up text-2xl md:text-3xl text-black leading-tight"
-            style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
+            className="opacity-0 animate-fade-in-up text-2xl md:text-3xl leading-tight font-medium"
+            style={{ 
+              ...textColorStyle,
+              animationDelay: "0.4s", 
+              animationFillMode: "forwards" 
+            }}
           >
-            <span className="font-editorial italic">4–6 week</span> messaging rebuild with a story your team can <span className="font-editorial italic">actually use</span>.
+            {renderHeadline()}
           </h1>
 
-          {/* Description */}
-          <p 
-            className="opacity-0 animate-fade-in-up text-base text-black leading-relaxed mt-6 px-2"
-            style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
+          {/* Description - FIXED: removed opacity, using separate color style */}
+          <div 
+            className="opacity-0 animate-fade-in-up mt-6 px-2"
+            style={{ 
+              animationDelay: "0.8s", 
+              animationFillMode: "forwards" 
+            }}
           >
-            The Story Foundation starts with a full audit, rebuilds your messaging architecture from the ground up, and applies it across three priority assets your team can use immediately. Built for food-forward founders who have outgrown their original brand story and are ready to do the messaging work properly, once.
-          </p>
+            <p 
+              className="text-base leading-relaxed"
+              style={descriptionColorStyle}
+            >
+              {description}
+            </p>
+          </div>
 
           <div 
             className="opacity-0 animate-fade-in-up mt-8"
@@ -94,10 +187,11 @@ export default function FoundationHero() {
           >
             <button
               onClick={createCalendarEvent}
-              className="group relative rounded-full bg-black text-white text-base font-medium px-6 py-2.5 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 overflow-hidden"
+              className="group relative rounded-full text-base font-medium px-6 py-2.5 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 overflow-hidden"
+              style={buttonStyle}
             >
               <span className="relative z-10 flex items-center gap-2">
-                Book a call
+                {buttonText}
                 <svg
                   className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
                   fill="none"
@@ -131,40 +225,62 @@ export default function FoundationHero() {
       
       <div
         className="absolute inset-0"
-        style={{
-          background: `radial-gradient(circle at center, #ffffff 0%, #ffffff 25%, #fdf4e3 50%, #f0e0c4 75%, #e8c8a0 100%)`,
-        }}
+        style={{ background: backgroundGradient }}
       />
 
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[15%] left-[5%] w-[300px] h-[300px] bg-[#f0d5a8]/35 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[10%] right-[10%] w-[350px] h-[350px] bg-[#e8b88a]/35 blur-[120px] rounded-full" />
-        <div className="absolute top-[50%] left-[70%] w-[250px] h-[250px] bg-[#fdf4e3]/40 blur-[100px] rounded-full" />
+        <div 
+          className="absolute top-[15%] left-[5%] w-[300px] h-[300px] rounded-full blur-[120px]"
+          style={{ backgroundColor: `${accentColor}35` }}
+        />
+        <div 
+          className="absolute bottom-[10%] right-[10%] w-[350px] h-[350px] rounded-full blur-[120px]"
+          style={{ backgroundColor: `${accentColor}35` }}
+        />
+        <div 
+          className="absolute top-[50%] left-[70%] w-[250px] h-[250px] rounded-full blur-[100px]"
+          style={{ backgroundColor: `${accentColor}30` }}
+        />
       </div>
 
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div 
           className="w-[700px] h-[700px] blur-[140px] rounded-full"
-          style={{ backgroundColor: '#f0c090', opacity: 0.3 }}
+          style={{ 
+            backgroundColor: settings.glow_color || '#f0c090',
+            opacity: (settings.glow_intensity || 30) / 100
+          }}
         />
       </div>
       
       <div className="relative z-10 w-full max-w-5xl px-6 text-center">
-        {/* Headline with font-editorial italic on key words */}
+        {/* Headline */}
         <h1 
-          className="opacity-0 animate-fade-in-up text-4xl md:text-5xl text-black leading-tight font-medium"
-          style={{ animationDelay: "0.4s", animationFillMode: "forwards" }}
+          className="opacity-0 animate-fade-in-up text-4xl md:text-5xl leading-tight font-medium"
+          style={{ 
+            ...textColorStyle,
+            animationDelay: "0.4s", 
+            animationFillMode: "forwards" 
+          }}
         >
-          <span className="font-editorial italic">4–6 week</span> messaging rebuild with a story your team can <span className="font-editorial italic">actually use</span>.
+          {renderHeadline()}
         </h1>
 
-        {/* Description */}
-        <p 
-          className="opacity-0 animate-fade-in-up text-base md:text-lg text-black leading-relaxed mt-8"
-          style={{ animationDelay: "0.8s", animationFillMode: "forwards" }}
+        {/* Description - FIXED: removed opacity, using separate color style */}
+        <div 
+          className="opacity-0 animate-fade-in-up mt-8"
+          style={{ 
+            animationDelay: "0.8s", 
+            animationFillMode: "forwards" 
+          }}
         >
-          The Story Foundation starts with a full audit, rebuilds your messaging architecture from the ground up, and applies it across three priority assets your team can use immediately. Built for food-forward founders who have outgrown their original brand story and are ready to do the messaging work properly, once.
-        </p>
+          <p 
+            className="text-base md:text-lg leading-relaxed"
+            style={descriptionColorStyle}
+          >
+            {description}
+          </p>
+        </div>
 
         <div 
           className="opacity-0 animate-fade-in-up mt-10"
@@ -172,10 +288,11 @@ export default function FoundationHero() {
         >
           <button
             onClick={createCalendarEvent}
-            className="group relative rounded-full bg-black text-white text-base md:text-lg font-medium px-8 py-3 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 overflow-hidden"
+            className="group relative rounded-full text-base md:text-lg font-medium px-8 py-3 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 overflow-hidden"
+            style={buttonStyle}
           >
             <span className="relative z-10 flex items-center gap-2">
-              Book a call
+              {buttonText}
               <svg
                 className="w-4 h-4 md:w-5 md:h-5 transition-transform duration-300 group-hover:translate-x-1"
                 fill="none"

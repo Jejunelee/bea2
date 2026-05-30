@@ -65,8 +65,113 @@ export default function ProblemStatement() {
   }, [hasAnimated, loading]);
 
   if (loading) {
-    return <div className="w-full py-16" style={{ backgroundColor: '#f5f3ef' }}></div>;
+    return (
+      <div 
+        className="w-full py-16 animate-pulse" 
+        style={{ backgroundColor: settings.background_color || '#f5f3ef' }}
+      />
+    );
   }
+
+  // Dynamic styles
+  const sectionStyle = {
+    backgroundColor: settings.background_color || '#f5f3ef',
+  };
+  
+  const textColorStyle = {
+    color: settings.text_color || '#000000',
+  };
+  
+  const mutedTextColorStyle = {
+    color: settings.muted_text_color || 'rgba(0, 0, 0, 0.7)',
+  };
+  
+  const lightMutedTextColorStyle = {
+    color: settings.muted_text_color || 'rgba(0, 0, 0, 0.35)',
+  };
+  
+  const accentColor = settings.accent_color || '#e9c08f';
+  const glowIntensity = (settings.glow_intensity || 30) / 100;
+  
+  // Get content from settings or use defaults
+  const sectionTitle = settings.section_title || "The real problem";
+  const italicWord = settings.italic_word || "real";
+  const titleParts = sectionTitle.split(italicWord);
+  
+  const openingStatement = settings.opening_statement || "Most early-stage food brands aren't underperforming because of a bad product. They are underperforming because their messaging grew piece by piece, on different days, in different moods, with no underlying story holding it together.";
+  const openingEmphasisPhrase = settings.opening_emphasis_phrase || "no underlying story holding it together";
+  
+  const fragmentedItems = settings.fragmented_items || [
+    "A website written two years ago.",
+    "Captions written last week.",
+    "A pitch deck written for one specific investor.",
+    "A press kit nobody has opened since launch."
+  ];
+  
+  const consequenceStatement = settings.consequence_statement || "That is expensive. It costs you press hits. It costs you partnership conversations. It costs you customers who would have stayed if the brand had been clearer.";
+  const consequenceEmphasisWords = settings.consequence_emphasis_words || ["expensive", "would have stayed"];
+  
+  const resolutionStatement = settings.resolution_statement || "The audit is how you find out exactly where the story is breaking down, and what to do about it.";
+  
+  const imageUrl = settings.image_url || "/StoryAudit/1-1.png";
+
+  // Helper to render text with emphasis
+  const renderWithEmphasis = (text: string, emphasisWords: string[]) => {
+    if (!emphasisWords.length) return text;
+
+    let result = [];
+    let lastIndex = 0;
+    let textLower = text.toLowerCase();
+    const sortedWords = [...emphasisWords].sort((a, b) => b.length - a.length);
+    
+    for (const word of sortedWords) {
+      const wordLower = word.toLowerCase();
+      const index = textLower.indexOf(wordLower);
+      
+      if (index !== -1) {
+        if (index > lastIndex) {
+          result.push(text.substring(lastIndex, index));
+        }
+        const foundWord = text.substring(index, index + word.length);
+        result.push(
+          <span key={index} className="font-editorial italic" style={textColorStyle}>
+            {foundWord}
+          </span>
+        );
+        lastIndex = index + word.length;
+        textLower = textLower.substring(lastIndex);
+      }
+    }
+    
+    if (lastIndex < text.length) {
+      result.push(text.substring(lastIndex));
+    }
+    
+    return result.length > 0 ? result : text;
+  };
+
+  // Render opening statement with emphasis
+  const renderOpeningStatement = () => {
+    if (!openingEmphasisPhrase) return openingStatement;
+    
+    const index = openingStatement.toLowerCase().indexOf(openingEmphasisPhrase.toLowerCase());
+    if (index === -1) return openingStatement;
+    
+    return (
+      <>
+        {openingStatement.substring(0, index)}
+        <span className="font-editorial italic" style={textColorStyle}>
+          {openingStatement.substring(index, index + openingEmphasisPhrase.length)}
+        </span>
+        {openingStatement.substring(index + openingEmphasisPhrase.length)}
+      </>
+    );
+  };
+
+  // Render consequence statement with emphasis
+  const renderConsequenceStatement = () => {
+    return renderWithEmphasis(consequenceStatement, consequenceEmphasisWords);
+  };
 
   // ========== MOBILE LAYOUT ==========
   if (isMobile) {
@@ -74,7 +179,7 @@ export default function ProblemStatement() {
       <section
         ref={sectionRef}
         className="relative w-full py-16 px-4 overflow-hidden"
-        style={{ backgroundColor: '#f5f3ef' }}
+        style={sectionStyle}
       >
         {/* Subtle pattern overlay */}
         <div className="absolute inset-0 opacity-5 pointer-events-none">
@@ -87,17 +192,33 @@ export default function ProblemStatement() {
 
         {/* Warm glow blobs */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#e9c08f]/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#e6ee9c]/20 rounded-full blur-3xl" />
+          <div 
+            className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl"
+            style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 40).toString(16).padStart(2, '0')}` }}
+          />
+          <div 
+            className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl"
+            style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 30).toString(16).padStart(2, '0')}` }}
+          />
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto">
-          {/* Header with editorial italic - matching original design */}
+          {/* Header */}
           <div className="mb-8 text-center">
-            <h2 className="text-xl font-medium text-black tracking-tight font-helvetica">
-              The <span className="font-editorial italic">real</span> problem
+            <h2 
+              className="text-xl font-medium tracking-tight font-helvetica"
+              style={textColorStyle}
+            >
+              {titleParts[0]}
+              <span className="font-editorial italic" style={textColorStyle}>
+                {italicWord}
+              </span>
+              {titleParts[1]}
             </h2>
-            <div className="w-12 h-px bg-black/20 mx-auto mt-3" />
+            <div 
+              className="w-12 h-px mx-auto mt-3"
+              style={{ backgroundColor: `${settings.text_color}20` }}
+            />
           </div>
 
           <div
@@ -109,41 +230,70 @@ export default function ProblemStatement() {
           >
             {/* Opening statement */}
             <div className="relative">
-              <span className="absolute -top-4 -left-2 text-5xl text-black/10 font-editorial">"</span>
-              <p className="text-base text-black/80 leading-relaxed font-helvetica relative z-10">
-                Most early-stage food brands aren't underperforming because of a bad product. They are underperforming because their messaging grew piece by piece, on different days, in different moods, with <span className="font-editorial italic text-black">no underlying story holding it together.</span>
+              <span 
+                className="absolute -top-4 -left-2 text-5xl font-editorial"
+                style={{ color: `${settings.text_color}10` }}
+              >
+                "
+              </span>
+              <p 
+                className="text-base leading-relaxed font-helvetica relative z-10"
+                style={mutedTextColorStyle}
+              >
+                {renderOpeningStatement()}
               </p>
             </div>
 
             {/* Fragmented list */}
-            <div className="my-8 space-y-2 pl-3 border-l-2 border-black/15">
-              <p className="text-sm text-black/40 font-helvetica">A website written two years ago.</p>
-              <p className="text-sm text-black/40 font-helvetica">Captions written last week.</p>
-              <p className="text-sm text-black/40 font-helvetica">A pitch deck written for one specific investor.</p>
-              <p className="text-sm text-black/40 font-helvetica">A press kit nobody has opened since launch.</p>
+            <div 
+              className="my-8 space-y-2 pl-3 border-l-2"
+              style={{ borderColor: `${settings.text_color}15` }}
+            >
+              {fragmentedItems.map((item, idx) => (
+                <p 
+                  key={idx}
+                  className="text-sm font-helvetica"
+                  style={lightMutedTextColorStyle}
+                >
+                  {item}
+                </p>
+              ))}
             </div>
 
             {/* Consequence statement */}
-            <div className="bg-white/60 backdrop-blur-sm rounded-xl p-5 my-6 border border-black/5 shadow-sm">
-              <p className="text-base text-black/80 leading-relaxed font-helvetica">
-                That is <span className="font-editorial italic text-black font-medium">expensive.</span> It costs you press hits. It costs you partnership conversations. It costs you customers who <span className="font-editorial italic text-black">would have stayed</span> if the brand had been clearer.
+            <div 
+              className="rounded-xl p-5 my-6 border shadow-sm"
+              style={{ 
+                backgroundColor: `${settings.card_background_color || '#ffffff'}60`,
+                borderColor: `${settings.text_color}05`,
+                backdropFilter: 'blur(8px)'
+              }}
+            >
+              <p 
+                className="text-base leading-relaxed font-helvetica"
+                style={mutedTextColorStyle}
+              >
+                {renderConsequenceStatement()}
               </p>
             </div>
 
             {/* Resolution statement */}
             <div className="mt-8 pt-4">
-              <p className="text-base text-black font-medium leading-relaxed font-helvetica">
-                The audit is how you find out exactly where the story is breaking down, and what to do about it.
+              <p 
+                className="text-base font-medium leading-relaxed font-helvetica"
+                style={textColorStyle}
+              >
+                {resolutionStatement}
               </p>
             </div>
 
-            {/* Image Section - Mobile */}
+            {/* Image Section */}
             <div className="mt-8 w-full relative aspect-[16/9]">
               <Image
-                src="/StoryAudit/1-1.png"
+                src={imageUrl}
                 alt="Problem statement illustration showing fragmented brand messaging"
                 fill
-                className=""
+                className="object-cover rounded-lg"
                 priority={false}
               />
             </div>
@@ -158,7 +308,7 @@ export default function ProblemStatement() {
     <section
       ref={sectionRef}
       className="relative w-full py-28 px-6 overflow-hidden"
-      style={{ backgroundColor: '#f5f3ef' }}
+      style={sectionStyle}
     >
       {/* Subtle pattern overlay */}
       <div className="absolute inset-0 opacity-5 pointer-events-none">
@@ -171,18 +321,37 @@ export default function ProblemStatement() {
 
       {/* Warm glow blobs */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 right-[10%] w-[400px] h-[400px] bg-[#e9c08f]/15 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-[5%] w-[500px] h-[500px] bg-[#e6ee9c]/15 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-white/30 rounded-full blur-3xl" />
+        <div 
+          className="absolute top-20 right-[10%] w-[400px] h-[400px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 40).toString(16).padStart(2, '0')}` }}
+        />
+        <div 
+          className="absolute bottom-20 left-[5%] w-[500px] h-[500px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 30).toString(16).padStart(2, '0')}` }}
+        />
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${settings.text_color}05` }}
+        />
       </div>
 
       <div className="relative z-10 max-w-3xl mx-auto">
-        {/* Header with editorial italic - matching original design pattern */}
+        {/* Header */}
         <div className="mb-10 text-center">
-          <h2 className="text-2xl md:text-3xl font-medium text-black tracking-tight font-helvetica">
-            The <span className="font-editorial italic">real</span> problem
+          <h2 
+            className="text-2xl md:text-3xl font-medium tracking-tight font-helvetica"
+            style={textColorStyle}
+          >
+            {titleParts[0]}
+            <span className="font-editorial italic" style={textColorStyle}>
+              {italicWord}
+            </span>
+            {titleParts[1]}
           </h2>
-          <div className="w-16 h-px bg-black/20 mx-auto mt-4" />
+          <div 
+            className="w-16 h-px mx-auto mt-4"
+            style={{ backgroundColor: `${settings.text_color}20` }}
+          />
         </div>
 
         <div
@@ -194,44 +363,76 @@ export default function ProblemStatement() {
         >
           {/* Opening paragraph with decorative quote */}
           <div className="relative">
-            <span className="absolute -top-10 -left-8 text-8xl text-black/8 font-editorial select-none">"</span>
-            <p className="text-xl md:text-2xl text-black/70 leading-relaxed font-helvetica relative z-10">
-              Most early-stage food brands aren't underperforming because of a bad product. They are underperforming because their messaging grew piece by piece, on different days, in different moods, with <span className="font-editorial italic text-black">no underlying story holding it together.</span>
+            <span 
+              className="absolute -top-10 -left-8 text-8xl font-editorial select-none"
+              style={{ color: `${settings.text_color}08` }}
+            >
+              "
+            </span>
+            <p 
+              className="text-xl md:text-2xl leading-relaxed font-helvetica relative z-10"
+              style={mutedTextColorStyle}
+            >
+              {renderOpeningStatement()}
             </p>
           </div>
 
           {/* Fragmented list */}
-          <div className="my-12 space-y-3 pl-8 border-l-2 border-black/15">
-            <p className="text-base md:text-lg text-black/35 font-helvetica">A website written two years ago.</p>
-            <p className="text-base md:text-lg text-black/35 font-helvetica">Captions written last week.</p>
-            <p className="text-base md:text-lg text-black/35 font-helvetica">A pitch deck written for one specific investor.</p>
-            <p className="text-base md:text-lg text-black/35 font-helvetica">A press kit nobody has opened since launch.</p>
+          <div 
+            className="my-12 space-y-3 pl-8 border-l-2"
+            style={{ borderColor: `${settings.text_color}15` }}
+          >
+            {fragmentedItems.map((item, idx) => (
+              <p 
+                key={idx}
+                className="text-base md:text-lg font-helvetica"
+                style={lightMutedTextColorStyle}
+              >
+                {item}
+              </p>
+            ))}
           </div>
 
           {/* Consequence statement */}
-          <div className="bg-white/50 backdrop-blur-sm rounded-2xl p-8 my-10 border border-white/20 shadow-sm">
-            <p className="text-xl md:text-2xl text-black/70 leading-relaxed font-helvetica">
-              That is <span className="font-editorial italic text-black font-medium">expensive.</span> It costs you press hits. It costs you partnership conversations. It costs you customers who <span className="font-editorial italic text-black">would have stayed</span> if the brand had been clearer.
+          <div 
+            className="rounded-2xl p-8 my-10 border shadow-sm"
+            style={{ 
+              backgroundColor: `${settings.card_background_color || '#ffffff'}50`,
+              borderColor: `${settings.text_color}05`,
+              backdropFilter: 'blur(8px)'
+            }}
+          >
+            <p 
+              className="text-xl md:text-2xl leading-relaxed font-helvetica"
+              style={mutedTextColorStyle}
+            >
+              {renderConsequenceStatement()}
             </p>
           </div>
 
           {/* Resolution statement */}
           <div className="mt-12 pt-6 text-center">
             <div className="inline-block">
-              <p className="text-xl md:text-2xl text-black font-medium leading-relaxed font-helvetica">
-                The audit is how you find out exactly where the story is breaking down, and what to do about it.
+              <p 
+                className="text-xl md:text-2xl font-medium leading-relaxed font-helvetica"
+                style={textColorStyle}
+              >
+                {resolutionStatement}
               </p>
-              <div className="w-full h-px bg-black/15 mt-5" />
+              <div 
+                className="w-full h-px mt-5"
+                style={{ backgroundColor: `${settings.text_color}15` }}
+              />
             </div>
           </div>
 
-          {/* Image Section - Desktop */}
+          {/* Image Section */}
           <div className="mt-12 w-full relative aspect-[15/9]">
             <Image
-              src="/StoryAudit/1-1.png"
+              src={imageUrl}
               alt="Problem statement illustration showing fragmented brand messaging across different channels"
               fill
-              className=""
+              className="object-cover rounded-lg"
               priority={false}
             />
           </div>

@@ -12,77 +12,50 @@ export default function ConsiderThisIf() {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Default items fallback with emphasis markers
-  const defaultItems: ConsiderThisIfItem[] = [
-    {
-      id: 1,
-      text: "You wrote your website two years ago and the business has changed since.",
-      display_order: 1,
-    },
-    {
-      id: 2,
-      text: "You have never had a documented brand story or messaging guide, just instinct and the founder's voice.",
-      display_order: 2,
-    },
-    {
-      id: 3,
-      text: "You are about to fundraise, expand markets, or launch something new and your messaging needs to be airtight before you walk in.",
-      display_order: 3,
-    },
-    {
-      id: 4,
-      text: "You have worked with agencies or freelancers, and the work never quite sounds like one brand.",
-      display_order: 4,
-    },
-    {
-      id: 5,
-      text: "You know something is off, but you cannot tell whether the problem is the story, the channels, or the execution.",
-      display_order: 5,
-    },
-  ];
+  // FIXED: Helper function to render text with italic emphasis on specific words
+  const renderTextWithEmphasis = (text: string, emphasisWords: string[] = []) => {
+    if (!emphasisWords.length || !text) {
+      return text;
+    }
 
-  // Helper function to render text with italic emphasis on key words
-  const renderTextWithEmphasis = (text: string) => {
-    const emphasisWords = [
-      "changed",
-      "never had",
-      "fundraise",
-      "airtight",
-      "never quite sounds",
-      "off",
-    ];
-
-    let result = [];
-    let lastIndex = 0;
+    // Sort words by length (longest first) to match phrases before single words
+    const sortedWords = [...emphasisWords].sort((a, b) => b.length - a.length);
     
-    for (const word of emphasisWords) {
-      const index = text.toLowerCase().indexOf(word.toLowerCase());
-      if (index !== -1) {
-        // Add text before the emphasis word
-        if (index > lastIndex) {
-          result.push(text.substring(lastIndex, index));
-        }
-        // Add the emphasized word
-        const foundWord = text.substring(index, index + word.length);
-        result.push(
-          <span key={index} className="font-editorial italic text-white">
-            {foundWord}
+    // Create regex pattern with escaped special characters
+    const pattern = sortedWords.map(word => word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|');
+    const regex = new RegExp(`(${pattern})`, 'gi');
+    
+    // Split the text, keeping the delimiters (matched words)
+    const parts = text.split(regex);
+    
+    // Render parts, wrapping matched words in italic spans
+    return parts.map((part, index) => {
+      if (!part) return null;
+      
+      // Check if this part matches any emphasis word (case-insensitive)
+      const isEmphasis = sortedWords.some(
+        word => word.toLowerCase() === part.toLowerCase()
+      );
+      
+      if (isEmphasis) {
+        return (
+          <span 
+            key={index} 
+            className="font-editorial italic" 
+            style={{ color: settings.text_color || '#ffffff' }}
+          >
+            {part}
           </span>
         );
-        lastIndex = index + word.length;
       }
-    }
-    
-    // Add remaining text
-    if (lastIndex < text.length) {
-      result.push(text.substring(lastIndex));
-    }
-    
-    return result;
+      
+      return <span key={index}>{part}</span>;
+    });
   };
 
   useEffect(() => {
     const fetchData = async () => {
+      // Fetch settings
       const { data: settingsData } = await supabase
         .from('audit_consider_settings')
         .select('*')
@@ -91,6 +64,7 @@ export default function ConsiderThisIf() {
       
       if (settingsData) setSettings(settingsData);
 
+      // Fetch items
       const { data: itemsData } = await supabase
         .from('audit_consider_items')
         .select('*')
@@ -98,8 +72,6 @@ export default function ConsiderThisIf() {
       
       if (itemsData && itemsData.length > 0) {
         setItems(itemsData);
-      } else {
-        setItems(defaultItems);
       }
 
       setLoading(false);
@@ -146,11 +118,48 @@ export default function ConsiderThisIf() {
   }, [hasAnimated, loading]);
 
   if (loading) {
-    return <div className="w-full py-16" style={{ backgroundColor: '#000000' }}></div>;
+    return (
+      <div 
+        className="w-full py-16 animate-pulse" 
+        style={{ backgroundColor: settings.background_color || '#000000' }}
+      />
+    );
   }
 
-  const displayItems = items.length > 0 ? items : defaultItems;
+  const displayItems = items.length > 0 ? items : [];
   const sectionTitle = settings.section_title || "You should consider this if";
+  const italicWord = settings.italic_word || "if";
+  const titleParts = sectionTitle.split(italicWord);
+  
+  // Dynamic styles
+  const sectionStyle = {
+    backgroundColor: settings.background_color || '#000000',
+  };
+  
+  const textColorStyle = {
+    color: settings.text_color || '#ffffff',
+  };
+  
+  const mutedTextColorStyle = {
+    color: settings.muted_text_color || 'rgba(255, 255, 255, 0.7)',
+  };
+  
+  const accentColor = settings.accent_color || '#e9c08f';
+  const glowIntensity = (settings.glow_intensity || 30) / 100;
+
+  if (displayItems.length === 0) {
+    return (
+      <section
+        ref={sectionRef}
+        className="relative w-full py-16 px-4 overflow-hidden"
+        style={sectionStyle}
+      >
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
+          <p style={textColorStyle}>No content available yet.</p>
+        </div>
+      </section>
+    );
+  }
 
   // ========== MOBILE LAYOUT ==========
   if (isMobile) {
@@ -158,19 +167,36 @@ export default function ConsiderThisIf() {
       <section
         ref={sectionRef}
         className="relative w-full py-16 px-4 overflow-hidden"
-        style={{ backgroundColor: '#000000' }}
+        style={sectionStyle}
       >
+        {/* Glow effects */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-0 w-64 h-64 bg-[#e9c08f]/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#e6ee9c]/10 rounded-full blur-3xl" />
+          <div 
+            className="absolute top-0 left-0 w-64 h-64 rounded-full blur-3xl"
+            style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 100).toString(16).padStart(2, '0')}` }}
+          />
+          <div 
+            className="absolute bottom-0 right-0 w-80 h-80 rounded-full blur-3xl"
+            style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 50).toString(16).padStart(2, '0')}` }}
+          />
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto">
           <div className="mb-8 text-center">
-            <h2 className="text-xl font-medium text-white tracking-tight font-helvetica">
-              You should consider this <span className="font-editorial italic">if</span>
+            <h2 
+              className="text-xl font-medium tracking-tight font-helvetica"
+              style={textColorStyle}
+            >
+              {titleParts[0]}
+              <span className="font-editorial italic" style={textColorStyle}>
+                {italicWord}
+              </span>
+              {titleParts[1]}
             </h2>
-            <div className="w-12 h-px bg-white/20 mx-auto mt-3" />
+            <div 
+              className="w-12 h-px mx-auto mt-3"
+              style={{ backgroundColor: `${settings.text_color}20` }}
+            />
           </div>
 
           <div
@@ -191,9 +217,17 @@ export default function ConsiderThisIf() {
                   }`}
                   style={{ transitionDelay: `${idx * 75}ms` }}
                 >
-                  <span className="text-white/40 text-base mt-0.5">✦</span>
-                  <p className="text-base text-white/70 leading-relaxed font-helvetica">
-                    {renderTextWithEmphasis(item.text)}
+                  <span 
+                    className="text-base mt-0.5"
+                    style={{ color: `${settings.muted_text_color}40` }}
+                  >
+                    ✦
+                  </span>
+                  <p 
+                    className="text-base leading-relaxed font-helvetica"
+                    style={mutedTextColorStyle}
+                  >
+                    {renderTextWithEmphasis(item.text, item.emphasis_words)}
                   </p>
                 </div>
               ))}
@@ -209,19 +243,36 @@ export default function ConsiderThisIf() {
     <section
       ref={sectionRef}
       className="relative w-full py-28 px-6 overflow-hidden"
-      style={{ backgroundColor: '#000000' }}
+      style={sectionStyle}
     >
+      {/* Glow effects */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-[5%] w-[300px] h-[300px] bg-[#e9c08f]/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-[10%] w-[400px] h-[400px] bg-[#e6ee9c]/10 rounded-full blur-3xl" />
+        <div 
+          className="absolute top-20 left-[5%] w-[300px] h-[300px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 100).toString(16).padStart(2, '0')}` }}
+        />
+        <div 
+          className="absolute bottom-20 right-[10%] w-[400px] h-[400px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 50).toString(16).padStart(2, '0')}` }}
+        />
       </div>
 
       <div className="relative z-10 max-w-3xl mx-auto">
         <div className="mb-10 text-center">
-          <h2 className="text-2xl md:text-3xl font-medium text-white tracking-tight font-helvetica">
-            You should consider this <span className="font-editorial italic">if</span>
+          <h2 
+            className="text-2xl md:text-3xl font-medium tracking-tight font-helvetica"
+            style={textColorStyle}
+          >
+            {titleParts[0]}
+            <span className="font-editorial italic" style={textColorStyle}>
+              {italicWord}
+            </span>
+            {titleParts[1]}
           </h2>
-          <div className="w-16 h-px bg-white/20 mx-auto mt-4" />
+          <div 
+            className="w-16 h-px mx-auto mt-4"
+            style={{ backgroundColor: `${settings.text_color}20` }}
+          />
         </div>
 
         <div
@@ -242,9 +293,17 @@ export default function ConsiderThisIf() {
                 }`}
                 style={{ transitionDelay: `${idx * 75}ms` }}
               >
-                <span className="text-white/30 text-xl mt-0.5">✦</span>
-                <p className="text-lg md:text-xl text-white/70 leading-relaxed font-helvetica">
-                  {renderTextWithEmphasis(item.text)}
+                <span 
+                  className="text-xl mt-0.5"
+                  style={{ color: `${settings.muted_text_color}40` }}
+                >
+                  ✦
+                </span>
+                <p 
+                  className="text-lg md:text-xl leading-relaxed font-helvetica"
+                  style={mutedTextColorStyle}
+                >
+                  {renderTextWithEmphasis(item.text, item.emphasis_words)}
                 </p>
               </div>
             ))}

@@ -1,4 +1,3 @@
-// app/components/foundation/FAQ.tsx
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -14,23 +13,21 @@ export default function FAQ() {
   const [isMobile, setIsMobile] = useState(false);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  const defaultFaqs: FoundationFAQItem[] = [
-    { id: 1, question: "How long does it take?", answer: "Four to six weeks, depending on scope and how quickly you can turn around feedback.", display_order: 1 },
-    { id: 2, question: "Which three assets should I pick?", answer: "Pick the three that are doing the most work in your business right now. For most founders that is some combination of website copy, pitch deck, press kit, About page, founder bio, sales one-pager, or launch communications plan. We talk through the choice on the kickoff call.", display_order: 2 },
-    { id: 3, question: "Do I need to send you anything in advance?", answer: "A short questionnaire and a shared folder for your existing assets. I send both once the contract is signed.", display_order: 3 },
-    { id: 4, question: "Can I add more assets after the three?", answer: "Yes. Additional assets are scoped and quoted separately, and they are usually faster to write because the messaging architecture has already been built.", display_order: 4 },
-    { id: 5, question: "Can I roll this into Comms Advisory afterwards?", answer: "Yes. A lot of Foundation clients move into Advisory once the messaging is built, because the new system needs ongoing maintenance and content extension. We can talk about that as the engagement wraps.", display_order: 5 },
-    { id: 6, question: "What if I am not based in the UK or Manila?", answer: "Most engagements run remotely.", display_order: 6 },
-    { id: 7, question: "What is the investment?", answer: "Pricing is shared on enquiry, scoped to your business and the assets we rebuild together.", display_order: 7 },
-  ];
-
   useEffect(() => {
     const fetchData = async () => {
-      const { data: settingsData } = await supabase.from('foundation_faq_settings').select('*').eq('id', 1).single();
+      const { data: settingsData } = await supabase
+        .from('foundation_faq_settings')
+        .select('*')
+        .eq('id', 1)
+        .single();
       if (settingsData) setSettings(settingsData);
-      const { data: faqsData } = await supabase.from('foundation_faq_items').select('*').order('display_order', { ascending: true });
+      
+      const { data: faqsData } = await supabase
+        .from('foundation_faq_items')
+        .select('*')
+        .order('display_order', { ascending: true });
       if (faqsData && faqsData.length > 0) setFaqs(faqsData);
-      else setFaqs(defaultFaqs);
+      
       setLoading(false);
     };
     fetchData();
@@ -47,7 +44,11 @@ export default function FAQ() {
     const currentSection = sectionRef.current;
     if (!currentSection || loading) return;
     const observer = new IntersectionObserver(
-      (entries) => { entries.forEach((entry) => { if (entry.isIntersecting && !hasAnimated) setHasAnimated(true); }); },
+      (entries) => { 
+        entries.forEach((entry) => { 
+          if (entry.isIntersecting && !hasAnimated) setHasAnimated(true); 
+        }); 
+      },
       { threshold: 0.2, rootMargin: "0px 0px -100px 0px" }
     );
     observer.observe(currentSection);
@@ -56,31 +57,144 @@ export default function FAQ() {
 
   const toggleFAQ = (index: number) => setOpenIndex(openIndex === index ? null : index);
 
-  if (loading) return <div className="w-full py-16" style={{ backgroundColor: '#f5f3ef' }}></div>;
+  if (loading) {
+    return (
+      <div 
+        className="w-full py-16 animate-pulse" 
+        style={{ backgroundColor: settings.background_color || '#f5f3ef' }}
+      />
+    );
+  }
 
-  const displayFaqs = faqs.length > 0 ? faqs : defaultFaqs;
+  const displayFaqs = faqs.length > 0 ? faqs : [];
+  
+  // Dynamic styles
+  const sectionStyle = {
+    backgroundColor: settings.background_color || '#f5f3ef',
+  };
+  
+  const textColorStyle = {
+    color: settings.text_color || '#000000',
+  };
+  
+  const mutedTextColorStyle = {
+    color: settings.muted_text_color || 'rgba(0, 0, 0, 0.6)',
+  };
+  
+  const accentColor = settings.accent_color || '#e9c08f';
+  const glowIntensity = (settings.glow_intensity || 30) / 100;
+  
+  const cardStyle = {
+    backgroundColor: settings.card_background_color || 'rgba(255, 255, 255, 0.5)',
+  };
+  
+  const hoverCardStyle = {
+    backgroundColor: settings.card_hover_color || 'rgba(255, 255, 255, 0.7)',
+  };
+  
+  // Get content from settings or use defaults
+  const sectionTitle = settings.section_title || "Frequently asked";
+  const italicWord = settings.italic_word || "asked";
+  const titleParts = sectionTitle.split(italicWord);
 
+  if (displayFaqs.length === 0) {
+    return (
+      <section
+        ref={sectionRef}
+        className="relative w-full py-16 px-4 overflow-hidden"
+        style={sectionStyle}
+      >
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
+          <p style={textColorStyle}>No FAQ items available yet.</p>
+        </div>
+      </section>
+    );
+  }
+
+  // ========== MOBILE LAYOUT ==========
   if (isMobile) {
     return (
-      <section ref={sectionRef} className="relative w-full py-16 px-4 overflow-hidden" style={{ backgroundColor: '#f5f3ef' }}>
+      <section
+        ref={sectionRef}
+        className="relative w-full py-16 px-4 overflow-hidden"
+        style={sectionStyle}
+      >
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-0 w-64 h-64 bg-[#e9c08f]/20 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#e6ee9c]/20 rounded-full blur-3xl" />
+          <div 
+            className="absolute top-0 left-0 w-64 h-64 rounded-full blur-3xl"
+            style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 40).toString(16).padStart(2, '0')}` }}
+          />
+          <div 
+            className="absolute bottom-0 right-0 w-80 h-80 rounded-full blur-3xl"
+            style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 30).toString(16).padStart(2, '0')}` }}
+          />
         </div>
         <div className="relative z-10 max-w-3xl mx-auto">
           <div className="mb-8 text-center">
-            <h2 className="text-xl font-medium text-black tracking-tight font-helvetica">Frequently <span className="font-editorial italic">asked</span></h2>
-            <div className="w-12 h-px bg-black/20 mx-auto mt-3" />
+            <h2 
+              className="text-xl font-medium tracking-tight font-helvetica"
+              style={textColorStyle}
+            >
+              {titleParts[0]}
+              <span className="font-editorial italic" style={textColorStyle}>
+                {italicWord}
+              </span>
+              {titleParts[1]}
+            </h2>
+            <div 
+              className="w-12 h-px mx-auto mt-3"
+              style={{ backgroundColor: `${settings.text_color}20` }}
+            />
           </div>
           <div className={`transition-all duration-700 ease-out ${hasAnimated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"}`}>
             <div className="space-y-3">
               {displayFaqs.map((faq, idx) => (
-                <div key={faq.id} className={`transition-all duration-700 ease-out ${hasAnimated ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"}`} style={{ transitionDelay: `${idx * 50}ms` }}>
-                  <button onClick={() => toggleFAQ(idx)} className="w-full text-left py-3 px-4 bg-white/50 rounded-lg flex justify-between items-center gap-3">
-                    <span className="text-sm font-medium text-black font-helvetica">{faq.question}</span>
-                    <span className="text-black/40 text-lg flex-shrink-0">{openIndex === idx ? "−" : "+"}</span>
+                <div 
+                  key={faq.id} 
+                  className={`transition-all duration-700 ease-out ${hasAnimated ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-4"}`} 
+                  style={{ transitionDelay: `${idx * 50}ms` }}
+                >
+                  <button 
+                    onClick={() => toggleFAQ(idx)} 
+                    className="w-full text-left py-3 px-4 rounded-lg flex justify-between items-center gap-3 transition-colors"
+                    style={cardStyle}
+                    onMouseEnter={(e) => {
+                      if (settings.card_hover_color) {
+                        e.currentTarget.style.backgroundColor = settings.card_hover_color;
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (settings.card_background_color) {
+                        e.currentTarget.style.backgroundColor = settings.card_background_color;
+                      } else {
+                        e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                      }
+                    }}
+                  >
+                    <span 
+                      className="text-sm font-medium font-helvetica"
+                      style={textColorStyle}
+                    >
+                      {faq.question}
+                    </span>
+                    <span 
+                      className="text-lg flex-shrink-0"
+                      style={{ color: `${settings.text_color}40` }}
+                    >
+                      {openIndex === idx ? "−" : "+"}
+                    </span>
                   </button>
-                  {openIndex === idx && <div className="px-4 py-3 text-sm text-black/60 leading-relaxed font-helvetica border-l-2 border-black/10 ml-2">{faq.answer}</div>}
+                  {openIndex === idx && (
+                    <div 
+                      className="px-4 py-3 text-sm leading-relaxed font-helvetica border-l-2 ml-2"
+                      style={{ 
+                        color: mutedTextColorStyle.color,
+                        borderLeftColor: `${accentColor}40`
+                      }}
+                    >
+                      {faq.answer}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -90,26 +204,89 @@ export default function FAQ() {
     );
   }
 
+  // ========== DESKTOP LAYOUT ==========
   return (
-    <section ref={sectionRef} className="relative w-full py-28 px-6 overflow-hidden" style={{ backgroundColor: '#f5f3ef' }}>
+    <section
+      ref={sectionRef}
+      className="relative w-full py-28 px-6 overflow-hidden"
+      style={sectionStyle}
+    >
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-[5%] w-[300px] h-[300px] bg-[#e9c08f]/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-[10%] w-[400px] h-[400px] bg-[#e6ee9c]/20 rounded-full blur-3xl" />
+        <div 
+          className="absolute top-20 left-[5%] w-[300px] h-[300px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 40).toString(16).padStart(2, '0')}` }}
+        />
+        <div 
+          className="absolute bottom-20 right-[10%] w-[400px] h-[400px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 30).toString(16).padStart(2, '0')}` }}
+        />
       </div>
       <div className="relative z-10 max-w-3xl mx-auto">
         <div className="mb-12 text-center">
-          <h2 className="text-2xl md:text-3xl font-medium text-black tracking-tight font-helvetica">Frequently <span className="font-editorial italic">asked</span></h2>
-          <div className="w-16 h-px bg-black/20 mx-auto mt-4" />
+          <h2 
+            className="text-2xl md:text-3xl font-medium tracking-tight font-helvetica"
+            style={textColorStyle}
+          >
+            {titleParts[0]}
+            <span className="font-editorial italic" style={textColorStyle}>
+              {italicWord}
+            </span>
+            {titleParts[1]}
+          </h2>
+          <div 
+            className="w-16 h-px mx-auto mt-4"
+            style={{ backgroundColor: `${settings.text_color}20` }}
+          />
         </div>
         <div className={`transition-all duration-700 ease-out ${hasAnimated ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"}`}>
           <div className="space-y-3">
             {displayFaqs.map((faq, idx) => (
-              <div key={faq.id} className={`transition-all duration-700 ease-out ${hasAnimated ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-6"}`} style={{ transitionDelay: `${idx * 50}ms` }}>
-                <button onClick={() => toggleFAQ(idx)} className="w-full text-left py-4 px-5 bg-white/50 rounded-xl flex justify-between items-center gap-4 hover:bg-white/70 transition-colors">
-                  <span className="text-base md:text-lg font-medium text-black font-helvetica">{faq.question}</span>
-                  <span className="text-black/30 text-xl md:text-2xl flex-shrink-0">{openIndex === idx ? "−" : "+"}</span>
+              <div 
+                key={faq.id} 
+                className={`transition-all duration-700 ease-out ${hasAnimated ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-6"}`} 
+                style={{ transitionDelay: `${idx * 50}ms` }}
+              >
+                <button 
+                  onClick={() => toggleFAQ(idx)} 
+                  className="w-full text-left py-4 px-5 rounded-xl flex justify-between items-center gap-4 transition-colors"
+                  style={cardStyle}
+                  onMouseEnter={(e) => {
+                    if (settings.card_hover_color) {
+                      e.currentTarget.style.backgroundColor = settings.card_hover_color;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (settings.card_background_color) {
+                      e.currentTarget.style.backgroundColor = settings.card_background_color;
+                    } else {
+                      e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
+                    }
+                  }}
+                >
+                  <span 
+                    className="text-base md:text-lg font-medium font-helvetica"
+                    style={textColorStyle}
+                  >
+                    {faq.question}
+                  </span>
+                  <span 
+                    className="text-xl md:text-2xl flex-shrink-0 transition-transform duration-200"
+                    style={{ color: `${settings.text_color}40` }}
+                  >
+                    {openIndex === idx ? "−" : "+"}
+                  </span>
                 </button>
-                {openIndex === idx && <div className="px-5 py-4 text-base md:text-lg text-black/60 leading-relaxed font-helvetica border-l-2 border-black/10 ml-6">{faq.answer}</div>}
+                {openIndex === idx && (
+                  <div 
+                    className="px-5 py-4 text-base md:text-lg leading-relaxed font-helvetica border-l-2 ml-6"
+                    style={{ 
+                      color: mutedTextColorStyle.color,
+                      borderLeftColor: `${accentColor}40`
+                    }}
+                  >
+                    {faq.answer}
+                  </div>
+                )}
               </div>
             ))}
           </div>

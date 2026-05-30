@@ -12,24 +12,6 @@ export default function Timeline() {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Default weeks fallback
-  const defaultWeeks: TimelineWeek[] = [
-    {
-      id: 1,
-      week_number: 1,
-      title: "Kickoff and review",
-      description: "We start with a 60-minute call to learn the business. Over the following days, I review every public-facing channel your brand lives on and build the audit.",
-      display_order: 1,
-    },
-    {
-      id: 2,
-      week_number: 2,
-      title: "Delivery and walkthrough",
-      description: "I deliver the written audit and the 30- to 90-day action plan, and we schedule a 60-minute walkthrough call to discuss the recommendations. Email follow-up is open for two weeks afterwards.",
-      display_order: 2,
-    },
-  ];
-
   useEffect(() => {
     const fetchData = async () => {
       // Fetch settings
@@ -49,8 +31,6 @@ export default function Timeline() {
       
       if (weeksData && weeksData.length > 0) {
         setWeeks(weeksData);
-      } else {
-        setWeeks(defaultWeeks);
       }
 
       setLoading(false);
@@ -97,11 +77,55 @@ export default function Timeline() {
   }, [hasAnimated, loading]);
 
   if (loading) {
-    return <div className="w-full py-16" style={{ backgroundColor: '#fefdf8' }}></div>;
+    return (
+      <div 
+        className="w-full py-16 animate-pulse" 
+        style={{ backgroundColor: settings.background_color || '#fefdf8' }}
+      />
+    );
   }
 
-  const displayWeeks = weeks.length > 0 ? weeks : defaultWeeks;
+  const displayWeeks = weeks.length > 0 ? weeks : [];
+  
+  // Dynamic styles
+  const sectionStyle = {
+    backgroundColor: settings.background_color || '#fefdf8',
+  };
+  
+  const textColorStyle = {
+    color: settings.text_color || '#000000',
+  };
+  
+  const mutedTextColorStyle = {
+    color: settings.muted_text_color || 'rgba(0, 0, 0, 0.6)',
+  };
+  
+  const circleStyle = {
+    backgroundColor: settings.circle_background_color || '#000000',
+    color: settings.circle_text_color || '#ffffff',
+  };
+  
+  const accentColor = settings.accent_color || '#e9c08f';
+  const glowIntensity = (settings.glow_intensity || 30) / 100;
+  
+  // Get content from settings or use defaults
   const sectionTitle = settings.section_title || "How the two weeks run";
+  const italicWord = settings.italic_word || "two weeks";
+  const titleParts = sectionTitle.split(italicWord);
+
+  if (displayWeeks.length === 0) {
+    return (
+      <section
+        ref={sectionRef}
+        className="relative w-full py-16 px-4 overflow-hidden"
+        style={sectionStyle}
+      >
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
+          <p style={textColorStyle}>No timeline weeks available yet.</p>
+        </div>
+      </section>
+    );
+  }
 
   // ========== MOBILE LAYOUT ==========
   if (isMobile) {
@@ -109,21 +133,37 @@ export default function Timeline() {
       <section
         ref={sectionRef}
         className="relative w-full py-16 px-4 overflow-hidden"
-        style={{ backgroundColor: '#fefdf8' }}
+        style={sectionStyle}
       >
         {/* Warm glow blobs */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-[#e9c08f]/15 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-[#e6ee9c]/15 rounded-full blur-3xl" />
+          <div 
+            className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl"
+            style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 40).toString(16).padStart(2, '0')}` }}
+          />
+          <div 
+            className="absolute bottom-0 left-0 w-80 h-80 rounded-full blur-3xl"
+            style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 30).toString(16).padStart(2, '0')}` }}
+          />
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto">
           {/* Header with editorial italic */}
           <div className="mb-8 text-center">
-            <h2 className="text-xl font-medium text-black tracking-tight font-helvetica">
-              How the <span className="font-editorial italic">two weeks</span> run
+            <h2 
+              className="text-xl font-medium tracking-tight font-helvetica"
+              style={textColorStyle}
+            >
+              {titleParts[0]}
+              <span className="font-editorial italic" style={textColorStyle}>
+                {italicWord}
+              </span>
+              {titleParts[1]}
             </h2>
-            <div className="w-12 h-px bg-black/20 mx-auto mt-3" />
+            <div 
+              className="w-12 h-px mx-auto mt-3"
+              style={{ backgroundColor: `${settings.text_color}20` }}
+            />
           </div>
 
           <div
@@ -144,16 +184,25 @@ export default function Timeline() {
                   }`}
                   style={{ transitionDelay: `${idx * 150}ms` }}
                 >
-                  {/* Week number circle - larger */}
-                  <div className="w-20 h-20 rounded-full bg-black text-white flex items-center justify-center text-2xl font-medium font-helvetica mb-4 shadow-md">
+                  {/* Week number circle */}
+                  <div 
+                    className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-medium font-helvetica mb-4 shadow-md"
+                    style={circleStyle}
+                  >
                     {week.week_number}
                   </div>
                   
-                  <h3 className="text-lg font-semibold text-black mb-2 font-helvetica">
+                  <h3 
+                    className="text-lg font-semibold mb-2 font-helvetica"
+                    style={textColorStyle}
+                  >
                     {week.title}
                   </h3>
                   
-                  <p className="text-sm text-black/60 leading-relaxed font-helvetica max-w-xs">
+                  <p 
+                    className="text-sm leading-relaxed font-helvetica max-w-xs"
+                    style={mutedTextColorStyle}
+                  >
                     {week.description}
                   </p>
                 </div>
@@ -170,22 +219,41 @@ export default function Timeline() {
     <section
       ref={sectionRef}
       className="relative w-full py-28 px-6 overflow-hidden"
-      style={{ backgroundColor: '#fefdf8' }}
+      style={sectionStyle}
     >
       {/* Warm glow blobs */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 right-[10%] w-[350px] h-[350px] bg-[#e9c08f]/15 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-[5%] w-[400px] h-[400px] bg-[#e6ee9c]/15 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/40 rounded-full blur-3xl" />
+        <div 
+          className="absolute top-20 right-[10%] w-[350px] h-[350px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 40).toString(16).padStart(2, '0')}` }}
+        />
+        <div 
+          className="absolute bottom-20 left-[5%] w-[400px] h-[400px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 30).toString(16).padStart(2, '0')}` }}
+        />
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${settings.text_color}05` }}
+        />
       </div>
 
       <div className="relative z-10 max-w-4xl mx-auto">
         {/* Header with editorial italic */}
         <div className="mb-12 text-center">
-          <h2 className="text-2xl md:text-3xl font-medium text-black tracking-tight font-helvetica">
-            How the <span className="font-editorial italic">two weeks</span> run
+          <h2 
+            className="text-2xl md:text-3xl font-medium tracking-tight font-helvetica"
+            style={textColorStyle}
+          >
+            {titleParts[0]}
+            <span className="font-editorial italic" style={textColorStyle}>
+              {italicWord}
+            </span>
+            {titleParts[1]}
           </h2>
-          <div className="w-16 h-px bg-black/20 mx-auto mt-4" />
+          <div 
+            className="w-16 h-px mx-auto mt-4"
+            style={{ backgroundColor: `${settings.text_color}20` }}
+          />
         </div>
 
         <div
@@ -206,16 +274,25 @@ export default function Timeline() {
                 }`}
                 style={{ transitionDelay: `${idx * 150}ms` }}
               >
-                {/* Week number circle - larger */}
-                <div className="w-28 h-28 rounded-full bg-black text-white flex items-center justify-center text-3xl md:text-4xl font-medium font-helvetica mx-auto mb-6 shadow-lg">
+                {/* Week number circle */}
+                <div 
+                  className="w-28 h-28 rounded-full flex items-center justify-center text-3xl md:text-4xl font-medium font-helvetica mx-auto mb-6 shadow-lg"
+                  style={circleStyle}
+                >
                   {week.week_number}
                 </div>
                 
-                <h3 className="text-xl md:text-2xl font-semibold text-black mb-3 font-helvetica">
+                <h3 
+                  className="text-xl md:text-2xl font-semibold mb-3 font-helvetica"
+                  style={textColorStyle}
+                >
                   {week.title}
                 </h3>
                 
-                <p className="text-base md:text-lg text-black/60 leading-relaxed font-helvetica">
+                <p 
+                  className="text-base md:text-lg leading-relaxed font-helvetica"
+                  style={mutedTextColorStyle}
+                >
                   {week.description}
                 </p>
               </div>

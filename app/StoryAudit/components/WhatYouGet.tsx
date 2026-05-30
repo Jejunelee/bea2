@@ -12,40 +12,6 @@ export default function WhatYouGet() {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Default deliverables fallback
-  const defaultDeliverables: Deliverable[] = [
-    {
-      id: 1,
-      title: "Kickoff call",
-      description: "A 60-minute kickoff call to walk through the business, the goals, and what is currently in flight.",
-      display_order: 1,
-    },
-    {
-      id: 2,
-      title: "Written audit document",
-      description: "A written audit document covering the four areas above, with specific examples and screenshots from your existing assets across your website, email, and active social channels.",
-      display_order: 2,
-    },
-    {
-      id: 3,
-      title: "Prioritised action plan",
-      description: "A prioritised action plan covering the 30, 60, and 90-day moves that will sharpen your communications fastest.",
-      display_order: 3,
-    },
-    {
-      id: 4,
-      title: "Walkthrough call",
-      description: "A 60-minute walkthrough call where I present the audit, take your questions, and pressure-test the recommendations against your business reality.",
-      display_order: 4,
-    },
-    {
-      id: 5,
-      title: "Email follow-up",
-      description: "Two weeks of email follow-up after delivery, in case anything comes up once you start running the plan.",
-      display_order: 5,
-    },
-  ];
-
   useEffect(() => {
     const fetchData = async () => {
       // Fetch settings
@@ -65,8 +31,6 @@ export default function WhatYouGet() {
       
       if (deliverablesData && deliverablesData.length > 0) {
         setDeliverables(deliverablesData);
-      } else {
-        setDeliverables(defaultDeliverables);
       }
 
       setLoading(false);
@@ -113,68 +77,132 @@ export default function WhatYouGet() {
   }, [hasAnimated, loading]);
 
   if (loading) {
-    return <div className="w-full py-16" style={{ backgroundColor: '#000000' }}></div>;
+    return (
+      <div 
+        className="w-full py-16 animate-pulse" 
+        style={{ backgroundColor: settings.background_color || '#000000' }}
+      />
+    );
   }
 
-  const displayDeliverables = deliverables.length > 0 ? deliverables : defaultDeliverables;
+  const displayDeliverables = deliverables.length > 0 ? deliverables : [];
+  
+  // Dynamic styles
+  const sectionStyle = {
+    backgroundColor: settings.background_color || '#000000',
+  };
+  
+  const textColorStyle = {
+    color: settings.text_color || '#ffffff',
+  };
+  
+  const mutedTextColorStyle = {
+    color: settings.muted_text_color || 'rgba(255, 255, 255, 0.6)',
+  };
+  
+  const checkmarkBgStyle = {
+    backgroundColor: settings.checkmark_background_color || 'rgba(255, 255, 255, 0.1)',
+  };
+  
+  const checkmarkIconStyle = {
+    color: settings.checkmark_icon_color || 'rgba(255, 255, 255, 0.4)',
+  };
+  
+  const accentColor = settings.accent_color || '#e9c08f';
+  const glowIntensity = (settings.glow_intensity || 30) / 100;
+  
+  // Get content from settings or use defaults
   const sectionTitle = settings.section_title || "What you get";
+  const italicWord = settings.italic_word || "get";
+  const titleParts = sectionTitle.split(italicWord);
+  
+  const titleEmphasisWords = settings.title_emphasis_words || {};
+  const descriptionEmphasisPhrases = settings.description_emphasis_phrases || [
+    "walk through the business",
+    "specific examples and screenshots",
+    "30, 60, and 90-day",
+    "pressure-test the recommendations",
+    "in case anything comes up"
+  ];
 
   // Helper to render title with italic emphasis
   const renderTitle = (title: string) => {
-    if (title === "Kickoff call") {
-      return <>Kickoff <span className="font-editorial italic text-white">call</span></>;
+    // Check if there's a custom emphasis mapping for this title
+    const customEmphasis = titleEmphasisWords[title];
+    if (customEmphasis) {
+      const parts = title.split(customEmphasis);
+      return (
+        <>
+          {parts[0]}
+          <span className="font-editorial italic" style={textColorStyle}>
+            {customEmphasis}
+          </span>
+          {parts[1]}
+        </>
+      );
     }
-    if (title === "Written audit document") {
-      return <>Written audit <span className="font-editorial italic text-white">document</span></>;
-    }
-    if (title === "Prioritised action plan") {
-      return <>Prioritised action <span className="font-editorial italic text-white">plan</span></>;
-    }
-    if (title === "Walkthrough call") {
-      return <>Walkthrough <span className="font-editorial italic text-white">call</span></>;
-    }
-    if (title === "Email follow-up") {
-      return <>Email <span className="font-editorial italic text-white">follow-up</span></>;
-    }
-    return title;
+    
+    // Default: italicize the last word
+    const words = title.split(' ');
+    const lastWord = words.pop();
+    return (
+      <>
+        {words.join(' ')} {words.length > 0 && ' '}
+        <span className="font-editorial italic" style={textColorStyle}>
+          {lastWord}
+        </span>
+      </>
+    );
   };
 
   // Helper to render description with italic emphasis on key phrases
   const renderDescription = (description: string) => {
-    const emphasisPhrases = [
-      "walk through the business",
-      "specific examples and screenshots",
-      "30, 60, and 90-day",
-      "pressure-test the recommendations",
-      "in case anything comes up"
-    ];
+    if (!descriptionEmphasisPhrases.length) return description;
 
     let result = [];
     let lastIndex = 0;
-    let currentText = description;
+    let descLower = description.toLowerCase();
+    const sortedPhrases = [...descriptionEmphasisPhrases].sort((a, b) => b.length - a.length);
     
-    for (const phrase of emphasisPhrases) {
-      const index = currentText.toLowerCase().indexOf(phrase.toLowerCase());
+    for (const phrase of sortedPhrases) {
+      const phraseLower = phrase.toLowerCase();
+      const index = descLower.indexOf(phraseLower);
+      
       if (index !== -1) {
         if (index > lastIndex) {
-          result.push(currentText.substring(lastIndex, index));
+          result.push(description.substring(lastIndex, index));
         }
-        const foundPhrase = currentText.substring(index, index + phrase.length);
+        const foundPhrase = description.substring(index, index + phrase.length);
         result.push(
-          <span key={index} className="font-editorial italic text-white/90">
+          <span key={index} className="font-editorial italic" style={mutedTextColorStyle}>
             {foundPhrase}
           </span>
         );
         lastIndex = index + phrase.length;
+        descLower = descLower.substring(lastIndex);
       }
     }
     
-    if (lastIndex < currentText.length) {
-      result.push(currentText.substring(lastIndex));
+    if (lastIndex < description.length) {
+      result.push(description.substring(lastIndex));
     }
     
     return result.length > 0 ? result : description;
   };
+
+  if (displayDeliverables.length === 0) {
+    return (
+      <section
+        ref={sectionRef}
+        className="relative w-full py-16 px-4 overflow-hidden"
+        style={sectionStyle}
+      >
+        <div className="relative z-10 max-w-3xl mx-auto text-center">
+          <p style={textColorStyle}>No deliverables available yet.</p>
+        </div>
+      </section>
+    );
+  }
 
   // ========== MOBILE LAYOUT ==========
   if (isMobile) {
@@ -182,21 +210,37 @@ export default function WhatYouGet() {
       <section
         ref={sectionRef}
         className="relative w-full py-16 px-4 overflow-hidden"
-        style={{ backgroundColor: '#000000' }}
+        style={sectionStyle}
       >
         {/* Subtle glow blobs */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-0 w-64 h-64 bg-[#e9c08f]/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-0 w-80 h-80 bg-[#e6ee9c]/10 rounded-full blur-3xl" />
+          <div 
+            className="absolute top-0 left-0 w-64 h-64 rounded-full blur-3xl"
+            style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 40).toString(16).padStart(2, '0')}` }}
+          />
+          <div 
+            className="absolute bottom-0 right-0 w-80 h-80 rounded-full blur-3xl"
+            style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 30).toString(16).padStart(2, '0')}` }}
+          />
         </div>
 
         <div className="relative z-10 max-w-3xl mx-auto">
           {/* Header with editorial italic */}
           <div className="mb-8 text-center">
-            <h2 className="text-xl font-medium text-white tracking-tight font-helvetica">
-              What you <span className="font-editorial italic">get</span>
+            <h2 
+              className="text-xl font-medium tracking-tight font-helvetica"
+              style={textColorStyle}
+            >
+              {titleParts[0]}
+              <span className="font-editorial italic" style={textColorStyle}>
+                {italicWord}
+              </span>
+              {titleParts[1]}
             </h2>
-            <div className="w-12 h-px bg-white/20 mx-auto mt-3" />
+            <div 
+              className="w-12 h-px mx-auto mt-3"
+              style={{ backgroundColor: `${settings.text_color}20` }}
+            />
           </div>
 
           <div
@@ -218,16 +262,31 @@ export default function WhatYouGet() {
                   style={{ transitionDelay: `${idx * 75}ms` }}
                 >
                   {/* Checkmark */}
-                  <div className="flex-shrink-0 w-5 h-5 rounded-full bg-white/10 flex items-center justify-center mt-0.5">
-                    <svg className="w-3 h-3 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div 
+                    className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center mt-0.5"
+                    style={checkmarkBgStyle}
+                  >
+                    <svg 
+                      className="w-3 h-3" 
+                      style={checkmarkIconStyle}
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="text-base font-semibold text-white mb-1 font-helvetica">
+                    <h3 
+                      className="text-base font-semibold mb-1 font-helvetica"
+                      style={textColorStyle}
+                    >
                       {renderTitle(item.title)}
                     </h3>
-                    <p className="text-sm text-white/60 leading-relaxed font-helvetica">
+                    <p 
+                      className="text-sm leading-relaxed font-helvetica"
+                      style={mutedTextColorStyle}
+                    >
                       {renderDescription(item.description)}
                     </p>
                   </div>
@@ -245,22 +304,41 @@ export default function WhatYouGet() {
     <section
       ref={sectionRef}
       className="relative w-full py-28 px-6 overflow-hidden"
-      style={{ backgroundColor: '#000000' }}
+      style={sectionStyle}
     >
       {/* Subtle glow blobs */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-20 left-[5%] w-[300px] h-[300px] bg-[#e9c08f]/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-[10%] w-[400px] h-[400px] bg-[#e6ee9c]/10 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-white/5 rounded-full blur-3xl" />
+        <div 
+          className="absolute top-20 left-[5%] w-[300px] h-[300px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 40).toString(16).padStart(2, '0')}` }}
+        />
+        <div 
+          className="absolute bottom-20 right-[10%] w-[400px] h-[400px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${accentColor}${Math.floor(glowIntensity * 30).toString(16).padStart(2, '0')}` }}
+        />
+        <div 
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full blur-3xl"
+          style={{ backgroundColor: `${settings.text_color}05` }}
+        />
       </div>
 
       <div className="relative z-10 max-w-4xl mx-auto">
         {/* Header with editorial italic */}
         <div className="mb-12 text-center">
-          <h2 className="text-2xl md:text-3xl font-medium text-white tracking-tight font-helvetica">
-            What you <span className="font-editorial italic">get</span>
+          <h2 
+            className="text-2xl md:text-3xl font-medium tracking-tight font-helvetica"
+            style={textColorStyle}
+          >
+            {titleParts[0]}
+            <span className="font-editorial italic" style={textColorStyle}>
+              {italicWord}
+            </span>
+            {titleParts[1]}
           </h2>
-          <div className="w-16 h-px bg-white/20 mx-auto mt-4" />
+          <div 
+            className="w-16 h-px mx-auto mt-4"
+            style={{ backgroundColor: `${settings.text_color}20` }}
+          />
         </div>
 
         <div
@@ -282,16 +360,31 @@ export default function WhatYouGet() {
                 style={{ transitionDelay: `${idx * 75}ms` }}
               >
                 {/* Checkmark circle */}
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-white/10 flex items-center justify-center mt-1">
-                  <svg className="w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div 
+                  className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center mt-1"
+                  style={checkmarkBgStyle}
+                >
+                  <svg 
+                    className="w-4 h-4" 
+                    style={checkmarkIconStyle}
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-2 font-helvetica">
+                  <h3 
+                    className="text-xl font-semibold mb-2 font-helvetica"
+                    style={textColorStyle}
+                  >
                     {renderTitle(item.title)}
                   </h3>
-                  <p className="text-base md:text-lg text-white/60 leading-relaxed font-helvetica">
+                  <p 
+                    className="text-base md:text-lg leading-relaxed font-helvetica"
+                    style={mutedTextColorStyle}
+                  >
                     {renderDescription(item.description)}
                   </p>
                 </div>

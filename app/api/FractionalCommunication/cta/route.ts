@@ -1,0 +1,64 @@
+import { NextResponse } from 'next/server';
+import { supabase } from '@/app/lib/supabase/client';
+
+export async function GET() {
+  try {
+    const { data, error } = await supabase
+      .from('fractional_cta_settings')
+      .select('*')
+      .eq('id', 1)
+      .single();
+
+    if (error) throw error;
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Error fetching fractional CTA settings:', error);
+    return NextResponse.json({ error: 'Failed to fetch CTA settings' }, { status: 500 });
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const body = await request.json();
+    const { 
+      headline,
+      italic_word,
+      subheadline,
+      button_text,
+      booking_url,
+      background_color,
+      text_color,
+      muted_text_color,
+      accent_color,
+      glow_intensity,
+      button_background_color,
+      button_text_color
+    } = body;
+
+    const { data, error } = await supabase
+      .from('fractional_cta_settings')
+      .update({
+        headline,
+        italic_word,
+        subheadline,
+        button_text,
+        booking_url,
+        background_color,
+        text_color,
+        muted_text_color,
+        accent_color,
+        glow_intensity,
+        button_background_color,
+        button_text_color,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', 1)
+      .select();
+
+    if (error) throw error;
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Error updating fractional CTA settings:', error);
+    return NextResponse.json({ error: 'Failed to update CTA settings' }, { status: 500 });
+  }
+}
